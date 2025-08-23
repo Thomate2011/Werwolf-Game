@@ -318,10 +318,10 @@ def neustart_seite():
             
         players_list_html += f"""
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; {style}">
-            <div onclick="killPlayer('{player_name}')">
+            <span onclick="killPlayer('{player_name}')" style="flex-grow: 1; text-align: left;">
                 <span style="font-weight: bold;">{role}</span> | {player_name}
-            </div>
-            <button onclick="showRolePopup('{player_name}')" style="font-size: 1.5em; background: none; border: none; cursor: pointer;">👀</button>
+            </span>
+            <button onclick="showInfoNeustart('{role}')" style="font-size: 1em; margin-left: 10px; padding: 0 5px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #008CBA; background-color: #008CBA; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center;">i</button>
         </div>
         """
 
@@ -330,7 +330,7 @@ def neustart_seite():
         <h1 style="color: #4CAF50;">Spielübersicht</h1>
         
         <div style="text-align: left; padding: 0 20px;">
-            <p>Tippe auf eine Rolle, um einen ausgeschiedenen Spieler zu entfernen. Klicke auf das Auge, um die Rolle einer Person geheim zu zeigen.</p>
+            <p>Tippe auf den Namen, um einen ausgeschiedenen Spieler zu entfernen.</p>
         </div>
         
         <div id="player-list" style="text-align: left; margin: 20px auto; width: 80%;">
@@ -343,15 +343,15 @@ def neustart_seite():
         </a>
     </div>
 
-    <div id="role-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; display: flex; justify-content: center; align-items: center; text-align: center;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-            <h1 id="popup-player-role" style="font-size: 3em; color: black; margin: 0;"></h1>
-            <p id="popup-role-description-full" style="font-size: 1.5em; color: #555;"></p>
-        </div>
-        <button onclick="hideRolePopup()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2em; cursor: pointer;">&times;</button>
+    <div id="info-popup-neustart" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
+        <p id="popup-role-name-neustart" style="font-size: 3em; font-weight: bold; color: #008CBA; margin-bottom: 5px;"></p>
+        <p id="popup-role-description-neustart" style="font-size: 0.9em; color: #555;"></p>
+        <button onclick="hideInfoNeustart()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 2em; cursor: pointer;">&times;</button>
     </div>
 
     <script>
+        const ALL_ROLES_DESCRIPTIONS = {json.dumps(ALL_ROLES)};
+
         async function killPlayer(playerName) {{
             const confirmKill = confirm(`Spieler '{{playerName}}' als 'tot' markieren?`);
             if (confirmKill) {{
@@ -370,22 +370,16 @@ def neustart_seite():
             alert(result.message);
             window.location.href = '/rollen_seite';
         }}
-
-        // Neue Funktionen für die Augenfunkction
-        async function showRolePopup(playerName) {{
-            const response = await fetch(`/api/gamemaster/role/` + playerName);
-            const data = await response.json();
-            if (response.ok) {{
-                document.getElementById('popup-player-role').textContent = data.role;
-                document.getElementById('popup-role-description-full').textContent = data.description;
-                document.getElementById('role-popup').style.display = 'flex';
-            }} else {{
-                alert('Rolle konnte nicht geladen werden.');
-            }}
+        
+        function showInfoNeustart(role) {{
+            const popup = document.getElementById('info-popup-neustart');
+            document.getElementById('popup-role-name-neustart').textContent = role;
+            document.getElementById('popup-role-description-neustart').textContent = ALL_ROLES_DESCRIPTIONS[role];
+            popup.style.display = 'block';
         }}
 
-        function hideRolePopup() {{
-            document.getElementById('role-popup').style.display = 'none';
+        function hideInfoNeustart() {{
+            document.getElementById('info-popup-neustart').style.display = 'none';
         }}
     </script>
     """)
@@ -520,24 +514,6 @@ def kill_player(player_name):
         return jsonify({"message": f"Spieler '{player_name}' wurde als 'tot' markiert."})
     else:
         return jsonify({"error": "Spieler nicht gefunden."}), 404
-
-# --- Neuer API-Endpunkt für die Rollen-Anzeige ---
-@app.route('/api/gamemaster/role/<player_name>', methods=['GET'])
-def get_player_role(player_name):
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
-    
-    role_name = game_state["assigned_roles"].get(player_name)
-    if not role_name:
-        return jsonify({"error": "Spieler oder Rolle nicht gefunden."}), 404
-        
-    role_description = ALL_ROLES.get(role_name, "Keine Erklärung verfügbar.")
-    
-    return jsonify({
-        "player_name": player_name,
-        "role": role_name,
-        "description": role_description
-    })
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
