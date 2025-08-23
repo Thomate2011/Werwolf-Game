@@ -3,7 +3,7 @@ import random
 import json
 
 app = Flask(__name__)
-app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt
+app.secret_key = 'your_super_secret_key'  # Ein geheimer Schlüssel wird für Sessions benötigt
 
 # Ein Dictionary, um den Zustand des Spiels zu speichern.
 game_state = {
@@ -61,15 +61,43 @@ def save_role_counts_to_session(role_counts):
 
 @app.route('/')
 def startseite():
-    session.clear() # Hier wird die Session beim Betreten der Startseite geleert.
+    session.clear()
     html_content = """
-    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #4CAF50;">Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
-        <p style="font-size: 1.2em; color: #555;">Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
-        <hr style="margin: 30px auto; width: 50%;">
-        <a href="/spiel" style="text-decoration: none;">
-            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zum Spiel</button>
-        </a>
+    <style>
+        body { margin: 0; padding: 0; background-color: #f4f4f4; }
+        .main-container {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            width: 100vw;
+            margin: 0 auto;
+            padding: 20px 10px;
+            box-sizing: border-box;
+        }
+        .card { padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: white; }
+        h1 { color: #4CAF50; font-size: 2em; }
+        p { font-size: 1.2em; color: #555; }
+        button {
+            font-size: 1.5em;
+            padding: 15px 30px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 90%;
+            margin-top: 20px;
+        }
+    </style>
+    <div class="main-container">
+        <div class="card">
+            <h1>Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
+            <p>Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
+            <hr style="margin: 30px auto; width: 80%;">
+            <a href="/spiel" style="text-decoration: none;">
+                <button>Zum Spiel</button>
+            </a>
+        </div>
     </div>
     """
     return html_content
@@ -91,13 +119,49 @@ def spiel_seite():
 
     saved_players_string = session.get('saved_players', '')
     html_content = f"""
-    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #4CAF50;">Namen eingeben</h1>
-        <p style="font-size: 1em; color: #555;">Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
-        <form action="/spiel" method="post">
-            <textarea name="namen" rows="10" cols="40" style="width: 80%; padding: 10px; font-size: 1em;">{saved_players_string}</textarea><br><br>
-            <button type="submit" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zu den Rollen</button>
-        </form>
+    <style>
+        body {{ margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .main-container {{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            width: 100vw;
+            margin: 0 auto;
+            padding: 20px 10px;
+            box-sizing: border-box;
+        }}
+        .card {{ padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: white; }}
+        h1 {{ color: #4CAF50; font-size: 2em; }}
+        p {{ font-size: 1.1em; color: #555; }}
+        textarea {{
+            width: 90%;
+            padding: 10px;
+            font-size: 1em;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }}
+        button {{
+            font-size: 1.2em;
+            padding: 15px 30px;
+            cursor: pointer;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 90%;
+            margin-top: 20px;
+        }}
+    </style>
+    <div class="main-container">
+        <div class="card">
+            <h1>Namen eingeben</h1>
+            <p>Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
+            <form action="/spiel" method="post">
+                <textarea name="namen" rows="10" cols="40">{saved_players_string}</textarea><br><br>
+                <button type="submit">Zu den Rollen</button>
+            </form>
+        </div>
     </div>
     """
     return html_content
@@ -115,44 +179,160 @@ def rollen_seite():
     for role in all_roles:
         count = saved_roles.get(role, 0)
         roles_html += f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <div style="display: flex; align-items: center;">
-                <span style="font-size: 1.1em; color: #333;">{role}</span>
-                <button onclick="showInfo('{role}')" style="font-size: 1em; margin-left: 10px; padding: 0 5px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #008CBA; background-color: #008CBA; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center;">i</button>
-            </div>
-            <div>
-                <button onclick="decrementRole('{role}')" style="font-size: 1.2em; padding: 5px 10px; cursor: pointer;">-</button>
-                <span id="{role}-count" style="font-size: 1.2em; margin: 0 10px;">{count}</span>
-                <button onclick="incrementRole('{role}')" style="font-size: 1.2em; padding: 5px 10px; cursor: pointer;">+</button>
+        <div class="role-item">
+            <span class="role-name">{role}</span>
+            <button onclick="showInfo('{role}')" class="info-btn">i</button>
+            <div class="role-controls">
+                <button onclick="decrementRole('{role}')" class="control-btn">-</button>
+                <span id="{role}-count" class="role-count">{count}</span>
+                <button onclick="incrementRole('{role}')" class="control-btn">+</button>
             </div>
         </div>
         """
     
     return render_template_string(f"""
-    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #4CAF50;">Rollen auswählen</h1>
-        <p style="font-size: 1em; color: #555;">Wähle genau {player_count} Rollen aus.</p>
-        <p style="font-size: 1.2em; color: #008CBA;">Noch zu vergeben: <span id="roles-to-go">{player_count - sum(saved_roles.values())}</span></p>
+    <style>
+        body {{ margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .main-container {{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            width: 100vw;
+            margin: 0 auto;
+            padding: 20px 10px;
+            box-sizing: border-box;
+        }}
+        .card {{ padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: white; }}
+        h1 {{ color: #4CAF50; font-size: 2em; }}
+        p {{ font-size: 1.1em; color: #555; }}
         
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-            <a href="/spiel" style="text-decoration: none;">
-                <button style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px;">Zurück</button>
-            </a>
-            <button id="start-button-top" onclick="startGame()" style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; display: none;">Mischen</button>
+        .roles-list {{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }}
+        .role-item {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }}
+        .role-name {{
+            font-size: 1.2em;
+            color: #333;
+            flex-grow: 1;
+            text-align: left;
+        }}
+        .info-btn {{
+            font-size: 1em;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 1px solid #008CBA;
+            background-color: #008CBA;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }}
+        .role-controls {{
+            display: flex;
+            align-items: center;
+        }}
+        .control-btn {{
+            font-size: 1.2em;
+            padding: 5px 12px;
+            cursor: pointer;
+            background-color: #eee;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }}
+        .role-count {{
+            font-size: 1.2em;
+            margin: 0 10px;
+        }}
+        .action-buttons {{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }}
+        .start-btn, .back-btn {{
+            width: 90%;
+            padding: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }}
+        .start-btn {{ background-color: #4CAF50; }}
+        .back-btn {{ background-color: #f44336; }}
+
+        .info-popup, .overlay {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }}
+        .overlay {{
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }}
+        .info-popup {{
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }}
+        .close-btn {{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+        }}
+    </style>
+    <div class="main-container">
+        <div class="card">
+            <h1>Rollen auswählen</h1>
+            <p>Wähle genau {player_count} Rollen aus.</p>
+            <p style="font-size: 1.2em; color: #008CBA;">Noch zu vergeben: <span id="roles-to-go">{player_count - sum(saved_roles.values())}</span></p>
+            
+            <div class="action-buttons">
+                <a href="/spiel" style="text-decoration: none;">
+                    <button class="back-btn">Zurück</button>
+                </a>
+                <button id="start-button-top" onclick="startGame()" class="start-btn" style="display: none;">Mischen</button>
+            </div>
+            
+            <div class="roles-list">
+                {roles_html}
+            </div>
+
+            <button id="start-button-bottom" onclick="startGame()" class="start-btn" style="display: none;">Mischen</button>
         </div>
-        
-
-        {roles_html}
-
-        <button id="start-button-bottom" onclick="startGame()" style="font-size: 1.5em; padding: 15px 30px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px; display: none;">Mischen</button>
     </div>
-
-    <div id="info-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
+    
+    <div id="info-popup" class="info-popup">
         <h2 id="popup-role-name"></h2>
         <p id="popup-role-description"></p>
-        <button onclick="hideInfo()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5em; cursor: pointer;">&times;</button>
+        <button onclick="hideInfo()" class="close-btn">&times;</button>
     </div>
-    <div id="overlay" onclick="hideInfo()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+    <div id="overlay" onclick="hideInfo()" class="overlay"></div>
 
     <script>
         let rolesCount = {json.dumps(saved_roles)};
@@ -167,8 +347,8 @@ def rollen_seite():
             const remainingRoles = totalPlayers - totalRolesSelected;
             rolesToGo.textContent = remainingRoles;
             if (remainingRoles === 0) {{
-                startButtonTop.style.display = 'inline-block';
-                startButtonBottom.style.display = 'inline-block';
+                startButtonTop.style.display = 'block';
+                startButtonBottom.style.display = 'block';
             }} else {{
                 startButtonTop.style.display = 'none';
                 startButtonBottom.style.display = 'none';
@@ -239,15 +419,55 @@ def rollen_seite():
 @app.route('/karten')
 def karten_seite():
     return render_template_string(f"""
-    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #4CAF50;">Rollen aufdecken</h1>
-        <div id="player-card" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; border: 2px dashed #008CBA; border-radius: 10px;">
-            <h2 id="player-name" style="color: #333;"></h2>
-            <p id="role-name" style="font-size: 1.5em; font-weight: bold; color: #f44336; display: none;"></p>
-            <p id="role-description" style="font-size: 1em; color: #555; display: none;"></p>
-            <button id="reveal-role-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; margin-top: 15px;">Rolle aufdecken</button>
-            <button id="show-description-btn" style="font-size: 1em; padding: 8px 15px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 5px; margin-top: 10px; display: none;">Erklärung</button>
-            <button id="next-player-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 15px; display: none;">Nächster Spieler</button>
+    <style>
+        body {{ margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .main-container {{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            width: 100vw;
+            margin: 0 auto;
+            padding: 20px 10px;
+            box-sizing: border-box;
+        }}
+        .card {{
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border: 2px dashed #008CBA;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: white;
+        }}
+        h1 {{ color: #4CAF50; font-size: 2em; }}
+        h2 {{ color: #333; font-size: 1.8em; }}
+        .role-name {{ font-size: 2em; font-weight: bold; color: #f44336; }}
+        .role-description {{ font-size: 1.1em; color: #555; margin-top: 10px; }}
+        button {{
+            width: 90%;
+            padding: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }}
+        #reveal-role-btn {{ background-color: #008CBA; }}
+        #show-description-btn {{ background-color: #2196F3; }}
+        #next-player-btn {{ background-color: #4CAF50; }}
+    </style>
+    <div class="main-container">
+        <div class="card">
+            <h1>Rollen aufdecken</h1>
+            <h2 id="player-name"></h2>
+            <p id="role-name" class="role-name" style="display: none;"></p>
+            <p id="role-description" class="role-description" style="display: none;"></p>
+            <button id="reveal-role-btn">Rolle aufdecken</button>
+            <button id="show-description-btn" style="display: none;">Erklärung</button>
+            <button id="next-player-btn" style="display: none;">Nächster Spieler</button>
         </div>
     </div>
     <script>
@@ -262,7 +482,11 @@ def karten_seite():
                     window.location.href = '/neustart';
                 }} else {{
                     document.getElementById('player-name').textContent = data.player_name;
-                    document.getElementById('reveal-role-btn').style.display = 'inline-block';
+                    document.getElementById('reveal-role-btn').style.display = 'block';
+                    document.getElementById('show-description-btn').style.display = 'none';
+                    document.getElementById('next-player-btn').style.display = 'none';
+                    document.getElementById('role-name').style.display = 'none';
+                    document.getElementById('role-description').style.display = 'none';
                     isRevealed = false;
                 }}
             }}
@@ -276,8 +500,8 @@ def karten_seite():
                 document.getElementById('role-name').textContent = data.role_name;
                 document.getElementById('role-name').style.display = 'block';
                 document.getElementById('reveal-role-btn').style.display = 'none';
-                document.getElementById('show-description-btn').style.display = 'inline-block';
-                document.getElementById('next-player-btn').style.display = 'inline-block';
+                document.getElementById('show-description-btn').style.display = 'block';
+                document.getElementById('next-player-btn').style.display = 'block';
                 isRevealed = true;
             }} else {{
                 alert(data.error);
@@ -317,38 +541,128 @@ def neustart_seite():
             style = 'text-decoration: line-through; color: #888;'
             
         players_list_html += f"""
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; {style}">
-            <span onclick="killPlayer('{player_name}')" style="flex-grow: 1; text-align: left;">
-                <span style="font-weight: bold;">{role}</span> | {player_name}
-            </span>
-            <button onclick="showInfoNeustart('{role}')" style="font-size: 1em; margin-left: 10px; padding: 0 5px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #008CBA; background-color: #008CBA; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center;">i</button>
+        <div class="player-item" style="{style}">
+            <div class="player-info" onclick="killPlayer('{player_name}')">
+                <span class="player-role-name">{role}</span>
+                <span class="player-name">| {player_name}</span>
+            </div>
+            <button onclick="showInfoNeustart('{role}')" class="info-btn">i</button>
         </div>
         """
 
     return render_template_string(f"""
-    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #4CAF50;">Spielübersicht</h1>
-        
-        <div style="text-align: left; padding: 0 20px;">
-            <p>Tippe auf den Namen, um einen ausgeschiedenen Spieler zu entfernen.</p>
+    <style>
+        body {{ margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .main-container {{
+            font-family: Arial, sans-serif;
+            text-align: center;
+            width: 100vw;
+            margin: 0 auto;
+            padding: 20px 10px;
+            box-sizing: border-box;
+        }}
+        .card {{ padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background-color: white; }}
+        h1 {{ color: #4CAF50; font-size: 2em; }}
+        p {{ font-size: 1.1em; color: #555; }}
+
+        .player-list {{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }}
+        .player-item {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }}
+        .player-info {{
+            flex-grow: 1;
+            cursor: pointer;
+        }}
+        .player-role-name {{ font-weight: bold; font-size: 1.2em; }}
+        .player-name {{ font-size: 1.2em; }}
+        .info-btn {{
+            font-size: 1em;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 1px solid #008CBA;
+            background-color: #008CBA;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }}
+        .action-buttons {{
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }}
+        .restart-btn, .startpage-btn {{
+            width: 90%;
+            padding: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }}
+        .restart-btn {{ background-color: #f44336; }}
+        .startpage-btn {{ background-color: #4CAF50; }}
+        .info-popup-neustart {{
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }}
+        .popup-close-btn {{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+        }}
+    </style>
+    <div class="main-container">
+        <div class="card">
+            <h1>Spielübersicht</h1>
+            <p>Tippe auf den Namen, um einen ausgeschiedenen Spieler zu markieren.</p>
+            
+            <div class="player-list">
+                {players_list_html}
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="restartGame()" class="restart-btn">Neustart</button>
+                <a href="/" style="text-decoration: none;">
+                    <button class="startpage-btn">Zur Startseite</button>
+                </a>
+            </div>
         </div>
-        
-        <div id="player-list" style="text-align: left; margin: 20px auto; width: 80%;">
-            {players_list_html}
-        </div>
-        
-        <button onclick="restartGame()" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px; margin-top: 20px;">Neustart</button>
-        <a href="/" style="text-decoration: none;">
-            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px;">Zur Startseite</button>
-        </a>
     </div>
 
-    <div id="info-popup-neustart" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
-        <p id="popup-role-name-neustart" style="font-size: 3em; font-weight: bold; color: #008CBA; margin-bottom: 5px;"></p>
+    <div id="info-popup-neustart" class="info-popup-neustart">
+        <p id="popup-role-name-neustart" style="font-size: 1.5em; font-weight: bold; color: #008CBA; margin-bottom: 5px;"></p>
         <p id="popup-role-description-neustart" style="font-size: 0.9em; color: #555;"></p>
-        <button onclick="hideInfoNeustart()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 2em; cursor: pointer;">&times;</button>
+        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
     </div>
-
     <script>
         const ALL_ROLES_DESCRIPTIONS = {json.dumps(ALL_ROLES)};
 
@@ -384,7 +698,7 @@ def neustart_seite():
     </script>
     """)
 
-# --- API-ENDPUNKTE ---
+# --- API-ENDPUNKTE (Bleiben unverändert) ---
 
 @app.route('/api/game/save_roles', methods=['POST'])
 def save_roles_api():
@@ -441,7 +755,7 @@ def get_next_card():
     
     if current_index >= len(game_state["players"]):
         return jsonify({"message": "Alle Rollen wurden aufgedeckt. Das Spiel kann beginnen."})
-        
+    
     player_name = game_state["players"][current_index]["name"]
     
     response = {
