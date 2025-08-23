@@ -317,9 +317,11 @@ def neustart_seite():
             style = 'text-decoration: line-through; color: #888;'
             
         players_list_html += f"""
-        <div style="padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; {style}"
-             onclick="killPlayer('{player_name}')">
-            <span style="font-weight: bold;">{role}</span> | {player_name}
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; {style}">
+            <div onclick="killPlayer('{player_name}')">
+                <span style="font-weight: bold;">{role}</span> | {player_name}
+            </div>
+            <button onclick="showRolePopup('{player_name}')" style="font-size: 1.5em; background: none; border: none; cursor: pointer;">👀</button>
         </div>
         """
 
@@ -328,7 +330,7 @@ def neustart_seite():
         <h1 style="color: #4CAF50;">Spielübersicht</h1>
         
         <div style="text-align: left; padding: 0 20px;">
-            <p>Tippe auf eine Rolle, um einen ausgeschiedenen Spieler zu entfernen.</p>
+            <p>Tippe auf eine Rolle, um einen ausgeschiedenen Spieler zu entfernen. Klicke auf das Auge, um die Rolle einer Person geheim zu zeigen.</p>
         </div>
         
         <div id="player-list" style="text-align: left; margin: 20px auto; width: 80%;">
@@ -339,6 +341,14 @@ def neustart_seite():
         <a href="/" style="text-decoration: none;">
             <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px;">Zur Startseite</button>
         </a>
+    </div>
+
+    <div id="role-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; display: flex; justify-content: center; align-items: center; text-align: center;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <h1 id="popup-player-role" style="font-size: 3em; color: black; margin: 0;"></h1>
+            <p id="popup-role-description-full" style="font-size: 1.5em; color: #555;"></p>
+        </div>
+        <button onclick="hideRolePopup()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 2em; cursor: pointer;">&times;</button>
     </div>
 
     <script>
@@ -359,6 +369,23 @@ def neustart_seite():
             const result = await response.json();
             alert(result.message);
             window.location.href = '/rollen_seite';
+        }}
+
+        // Neue Funktionen für die Augenfunkction
+        async function showRolePopup(playerName) {{
+            const response = await fetch(`/api/gamemaster/role/` + playerName);
+            const data = await response.json();
+            if (response.ok) {{
+                document.getElementById('popup-player-role').textContent = data.role;
+                document.getElementById('popup-role-description-full').textContent = data.description;
+                document.getElementById('role-popup').style.display = 'flex';
+            }} else {{
+                alert('Rolle konnte nicht geladen werden.');
+            }}
+        }}
+
+        function hideRolePopup() {{
+            document.getElementById('role-popup').style.display = 'none';
         }}
     </script>
     """)
@@ -493,6 +520,24 @@ def kill_player(player_name):
         return jsonify({"message": f"Spieler '{player_name}' wurde als 'tot' markiert."})
     else:
         return jsonify({"error": "Spieler nicht gefunden."}), 404
+
+# --- Neuer API-Endpunkt für die Rollen-Anzeige ---
+@app.route('/api/gamemaster/role/<player_name>', methods=['GET'])
+def get_player_role(player_name):
+    if not game_state["game_started"]:
+        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
+    
+    role_name = game_state["assigned_roles"].get(player_name)
+    if not role_name:
+        return jsonify({"error": "Spieler oder Rolle nicht gefunden."}), 404
+        
+    role_description = ALL_ROLES.get(role_name, "Keine Erklärung verfügbar.")
+    
+    return jsonify({
+        "player_name": player_name,
+        "role": role_name,
+        "description": role_description
+    })
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
