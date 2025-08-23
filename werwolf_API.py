@@ -3,7 +3,7 @@ import random
 import json
 
 app = Flask(__name__)
-app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt
+app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt.
 
 # Ein Dictionary, um den Zustand des Spiels zu speichern.
 game_state = {
@@ -59,7 +59,7 @@ def save_role_counts_to_session(role_counts):
     
 def get_view_mode_class():
     """Gibt die CSS-Klasse für den Ansichtsmodus zurück."""
-    return "mobile" if session.get('view_mode') == 'mobile' else ""
+    return "mobile-view" if session.get('view_mode') == 'mobile' else ""
 
 # --- WEBSEITEN-ROUTEN (Front-End) ---
 
@@ -77,7 +77,7 @@ def startseite():
         <title>Werwolf Spiel</title>
         <style>
             body {{
-                font-family: Arial, sans-serif;
+                font-family: Helvetica, sans-serif;
                 text-align: center;
                 margin: 0;
                 padding: 0;
@@ -89,6 +89,11 @@ def startseite():
                 border: 1px solid #ccc;
                 border-radius: 10px;
                 box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }}
+            .mobile-view {{
+                max-width: 90vw;
+                margin: auto;
+                padding: 2vw;
             }}
             h1 {{
                 color: #4CAF50;
@@ -121,27 +126,16 @@ def startseite():
                 color: white;
                 border: none;
                 border-radius: 5px;
-                position: absolute;
+                position: fixed;
                 top: 10px;
                 right: 10px;
-            }}
-            /* Handy-Ansicht */
-            .mobile .container {{
-                width: 90%;
-                margin: 20px auto;
-                padding: 10px;
-            }}
-            .mobile h1 {{
-                font-size: 1.5em;
-            }}
-            .mobile p {{
-                font-size: 1em;
+                z-index: 100;
             }}
         </style>
     </head>
-    <body class="{get_view_mode_class()}">
+    <body>
         <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div id="main-container" class="container">
+        <div id="main-container" class="container {get_view_mode_class()}">
             <h1>Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
             <p>Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
             <hr>
@@ -150,11 +144,11 @@ def startseite():
 
         <script>
             function toggleView() {{
-                const body = document.body;
+                const container = document.getElementById('main-container');
                 const button = document.getElementById('toggle-view-btn');
                 
                 let newMode = 'mobile';
-                if (body.classList.contains('mobile')) {{
+                if (container.classList.contains('mobile-view')) {{
                     newMode = 'desktop';
                 }}
 
@@ -164,8 +158,8 @@ def startseite():
                     body: JSON.stringify({{ 'mode': newMode }})
                 }}).then(response => {{
                     if (response.ok) {{
-                        body.classList.toggle('mobile');
-                        if (body.classList.contains('mobile')) {{
+                        container.classList.toggle('mobile-view');
+                        if (container.classList.contains('mobile-view')) {{
                             button.textContent = "Laptop-Ansicht";
                         }} else {{
                             button.textContent = "Handy-Ansicht";
@@ -196,23 +190,23 @@ def spiel_seite():
 
     saved_players_string = session.get('saved_players', '')
     html_content = f"""
-    <body class="{get_view_mode_class()}">
+    <body>
         <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div class="container">
+        <div id="main-container" class="container {get_view_mode_class()}">
             <h1 style="color: #4CAF50;">Namen eingeben</h1>
             <p style="font-size: 1em; color: #555;">Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
             <form action="/spiel" method="post">
-                <textarea name="namen" rows="10" cols="40" style="width: 80%; padding: 10px; font-size: 1em;">{saved_players_string}</textarea><br><br>
+                <textarea name="namen" rows="10" cols="40" style="width: 80%; padding: 10px; font-size: 1em;"></textarea><br><br>
                 <button type="submit" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zu den Rollen</button>
             </form>
         </div>
         <script>
             function toggleView() {{
-                const body = document.body;
+                const container = document.getElementById('main-container');
                 const button = document.getElementById('toggle-view-btn');
                 
                 let newMode = 'mobile';
-                if (body.classList.contains('mobile')) {{
+                if (container.classList.contains('mobile-view')) {{
                     newMode = 'desktop';
                 }}
 
@@ -222,8 +216,8 @@ def spiel_seite():
                     body: JSON.stringify({{ 'mode': newMode }})
                 }}).then(response => {{
                     if (response.ok) {{
-                        body.classList.toggle('mobile');
-                        if (body.classList.contains('mobile')) {{
+                        container.classList.toggle('mobile-view');
+                        if (container.classList.contains('mobile-view')) {{
                             button.textContent = "Laptop-Ansicht";
                         }} else {{
                             button.textContent = "Handy-Ansicht";
@@ -263,9 +257,9 @@ def rollen_seite():
         """
     
     return render_template_string(f"""
-    <body class="{get_view_mode_class()}">
+    <body>
         <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div class="container">
+        <div id="main-container" class="container {get_view_mode_class()}">
             <h1 style="color: #4CAF50;">Rollen auswählen</h1>
             <p style="font-size: 1em; color: #555;">Wähle genau {player_count} Rollen aus.</p>
             <p style="font-size: 1.2em; color: #008CBA;">Noch zu vergeben: <span id="roles-to-go">{player_count - sum(saved_roles.values())}</span></p>
@@ -370,11 +364,11 @@ def rollen_seite():
             
             // Toggle view function
             function toggleView() {{
-                const body = document.body;
+                const container = document.getElementById('main-container');
                 const button = document.getElementById('toggle-view-btn');
                 
                 let newMode = 'mobile';
-                if (body.classList.contains('mobile')) {{
+                if (container.classList.contains('mobile-view')) {{
                     newMode = 'desktop';
                 }}
 
@@ -384,8 +378,8 @@ def rollen_seite():
                     body: JSON.stringify({{ 'mode': newMode }})
                 }}).then(response => {{
                     if (response.ok) {{
-                        body.classList.toggle('mobile');
-                        if (body.classList.contains('mobile')) {{
+                        container.classList.toggle('mobile-view');
+                        if (container.classList.contains('mobile-view')) {{
                             button.textContent = "Laptop-Ansicht";
                         }} else {{
                             button.textContent = "Handy-Ansicht";
@@ -402,9 +396,9 @@ def rollen_seite():
 @app.route('/karten')
 def karten_seite():
     return render_template_string(f"""
-    <body class="{get_view_mode_class()}">
+    <body>
         <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div class="container">
+        <div id="main-container" class="container {get_view_mode_class()}">
             <h1 style="color: #4CAF50;">Rollen aufdecken</h1>
             <div id="player-card" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; border: 2px dashed #008CBA; border-radius: 10px;">
                 <h2 id="player-name" style="color: #333;"></h2>
@@ -469,11 +463,11 @@ def karten_seite():
             
             // Toggle view function
             function toggleView() {{
-                const body = document.body;
+                const container = document.getElementById('main-container');
                 const button = document.getElementById('toggle-view-btn');
                 
                 let newMode = 'mobile';
-                if (body.classList.contains('mobile')) {{
+                if (container.classList.contains('mobile-view')) {{
                     newMode = 'desktop';
                 }}
 
@@ -483,8 +477,8 @@ def karten_seite():
                     body: JSON.stringify({{ 'mode': newMode }})
                 }}).then(response => {{
                     if (response.ok) {{
-                        body.classList.toggle('mobile');
-                        if (body.classList.contains('mobile')) {{
+                        container.classList.toggle('mobile-view');
+                        if (container.classList.contains('mobile-view')) {{
                             button.textContent = "Laptop-Ansicht";
                         }} else {{
                             button.textContent = "Handy-Ansicht";
@@ -516,9 +510,9 @@ def neustart_seite():
         """
 
     return render_template_string(f"""
-    <body class="{get_view_mode_class()}">
+    <body>
         <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div class="container">
+        <div id="main-container" class="container {get_view_mode_class()}">
             <h1 style="color: #4CAF50;">Spielübersicht</h1>
             
             <div style="text-align: left; padding: 0 20px;">
@@ -557,11 +551,11 @@ def neustart_seite():
             
             // Toggle view function
             function toggleView() {{
-                const body = document.body;
+                const container = document.getElementById('main-container');
                 const button = document.getElementById('toggle-view-btn');
                 
                 let newMode = 'mobile';
-                if (body.classList.contains('mobile')) {{
+                if (container.classList.contains('mobile-view')) {{
                     newMode = 'desktop';
                 }}
 
@@ -571,8 +565,8 @@ def neustart_seite():
                     body: JSON.stringify({{ 'mode': newMode }})
                 }}).then(response => {{
                     if (response.ok) {{
-                        body.classList.toggle('mobile');
-                        if (body.classList.contains('mobile')) {{
+                        container.classList.toggle('mobile-view');
+                        if (container.classList.contains('mobile-view')) {{
                             button.textContent = "Laptop-Ansicht";
                         }} else {{
                             button.textContent = "Handy-Ansicht";
