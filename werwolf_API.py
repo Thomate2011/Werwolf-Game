@@ -3,7 +3,7 @@ import random
 import json
 
 app = Flask(__name__)
-app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt.
+app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt
 
 # Ein Dictionary, um den Zustand des Spiels zu speichern.
 game_state = {
@@ -56,120 +56,21 @@ def get_role_counts_from_session():
 def save_role_counts_to_session(role_counts):
     """Hilfsfunktion, um Rollen in der Session zu speichern."""
     session['saved_roles'] = json.dumps(role_counts)
-    
-def get_view_mode_class():
-    """Gibt die CSS-Klasse für den Ansichtsmodus zurück."""
-    return "mobile-view" if session.get('view_mode') == 'mobile' else ""
 
 # --- WEBSEITEN-ROUTEN (Front-End) ---
 
 @app.route('/')
 def startseite():
     session.clear() # Hier wird die Session beim Betreten der Startseite geleert.
-    session['view_mode'] = 'desktop' # Standardansicht auf Laptop setzen
-    
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Werwolf Spiel</title>
-        <style>
-            body {{
-                font-family: Helvetica, sans-serif;
-                text-align: center;
-                margin: 0;
-                padding: 0;
-            }}
-            .container {{
-                max-width: 600px;
-                margin: 50px auto;
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            }}
-            .mobile-view {{
-                max-width: 90vw;
-                margin: auto;
-                padding: 2vw;
-            }}
-            h1 {{
-                color: #4CAF50;
-            }}
-            p {{
-                font-size: 1.2em;
-                color: #555;
-            }}
-            hr {{
-                margin: 30px auto;
-                width: 50%;
-            }}
-            .button {{
-                font-size: 1.2em;
-                padding: 10px 20px;
-                cursor: pointer;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                text-decoration: none;
-                display: inline-block;
-            }}
-            .toggle-button {{
-                font-size: 1em;
-                padding: 5px 10px;
-                cursor: pointer;
-                background-color: #008CBA;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                z-index: 100;
-            }}
-        </style>
-    </head>
-    <body>
-        <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div id="main-container" class="container {get_view_mode_class()}">
-            <h1>Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
-            <p>Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
-            <hr>
-            <a href="/spiel" class="button">Zum Spiel</a>
-        </div>
-
-        <script>
-            function toggleView() {{
-                const container = document.getElementById('main-container');
-                const button = document.getElementById('toggle-view-btn');
-                
-                let newMode = 'mobile';
-                if (container.classList.contains('mobile-view')) {{
-                    newMode = 'desktop';
-                }}
-
-                fetch('/api/toggle_view_mode', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'mode': newMode }})
-                }}).then(response => {{
-                    if (response.ok) {{
-                        container.classList.toggle('mobile-view');
-                        if (container.classList.contains('mobile-view')) {{
-                            button.textContent = "Laptop-Ansicht";
-                        }} else {{
-                            button.textContent = "Handy-Ansicht";
-                        }}
-                    }}
-                }});
-            }}
-        </script>
-    </body>
-    </html>
+    html_content = """
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
+        <p style="font-size: 1.2em; color: #555;">Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
+        <hr style="margin: 30px auto; width: 50%;">
+        <a href="/spiel" style="text-decoration: none;">
+            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zum Spiel</button>
+        </a>
+    </div>
     """
     return html_content
 
@@ -190,43 +91,14 @@ def spiel_seite():
 
     saved_players_string = session.get('saved_players', '')
     html_content = f"""
-    <body>
-        <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div id="main-container" class="container {get_view_mode_class()}">
-            <h1 style="color: #4CAF50;">Namen eingeben</h1>
-            <p style="font-size: 1em; color: #555;">Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
-            <form action="/spiel" method="post">
-                <textarea name="namen" rows="10" cols="40" style="width: 80%; padding: 10px; font-size: 1em;"></textarea><br><br>
-                <button type="submit" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zu den Rollen</button>
-            </form>
-        </div>
-        <script>
-            function toggleView() {{
-                const container = document.getElementById('main-container');
-                const button = document.getElementById('toggle-view-btn');
-                
-                let newMode = 'mobile';
-                if (container.classList.contains('mobile-view')) {{
-                    newMode = 'desktop';
-                }}
-
-                fetch('/api/toggle_view_mode', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'mode': newMode }})
-                }}).then(response => {{
-                    if (response.ok) {{
-                        container.classList.toggle('mobile-view');
-                        if (container.classList.contains('mobile-view')) {{
-                            button.textContent = "Laptop-Ansicht";
-                        }} else {{
-                            button.textContent = "Handy-Ansicht";
-                        }}
-                    }}
-                }});
-            }}
-        </script>
-    </body>
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Namen eingeben</h1>
+        <p style="font-size: 1em; color: #555;">Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
+        <form action="/spiel" method="post">
+            <textarea name="namen" rows="10" cols="40" style="width: 80%; padding: 10px; font-size: 1em;">{saved_players_string}</textarea><br><br>
+            <button type="submit" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zu den Rollen</button>
+        </form>
+    </div>
     """
     return html_content
 
@@ -257,237 +129,179 @@ def rollen_seite():
         """
     
     return render_template_string(f"""
-    <body>
-        <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div id="main-container" class="container {get_view_mode_class()}">
-            <h1 style="color: #4CAF50;">Rollen auswählen</h1>
-            <p style="font-size: 1em; color: #555;">Wähle genau {player_count} Rollen aus.</p>
-            <p style="font-size: 1.2em; color: #008CBA;">Noch zu vergeben: <span id="roles-to-go">{player_count - sum(saved_roles.values())}</span></p>
-            
-            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                <a href="/spiel" style="text-decoration: none;">
-                    <button style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px;">Zurück</button>
-                </a>
-                <button id="start-button-top" onclick="startGame()" style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; display: none;">Mischen</button>
-            </div>
-            
-
-            {roles_html}
-
-            <button id="start-button-bottom" onclick="startGame()" style="font-size: 1.5em; padding: 15px 30px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px; display: none;">Mischen</button>
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Rollen auswählen</h1>
+        <p style="font-size: 1em; color: #555;">Wähle genau {player_count} Rollen aus.</p>
+        <p style="font-size: 1.2em; color: #008CBA;">Noch zu vergeben: <span id="roles-to-go">{player_count - sum(saved_roles.values())}</span></p>
+        
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <a href="/spiel" style="text-decoration: none;">
+                <button style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px;">Zurück</button>
+            </a>
+            <button id="start-button-top" onclick="startGame()" style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; display: none;">Mischen</button>
         </div>
+        
 
-        <div id="info-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
-            <h2 id="popup-role-name"></h2>
-            <p id="popup-role-description"></p>
-            <button onclick="hideInfo()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5em; cursor: pointer;">&times;</button>
-        </div>
-        <div id="overlay" onclick="hideInfo()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+        {roles_html}
 
-        <script>
-            let rolesCount = {json.dumps(saved_roles)};
-            const ALL_ROLES_DESCRIPTIONS = {json.dumps(ALL_ROLES)};
-            const totalPlayers = {player_count};
-            const rolesToGo = document.getElementById("roles-to-go");
-            const startButtonTop = document.getElementById("start-button-top");
-            const startButtonBottom = document.getElementById("start-button-bottom");
+        <button id="start-button-bottom" onclick="startGame()" style="font-size: 1.5em; padding: 15px 30px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px; display: none;">Mischen</button>
+    </div>
 
-            function updateRolesToGo() {{
-                const totalRolesSelected = Object.values(rolesCount).reduce((a, b) => a + b, 0);
-                const remainingRoles = totalPlayers - totalRolesSelected;
-                rolesToGo.textContent = remainingRoles;
-                if (remainingRoles === 0) {{
-                    startButtonTop.style.display = 'inline-block';
-                    startButtonBottom.style.display = 'inline-block';
-                }} else {{
-                    startButtonTop.style.display = 'none';
-                    startButtonBottom.style.display = 'none';
-                }}
+    <div id="info-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
+        <h2 id="popup-role-name"></h2>
+        <p id="popup-role-description"></p>
+        <button onclick="hideInfo()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5em; cursor: pointer;">&times;</button>
+    </div>
+    <div id="overlay" onclick="hideInfo()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
+    <script>
+        let rolesCount = {json.dumps(saved_roles)};
+        const ALL_ROLES_DESCRIPTIONS = {json.dumps(ALL_ROLES)};
+        const totalPlayers = {player_count};
+        const rolesToGo = document.getElementById("roles-to-go");
+        const startButtonTop = document.getElementById("start-button-top");
+        const startButtonBottom = document.getElementById("start-button-bottom");
+
+        function updateRolesToGo() {{
+            const totalRolesSelected = Object.values(rolesCount).reduce((a, b) => a + b, 0);
+            const remainingRoles = totalPlayers - totalRolesSelected;
+            rolesToGo.textContent = remainingRoles;
+            if (remainingRoles === 0) {{
+                startButtonTop.style.display = 'inline-block';
+                startButtonBottom.style.display = 'inline-block';
+            }} else {{
+                startButtonTop.style.display = 'none';
+                startButtonBottom.style.display = 'none';
             }}
+        }}
 
-            function incrementRole(role) {{
-                if (!rolesCount[role]) {{
-                    rolesCount[role] = 0;
-                }}
-                if (Object.values(rolesCount).reduce((a, b) => a + b, 0) < totalPlayers) {{
-                    rolesCount[role]++;
-                    document.getElementById(role + '-count').textContent = rolesCount[role];
-                    updateRolesToGo();
-                    saveRoles();
-                }}
+        function incrementRole(role) {{
+            if (!rolesCount[role]) {{
+                rolesCount[role] = 0;
             }}
+            if (Object.values(rolesCount).reduce((a, b) => a + b, 0) < totalPlayers) {{
+                rolesCount[role]++;
+                document.getElementById(role + '-count').textContent = rolesCount[role];
+                updateRolesToGo();
+                saveRoles();
+            }}
+        }}
 
-            function decrementRole(role) {{
-                if (rolesCount[role] > 0) {{
-                    rolesCount[role]--;
-                    document.getElementById(role + '-count').textContent = rolesCount[role];
-                    updateRolesToGo();
-                    saveRoles();
-                }}
+        function decrementRole(role) {{
+            if (rolesCount[role] > 0) {{
+                rolesCount[role]--;
+                document.getElementById(role + '-count').textContent = rolesCount[role];
+                updateRolesToGo();
+                saveRoles();
             }}
+        }}
 
-            function showInfo(role) {{
-                const popup = document.getElementById('info-popup');
-                const overlay = document.getElementById('overlay');
-                document.getElementById('popup-role-name').textContent = role;
-                document.getElementById('popup-role-description').textContent = ALL_ROLES_DESCRIPTIONS[role];
-                popup.style.display = 'block';
-                overlay.style.display = 'block';
-            }}
+        function showInfo(role) {{
+            const popup = document.getElementById('info-popup');
+            const overlay = document.getElementById('overlay');
+            document.getElementById('popup-role-name').textContent = role;
+            document.getElementById('popup-role-description').textContent = ALL_ROLES_DESCRIPTIONS[role];
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        }}
 
-            function hideInfo() {{
-                document.getElementById('info-popup').style.display = 'none';
-                document.getElementById('overlay').style.display = 'none';
-            }}
-            
-            function saveRoles() {{
-                fetch('/api/game/save_roles', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'role_counts': rolesCount }})
-                }});
-            }}
+        function hideInfo() {{
+            document.getElementById('info-popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }}
+        
+        function saveRoles() {{
+            fetch('/api/game/save_roles', {{
+                method: 'POST',
+                headers: {{'Content-Type': 'application/json'}},
+                body: JSON.stringify({{ 'role_counts': rolesCount }})
+            }});
+        }}
 
-            async function startGame() {{
-                const response = await fetch('/api/game/roles', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'role_counts': rolesCount }})
-                }});
-                const result = await response.json();
-                if (response.ok) {{
-                    window.location.href = '/karten';
-                }} else {{
-                    alert(result.error);
-                }}
+        async function startGame() {{
+            const response = await fetch('/api/game/roles', {{
+                method: 'POST',
+                headers: {{'Content-Type': 'application/json'}},
+                body: JSON.stringify({{ 'role_counts': rolesCount }})
+            }});
+            const result = await response.json();
+            if (response.ok) {{
+                window.location.href = '/karten';
+            }} else {{
+                alert(result.error);
             }}
-            
-            // Toggle view function
-            function toggleView() {{
-                const container = document.getElementById('main-container');
-                const button = document.getElementById('toggle-view-btn');
-                
-                let newMode = 'mobile';
-                if (container.classList.contains('mobile-view')) {{
-                    newMode = 'desktop';
-                }}
+        }}
 
-                fetch('/api/toggle_view_mode', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'mode': newMode }})
-                }}).then(response => {{
-                    if (response.ok) {{
-                        container.classList.toggle('mobile-view');
-                        if (container.classList.contains('mobile-view')) {{
-                            button.textContent = "Laptop-Ansicht";
-                        }} else {{
-                            button.textContent = "Handy-Ansicht";
-                        }}
-                    }}
-                }});
-            }}
-
-            updateRolesToGo();
-        </script>
-    </body>
+        updateRolesToGo();
+    </script>
     """)
 
 @app.route('/karten')
 def karten_seite():
     return render_template_string(f"""
-    <body>
-        <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div id="main-container" class="container {get_view_mode_class()}">
-            <h1 style="color: #4CAF50;">Rollen aufdecken</h1>
-            <div id="player-card" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; border: 2px dashed #008CBA; border-radius: 10px;">
-                <h2 id="player-name" style="color: #333;"></h2>
-                <p id="role-name" style="font-size: 1.5em; font-weight: bold; color: #f44336; display: none;"></p>
-                <p id="role-description" style="font-size: 1em; color: #555; display: none;"></p>
-                <button id="reveal-role-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; margin-top: 15px;">Rolle aufdecken</button>
-                <button id="show-description-btn" style="font-size: 1em; padding: 8px 15px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 5px; margin-top: 10px; display: none;">Erklärung</button>
-                <button id="next-player-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 15px; display: none;">Nächster Spieler</button>
-            </div>
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Rollen aufdecken</h1>
+        <div id="player-card" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; border: 2px dashed #008CBA; border-radius: 10px;">
+            <h2 id="player-name" style="color: #333;"></h2>
+            <p id="role-name" style="font-size: 1.5em; font-weight: bold; color: #f44336; display: none;"></p>
+            <p id="role-description" style="font-size: 1em; color: #555; display: none;"></p>
+            <button id="reveal-role-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; margin-top: 15px;">Rolle aufdecken</button>
+            <button id="show-description-btn" style="font-size: 1em; padding: 8px 15px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 5px; margin-top: 10px; display: none;">Erklärung</button>
+            <button id="next-player-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 15px; display: none;">Nächster Spieler</button>
         </div>
-        <script>
-            let currentRoleData = null;
-            let isRevealed = false;
+    </div>
+    <script>
+        let currentRoleData = null;
+        let isRevealed = false;
 
-            async function fetchCurrentPlayer() {{
-                const response = await fetch('/api/game/next_card');
-                const data = await response.json();
-                if (response.ok) {{
-                    if (data.message) {{
-                        window.location.href = '/neustart';
-                    }} else {{
-                        document.getElementById('player-name').textContent = data.player_name;
-                        document.getElementById('reveal-role-btn').style.display = 'inline-block';
-                        isRevealed = false;
-                    }}
-                }}
-            }}
-            
-            async function revealCard() {{
-                const response = await fetch('/api/game/reveal_and_next', {{ method: 'POST' }});
-                const data = await response.json();
-                if (response.ok) {{
-                    currentRoleData = data;
-                    document.getElementById('role-name').textContent = data.role_name;
-                    document.getElementById('role-name').style.display = 'block';
-                    document.getElementById('reveal-role-btn').style.display = 'none';
-                    document.getElementById('show-description-btn').style.display = 'inline-block';
-                    document.getElementById('next-player-btn').style.display = 'inline-block';
-                    isRevealed = true;
+        async function fetchCurrentPlayer() {{
+            const response = await fetch('/api/game/next_card');
+            const data = await response.json();
+            if (response.ok) {{
+                if (data.message) {{
+                    window.location.href = '/neustart';
                 }} else {{
-                    alert(data.error);
+                    document.getElementById('player-name').textContent = data.player_name;
+                    document.getElementById('reveal-role-btn').style.display = 'inline-block';
+                    isRevealed = false;
                 }}
             }}
-
-            function showDescription() {{
-                if (currentRoleData && isRevealed) {{
-                    document.getElementById('role-description').textContent = currentRoleData.role_description;
-                    document.getElementById('role-description').style.display = 'block';
-                    document.getElementById('show-description-btn').style.display = 'none';
-                }}
+        }}
+        
+        async function revealCard() {{
+            const response = await fetch('/api/game/reveal_and_next', {{ method: 'POST' }});
+            const data = await response.json();
+            if (response.ok) {{
+                currentRoleData = data;
+                document.getElementById('role-name').textContent = data.role_name;
+                document.getElementById('role-name').style.display = 'block';
+                document.getElementById('reveal-role-btn').style.display = 'none';
+                document.getElementById('show-description-btn').style.display = 'inline-block';
+                document.getElementById('next-player-btn').style.display = 'inline-block';
+                isRevealed = true;
+            }} else {{
+                alert(data.error);
             }}
+        }}
 
-            function nextPlayer() {{
-                window.location.reload();
+        function showDescription() {{
+            if (currentRoleData && isRevealed) {{
+                document.getElementById('role-description').textContent = currentRoleData.role_description;
+                document.getElementById('role-description').style.display = 'block';
+                document.getElementById('show-description-btn').style.display = 'none';
             }}
+        }}
 
-            document.getElementById('reveal-role-btn').addEventListener('click', revealCard);
-            document.getElementById('show-description-btn').addEventListener('click', showDescription);
-            document.getElementById('next-player-btn').addEventListener('click', nextPlayer);
+        function nextPlayer() {{
+            window.location.reload();
+        }}
 
-            window.onload = fetchCurrentPlayer;
-            
-            // Toggle view function
-            function toggleView() {{
-                const container = document.getElementById('main-container');
-                const button = document.getElementById('toggle-view-btn');
-                
-                let newMode = 'mobile';
-                if (container.classList.contains('mobile-view')) {{
-                    newMode = 'desktop';
-                }}
+        document.getElementById('reveal-role-btn').addEventListener('click', revealCard);
+        document.getElementById('show-description-btn').addEventListener('click', showDescription);
+        document.getElementById('next-player-btn').addEventListener('click', nextPlayer);
 
-                fetch('/api/toggle_view_mode', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'mode': newMode }})
-                }}).then(response => {{
-                    if (response.ok) {{
-                        container.classList.toggle('mobile-view');
-                        if (container.classList.contains('mobile-view')) {{
-                            button.textContent = "Laptop-Ansicht";
-                        }} else {{
-                            button.textContent = "Handy-Ansicht";
-                        }}
-                    }}
-                }});
-            }}
-        </script>
-    </body>
+        window.onload = fetchCurrentPlayer;
+    </script>
     """)
 
 @app.route('/neustart')
@@ -510,81 +324,46 @@ def neustart_seite():
         """
 
     return render_template_string(f"""
-    <body>
-        <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
-        <div id="main-container" class="container {get_view_mode_class()}">
-            <h1 style="color: #4CAF50;">Spielübersicht</h1>
-            
-            <div style="text-align: left; padding: 0 20px;">
-                <p>Tippe auf eine Rolle, um einen ausgeschiedenen Spieler zu entfernen.</p>
-            </div>
-            
-            <div id="player-list" style="text-align: left; margin: 20px auto; width: 80%;">
-                {players_list_html}
-            </div>
-            
-            <button onclick="restartGame()" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px; margin-top: 20px;">Neustart</button>
-            <a href="/" style="text-decoration: none;">
-                <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px;">Zur Startseite</button>
-            </a>
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Spielübersicht</h1>
+        
+        <div style="text-align: left; padding: 0 20px;">
+            <p>Tippe auf eine Rolle, um einen ausgeschiedenen Spieler zu entfernen.</p>
         </div>
+        
+        <div id="player-list" style="text-align: left; margin: 20px auto; width: 80%;">
+            {players_list_html}
+        </div>
+        
+        <button onclick="restartGame()" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px; margin-top: 20px;">Neustart</button>
+        <a href="/" style="text-decoration: none;">
+            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px;">Zur Startseite</button>
+        </a>
+    </div>
 
-        <script>
-            async function killPlayer(playerName) {{
-                const confirmKill = confirm(`Spieler '{{playerName}}' als 'tot' markieren?`);
-                if (confirmKill) {{
-                    const killResponse = await fetch(`/api/gamemaster/kill/` + playerName, {{ method: 'PUT' }});
-                    if (killResponse.ok) {{
-                        window.location.reload();
-                    }} else {{
-                        alert('Fehler beim Markieren des Spielers.');
-                    }}
+    <script>
+        async function killPlayer(playerName) {{
+            const confirmKill = confirm(`Spieler '{{playerName}}' als 'tot' markieren?`);
+            if (confirmKill) {{
+                const killResponse = await fetch(`/api/gamemaster/kill/` + playerName, {{ method: 'PUT' }});
+                if (killResponse.ok) {{
+                    window.location.reload();
+                }} else {{
+                    alert('Fehler beim Markieren des Spielers.');
                 }}
             }}
+        }}
 
-            async function restartGame() {{
-                const response = await fetch('/api/game/restart', {{ method: 'POST' }});
-                const result = await response.json();
-                alert(result.message);
-                window.location.href = '/rollen_seite';
-            }}
-            
-            // Toggle view function
-            function toggleView() {{
-                const container = document.getElementById('main-container');
-                const button = document.getElementById('toggle-view-btn');
-                
-                let newMode = 'mobile';
-                if (container.classList.contains('mobile-view')) {{
-                    newMode = 'desktop';
-                }}
-
-                fetch('/api/toggle_view_mode', {{
-                    method: 'POST',
-                    headers: {{'Content-Type': 'application/json'}},
-                    body: JSON.stringify({{ 'mode': newMode }})
-                }}).then(response => {{
-                    if (response.ok) {{
-                        container.classList.toggle('mobile-view');
-                        if (container.classList.contains('mobile-view')) {{
-                            button.textContent = "Laptop-Ansicht";
-                        }} else {{
-                            button.textContent = "Handy-Ansicht";
-                        }}
-                    }}
-                }});
-            }}
-        </script>
-    </body>
+        async function restartGame() {{
+            const response = await fetch('/api/game/restart', {{ method: 'POST' }});
+            const result = await response.json();
+            alert(result.message);
+            window.location.href = '/rollen_seite';
+        }}
+    </script>
     """)
 
 # --- API-ENDPUNKTE ---
-
-@app.route('/api/toggle_view_mode', methods=['POST'])
-def toggle_view_mode():
-    data = request.get_json()
-    session['view_mode'] = data.get('mode', 'desktop')
-    return jsonify({"message": "Ansichtsmodus aktualisiert."}), 200
 
 @app.route('/api/game/save_roles', methods=['POST'])
 def save_roles_api():
