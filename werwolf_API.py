@@ -13,10 +13,6 @@ game_state = {
     "game_started": False,
     "assigned_roles": {},
     "current_player_index": 0,
-    "amors_chosen": False,
-    "amors_lovers": [],
-    "homeless_chosen": False,
-    "homeless_partners": []
 }
 
 # --- Konstanten für alle verfügbaren Rollen und ihre detaillierten Erklärungen ---
@@ -67,14 +63,102 @@ def save_role_counts_to_session(role_counts):
 def startseite():
     session.clear() # Hier wird die Session beim Betreten der Startseite geleert.
     html_content = """
-    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <h1 style="color: #4CAF50;">Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
-        <p style="font-size: 1.2em; color: #555;">Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
-        <hr style="margin: 30px auto; width: 50%;">
-        <a href="/spiel" style="text-decoration: none;">
-            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zum Spiel</button>
-        </a>
-    </div>
+    <!DOCTYPE html>
+    <html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Werwolf Spiel</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 600px;
+                margin: 50px auto;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #4CAF50;
+            }
+            p {
+                font-size: 1.2em;
+                color: #555;
+            }
+            hr {
+                margin: 30px auto;
+                width: 50%;
+            }
+            .button {
+                font-size: 1.2em;
+                padding: 10px 20px;
+                cursor: pointer;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                text-decoration: none;
+                display: inline-block;
+            }
+            .toggle-button {
+                font-size: 1em;
+                padding: 5px 10px;
+                cursor: pointer;
+                background-color: #008CBA;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+            /* Handy-Ansicht */
+            @media (max-width: 600px) {
+                .container.mobile {
+                    width: 90%;
+                    margin: 20px auto;
+                    padding: 10px;
+                }
+                .container.mobile h1 {
+                    font-size: 1.5em;
+                }
+                .container.mobile p {
+                    font-size: 1em;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <button id="toggle-view-btn" class="toggle-button" onclick="toggleView()">Handy-Ansicht</button>
+        <div id="main-container" class="container">
+            <h1>Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
+            <p>Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
+            <hr>
+            <a href="/spiel" class="button">Zum Spiel</a>
+        </div>
+
+        <script>
+            function toggleView() {
+                const container = document.getElementById('main-container');
+                const button = document.getElementById('toggle-view-btn');
+                container.classList.toggle('mobile');
+
+                if (container.classList.contains('mobile')) {
+                    button.textContent = "Laptop-Ansicht";
+                } else {
+                    button.textContent = "Handy-Ansicht";
+                }
+            }
+        </script>
+    </body>
+    </html>
     """
     return html_content
 
@@ -503,10 +587,6 @@ def restart_game():
     game_state["game_started"] = False
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
-    game_state["amors_lovers"] = []
-    game_state["amors_chosen"] = False
-    game_state["homeless_partners"] = []
-    game_state["homeless_chosen"] = False
     
     for player_info in game_state["players"]:
         player_info["status"] = "alive"
