@@ -3,9 +3,8 @@ import random
 import json
 
 app = Flask(__name__)
-app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt
+app.secret_key = 'your_super_secret_key'
 
-# Ein Dictionary, um den Zustand des Spiels zu speichern.
 game_state = {
     "players": [],
     "roles": {},
@@ -15,7 +14,6 @@ game_state = {
     "current_player_index": 0,
 }
 
-# --- Konstanten für alle verfügbaren Rollen und ihre detaillierten Erklärungen ---
 ALL_ROLES = {
     "Dorfbewohner": "Der normale Dorfbewohner hat keine Sonderfähigkeit.",
     "Werwölfe": "Die Werwölfe werden nachts vom Spielleiter aufgerufen, erkennen sich und einigen sich auf ein Opfer, welches „gefressen“ wird und somit aus dem Spiel ist.",
@@ -50,31 +48,25 @@ ALL_ROLES = {
 }
 
 def get_role_counts_from_session():
-    """Hilfsfunktion, um Rollen aus der Session zu laden."""
     return json.loads(session.get('saved_roles', '{}'))
 
 def save_role_counts_to_session(role_counts):
-    """Hilfsfunktion, um Rollen in der Session zu speichern."""
     session['saved_roles'] = json.dumps(role_counts)
 
-# --- API-ENDPUNKTE ---
+# API-ENDPUNKTE
 
 @app.route('/api/game/save_players', methods=['POST'])
 def save_players_api():
-    """Speichert die Spielernamen in der Session und passt die Rollenanzahl an."""
     data = request.get_json()
     namen_string = data.get("namen")
     namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
     
-    # Alte Spieleranzahl aus der Session holen
     old_players_string = session.get('saved_players', '')
     old_players_count = len([name.strip() for name in old_players_string.split('\n') if name.strip()])
-    
     new_players_count = len(namen_liste)
     
     session['saved_players'] = namen_string
     
-    # Rollen zurücksetzen, wenn Spieler entfernt wurden
     if new_players_count < old_players_count:
         save_role_counts_to_session({})
         
@@ -82,7 +74,6 @@ def save_players_api():
 
 @app.route('/api/game/get_players', methods=['GET'])
 def get_players_api():
-    """Gibt die gespeicherten Spielernamen zurück."""
     saved_players_string = session.get('saved_players', '')
     return jsonify({
         "players_string": saved_players_string,
@@ -91,7 +82,6 @@ def get_players_api():
 
 @app.route('/api/game/get_roles_data', methods=['GET'])
 def get_roles_data_api():
-    """Gibt die Liste der Rollen und die gespeicherten Zählungen zurück."""
     saved_roles = get_role_counts_from_session()
     all_roles = list(ALL_ROLES.keys())
     player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
@@ -104,14 +94,12 @@ def get_roles_data_api():
 
 @app.route('/api/game/save_roles', methods=['POST'])
 def save_roles_api():
-    """Speichert die Rollenzählungen in der Session."""
     data = request.get_json()
     save_role_counts_to_session(data.get('role_counts', {}))
     return jsonify({"message": "Rollen wurden in der Session gespeichert."}), 200
 
 @app.route('/api/game/start', methods=['POST'])
 def start_game_api():
-    """Startet das Spiel mit den ausgewählten Rollen."""
     data = request.get_json()
     role_counts = data.get("role_counts", {})
     
@@ -154,7 +142,6 @@ def start_game_api():
 
 @app.route('/api/game/next_card', methods=['GET'])
 def get_next_card():
-    """Gibt den Namen des nächsten Spielers zurück, der seine Rolle aufdecken soll."""
     if not game_state["game_started"]:
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
@@ -174,7 +161,6 @@ def get_next_card():
 
 @app.route('/api/game/reveal_and_next', methods=['POST'])
 def reveal_and_next():
-    """Gibt die Rolle und Beschreibung des aktuellen Spielers zurück."""
     if not game_state["game_started"]:
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
@@ -203,7 +189,6 @@ def reveal_and_next():
 
 @app.route('/api/gamemaster/view', methods=['GET'])
 def get_gamemaster_view():
-    """Gibt die aktuelle Übersicht aller Spieler und ihrer Rollen zurück."""
     if not game_state["game_started"]:
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
@@ -223,7 +208,6 @@ def get_gamemaster_view():
 
 @app.route('/api/gamemaster/kill/<player_name>', methods=['PUT'])
 def kill_player(player_name):
-    """Markiert einen Spieler als 'tot'."""
     if not game_state["game_started"]:
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
@@ -242,7 +226,6 @@ def kill_player(player_name):
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
-    """Setzt das Spiel zurück."""
     game_state["game_started"] = False
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
@@ -254,10 +237,8 @@ def restart_game():
 
 @app.route('/api/game/reset_all', methods=['POST'])
 def reset_all_data():
-    """Löscht alle Daten aus der Session und dem Spielzustand."""
     session.pop('saved_players', None)
     session.pop('saved_roles', None)
-    # Zusätzlich den In-Memory-Spielzustand zurücksetzen
     game_state["players"] = []
     game_state["roles"] = {}
     game_state["game_started"] = False
