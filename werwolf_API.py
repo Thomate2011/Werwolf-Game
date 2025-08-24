@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for, session
+from flask import Flask, request, jsonify, session
 import random
 import json
 
@@ -61,18 +61,23 @@ def save_role_counts_to_session(role_counts):
 
 @app.route('/api/game/save_players', methods=['POST'])
 def save_players_api():
-    """Speichert die Spielernamen in der Session."""
+    """Speichert die Spielernamen in der Session und passt die Rollenanzahl an."""
     data = request.get_json()
     namen_string = data.get("namen")
     namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
-    if not namen_liste:
-        return jsonify({"error": "Bitte geben Sie Spielernamen ein."}), 400
+    
+    # Alte Spieleranzahl aus der Session holen
+    old_players_string = session.get('saved_players', '')
+    old_players_count = len([name.strip() for name in old_players_string.split('\n') if name.strip()])
+    
+    new_players_count = len(namen_liste)
+    
     session['saved_players'] = namen_string
-    # Wenn die Spieleranzahl sich ändert, Rollen zurücksetzen
-    saved_roles = get_role_counts_from_session()
-    total_roles_selected = sum(saved_roles.values())
-    if len(namen_liste) < total_roles_selected:
+    
+    # Rollen zurücksetzen, wenn Spieler entfernt wurden
+    if new_players_count < old_players_count:
         save_role_counts_to_session({})
+        
     return jsonify({"message": "Spielernamen gespeichert."}), 200
 
 @app.route('/api/game/get_players', methods=['GET'])
@@ -246,6 +251,23 @@ def restart_game():
         player_info["status"] = "alive"
     
     return jsonify({"message": "Spiel wurde erfolgreich zurückgesetzt. Du kannst nun wieder zur Rollenauswahl wechseln."})
+
+@app.route('/api/game/reset_all', methods=['POST'])
+def reset_all_data():
+    """Löscht alle Daten aus der Session und dem Spielzustand."""
+    session.pop('saved_players', None)
+    session.pop('saved_roles', None)
+    # Zusätzlich den In-Memory-Spielzustand zurücksetzen
+    game_state["players"] = []
+    game_state["roles"] = {}
+    game_state["game_started"] = False
+    game_state["assigned_roles"] = {}
+    game_state["current_player_index"] = 0
+    return jsonify({"message": "Alle Spieldaten wurden gelöscht."})
+
+@app.route('/')
+def index():
+    return open('frontend.html').read()
 
 if __name__ == '__main__':
     app.run(debug=True)
