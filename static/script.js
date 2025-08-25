@@ -1,22 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Funktionen, die auf allen Seiten benötigt werden
-    if (document.getElementById('info-popup')) {
-        window.showInfo = async (role) => {
-            const popup = document.getElementById('info-popup');
-            const overlay = document.getElementById('overlay');
-            const response = await fetch('/api/get_roles_and_players');
-            const data = await response.json();
-            const roleDescription = data.all_roles[role] || "Keine Erklärung verfügbar.";
-            document.getElementById('popup-role-name').textContent = role;
-            document.getElementById('popup-role-description').textContent = roleDescription;
-            popup.style.display = 'block';
-            overlay.style.display = 'block';
-        };
-        window.hideInfo = () => {
-            document.getElementById('info-popup').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        };
-    }
+    window.showInfo = async (role) => {
+        const popup = document.getElementById('info-popup');
+        const overlay = document.getElementById('overlay');
+        const response = await fetch('/api/get_roles_and_players');
+        const data = await response.json();
+        const roleDescription = data.all_roles[role] || "Keine Erklärung verfügbar.";
+        document.getElementById('popup-role-name').textContent = role;
+        document.getElementById('popup-role-description').textContent = roleDescription;
+        popup.style.display = 'block';
+        overlay.style.display = 'block';
+    };
+    window.hideInfo = () => {
+        document.getElementById('info-popup').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    };
 
     // Rollen-Seite (rollen.html)
     if (document.body.classList.contains('rollen-page')) {
@@ -124,18 +122,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.body.classList.contains('karten-page')) {
         let currentRoleData = null;
         let isRevealed = false;
-    
+        const revealBtn = document.getElementById('reveal-role-btn');
+        const showDescBtn = document.getElementById('show-description-btn');
+        const nextBtn = document.getElementById('next-player-btn');
+        
         window.fetchCurrentPlayer = async () => {
             const response = await fetch('/api/game/next_card');
             const data = await response.json();
             if (response.ok) {
                 if (data.message) {
-                    window.location.href = '/neustart';
+                    document.getElementById('final-popup').style.display = 'block';
+                    document.getElementById('overlay').style.display = 'block';
                 } else {
                     document.getElementById('player-name').textContent = data.player_name;
-                    document.getElementById('reveal-role-btn').style.display = 'inline-block';
-                    document.getElementById('next-player-btn').style.display = 'none';
-                    document.getElementById('show-description-btn').style.display = 'none';
+                    revealBtn.style.display = 'inline-block';
+                    showDescBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
                     document.getElementById('role-name').style.display = 'none';
                     document.getElementById('role-description').style.display = 'none';
                     isRevealed = false;
@@ -150,9 +152,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentRoleData = data;
                 document.getElementById('role-name').textContent = data.role_name;
                 document.getElementById('role-name').style.display = 'block';
-                document.getElementById('reveal-role-btn').style.display = 'none';
-                document.getElementById('show-description-btn').style.display = 'inline-block';
-                document.getElementById('next-player-btn').style.display = 'inline-block';
+                revealBtn.style.display = 'none';
+                showDescBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'inline-block';
                 isRevealed = true;
             } else {
                 alert(data.error);
@@ -163,17 +165,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentRoleData && isRevealed) {
                 document.getElementById('role-description').textContent = currentRoleData.role_description;
                 document.getElementById('role-description').style.display = 'block';
-                document.getElementById('show-description-btn').style.display = 'none';
+                showDescBtn.style.display = 'none';
             }
         };
     
         window.nextPlayer = () => {
-            window.location.reload();
+            if (currentRoleData && currentRoleData.is_last_card) {
+                window.location.href = '/neustart';
+            } else {
+                window.location.reload();
+            }
         };
     
-        document.getElementById('reveal-role-btn').addEventListener('click', revealCard);
-        document.getElementById('show-description-btn').addEventListener('click', showDescription);
-        document.getElementById('next-player-btn').addEventListener('click', nextPlayer);
+        revealBtn.addEventListener('click', revealCard);
+        showDescBtn.addEventListener('click', showDescription);
+        nextBtn.addEventListener('click', nextPlayer);
         
         fetchCurrentPlayer();
     }
@@ -182,37 +188,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.body.classList.contains('neustart-page')) {
         let allRolesDescriptions = {};
 
-        window.killPlayer = async (playerName) => {
-            const confirmKill = confirm(`Spieler '${playerName}' als 'tot' markieren?`);
-            if (confirmKill) {
-                const killResponse = await fetch(`/api/gamemaster/kill/` + playerName, { method: 'PUT' });
-                if (killResponse.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Fehler beim Markieren des Spielers.');
-                }
+        async function fetchRoles() {
+            const response = await fetch('/api/get_roles_and_players');
+            const data = await response.json();
+            allRolesDescriptions = data.all_roles;
+        }
+
+        window.toggleStatus = async (playerName) => {
+            const response = await fetch(`/api/gamemaster/toggle_status/` + playerName, { method: 'PUT' });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Fehler beim Ändern des Spielerstatus.');
             }
         };
 
         window.restartGame = async () => {
             const response = await fetch('/api/game/restart', { method: 'POST' });
             const result = await response.json();
-            alert(result.message);
             window.location.href = '/rollen';
         };
         
         window.showInfoNeustart = (role) => {
-            const popup = document.getElementById('info-popup-neustart');
-            const overlay = document.getElementById('overlay-neustart');
-            document.getElementById('popup-role-name-neustart').textContent = role;
-            document.getElementById('popup-role-description-neustart').textContent = allRolesDescriptions[role] || "Keine Erklärung verfügbar.";
+            const popup = document.getElementById('info-popup');
+            const overlay = document.getElementById('overlay');
+            document.getElementById('popup-role-name').textContent = role;
+            document.getElementById('popup-role-description').textContent = allRolesDescriptions[role] || "Keine Erklärung verfügbar.";
             popup.style.display = 'block';
             overlay.style.display = 'block';
         };
 
         window.hideInfoNeustart = () => {
-            document.getElementById('info-popup-neustart').style.display = 'none';
-            document.getElementById('overlay-neustart').style.display = 'none';
+            document.getElementById('info-popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
         };
+        fetchRoles();
     }
 });

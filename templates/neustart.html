@@ -10,27 +10,30 @@
     <div class="container">
         <h1>Spielübersicht</h1>
         
-        <p>Tippe auf den Namen, um einen ausgeschiedenen Spieler als 'tot' zu markieren.</p>
+        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
         
         <div id="player-list">
             {% for player in players %}
                 <div class="player-list-item {{ 'dead' if player.status == 'dead' }}">
-                    <span onclick="killPlayer('{{ player.name }}')">
+                    <span onclick="toggleStatus('{{ player.name }}')">
                         <b>{{ player.role }}</b> | {{ player.name }}
                     </span>
+                    <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
                 </div>
             {% endfor %}
         </div>
         
         <button onclick="restartGame()" class="danger-button">Neustart</button>
-        <a href="{{ url_for('startseite') }}" class="button-link primary-button">Zur Startseite</a>
+        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
     </div>
     
+    <div id="info-popup" class="popup">
+        <h2 id="popup-role-name" class="role-popup-title"></h2>
+        <p id="popup-role-description" class="role-popup-description"></p>
+        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
+    </div>
+    <div id="overlay" class="overlay" onclick="hideInfoNeustart()"></div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const allRolesDescriptions = {{ all_roles|tojson }};
-        });
-    </script>
 </body>
 </html>

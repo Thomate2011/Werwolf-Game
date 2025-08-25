@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify, session, render_template
 import random
 import json
@@ -225,8 +226,8 @@ def get_gamemaster_view():
         
     return jsonify(overview)
 
-@app.route('/api/gamemaster/kill/<player_name>', methods=['PUT'])
-def kill_player(player_name):
+@app.route('/api/gamemaster/toggle_status/<player_name>', methods=['PUT'])
+def toggle_player_status(player_name):
     if not game_state["game_started"]:
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
@@ -234,12 +235,15 @@ def kill_player(player_name):
     
     for player_info in game_state["players"]:
         if player_info["name"] == player_name:
-            player_info["status"] = "dead"
+            if player_info["status"] == "alive":
+                player_info["status"] = "dead"
+            else:
+                player_info["status"] = "alive"
             player_found = True
             break
     
     if player_found:
-        return jsonify({"message": f"Spieler '{player_name}' wurde als 'tot' markiert."})
+        return jsonify({"message": f"Status von '{player_name}' wurde geändert."})
     else:
         return jsonify({"error": "Spieler nicht gefunden."}), 404
 
