@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rollen auswählen</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Rollen auswählen</h1>
+        <p>Wähle genau <span id="player-count"></span> Rollen aus.</p>
+        <p>Noch zu vergeben: <span id="roles-to-go"></span></p>
+
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <a href="spiel.html" class="button-link danger-button">Zurück</a>
+            <button id="start-button" class="primary-button" style="display: none;">Mischen</button>
+        </div>
+        
+        <div id="roles-container"></div>
+    </div>
+
+    <div id="info-popup" class="popup">
+        <h2 id="popup-role-name"></h2>
+        <p id="popup-role-description"></p>
+        <button onclick="hideInfo()" class="popup-close-btn">&times;</button>
+    </div>
+    <div id="overlay" class="overlay" onclick="hideInfo()"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
