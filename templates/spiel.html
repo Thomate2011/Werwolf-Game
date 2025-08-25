@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namen eingeben</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Namen eingeben</h1>
+        <p>Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
+        <form action="{{ url_for('spiel_seite') }}" method="post">
+            <textarea name="namen" rows="10" cols="40" placeholder="Spieler 1&#10;Spieler 2&#10;...">{{ saved_players }}</textarea><br><br>
+            <button type="submit" class="secondary-button">Zu den Rollen</button>
+        </form>
+    </div>
+</body>
+</html>

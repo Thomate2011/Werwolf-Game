@@ -4,21 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rollen aufdecken</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="karten-page">
     <div class="container">
         <h1>Rollen aufdecken</h1>
         <div id="player-card" class="player-card">
             <h2 id="player-name" class="card-title"></h2>
             <p id="role-name" class="card-role" style="display: none;"></p>
             <p id="role-description" class="card-description" style="display: none;"></p>
-            <button id="reveal-role-btn" class="secondary-button" style="margin-top: 15px;">Rolle aufdecken</button>
-            <button id="show-description-btn" class="secondary-button" style="margin-top: 10px; display: none;">Erklärung</button>
-            <button id="next-player-btn" class="primary-button" style="margin-top: 15px; display: none;">Nächster Spieler</button>
+            <button id="reveal-role-btn" class="secondary-button">Rolle aufdecken</button>
+            <button id="show-description-btn" class="secondary-button" style="display: none;">Erklärung</button>
+            <button id="next-player-btn" class="primary-button" style="display: none;">Nächster Spieler</button>
         </div>
     </div>
-
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

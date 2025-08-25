@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spielübersicht</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="neustart-page">
+    <div class="container">
+        <h1>Spielübersicht</h1>
+        
+        <p>Tippe auf den Namen, um einen ausgeschiedenen Spieler als 'tot' zu markieren.</p>
+        
+        <div id="player-list">
+            {% for player in players %}
+                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}">
+                    <span onclick="killPlayer('{{ player.name }}')">
+                        <b>{{ player.role }}</b> | {{ player.name }}
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button onclick="restartGame()" class="danger-button">Neustart</button>
+        <a href="{{ url_for('startseite') }}" class="button-link primary-button">Zur Startseite</a>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const allRolesDescriptions = {{ all_roles|tojson }};
+        });
+    </script>
+</body>
+</html>

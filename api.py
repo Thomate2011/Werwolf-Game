@@ -1,20 +1,10 @@
-from flask import Flask, request, jsonify, session, send_from_directory
+from flask import Flask, request, jsonify, session, render_template
 import random
 import json
 import os
 
-app = Flask(__name__, static_folder='static')
-app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt
-
-# Ein Dictionary, um den Zustand des Spiels zu speichern.
-game_state = {
-    "players": [],
-    "roles": {},
-    "total_roles_count": 0,
-    "game_started": False,
-    "assigned_roles": {},
-    "current_player_index": 0,
-}
+app = Flask(__name__)
+app.secret_key = 'your_super_secret_key'
 
 # --- Konstanten für alle verfügbaren Rollen und ihre detaillierten Erklärungen ---
 ALL_ROLES = {
@@ -50,36 +40,77 @@ ALL_ROLES = {
     "Der Obdachlose": "Wenn du aufgerufen wirst, wählst du eine Person bei der du übernachten willst. Wenn diese Person in der Nacht von den Werwölfen getötet wird, stirbst du auch. Wenn die Werwölfe dich in der Nacht töten wollen, stirbst du nicht, weil du bei der anderen Person schläfst."
 }
 
+# Ein Dictionary, um den Zustand des Spiels zu speichern.
+game_state = {
+    "players": [],
+    "roles": {},
+    "total_roles_count": 0,
+    "game_started": False,
+    "assigned_roles": {},
+    "current_player_index": 0,
+}
+
 def get_role_counts_from_session():
-    """Hilfsfunktion, um Rollen aus der Session zu laden."""
     return json.loads(session.get('saved_roles', '{}'))
 
 def save_role_counts_to_session(role_counts):
-    """Hilfsfunktion, um Rollen in der Session zu speichern."""
     session['saved_roles'] = json.dumps(role_counts)
 
-# --- Frontend-Routen (liefern die statischen Dateien aus) ---
+# --- Frontend-Routen (liefern die Templates aus) ---
 
 @app.route('/')
 def startseite():
     session.clear()
-    return send_from_directory(app.static_folder, 'index.html')
+    return render_template('index.html')
 
-@app.route('/spiel')
+@app.route('/spiel', methods=['GET', 'POST'])
 def spiel_seite():
-    return send_from_directory(app.static_folder, 'spiel.html')
+    if request.method == 'POST':
+        namen_string = request.form.get("namen")
+        namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
+        
+        session['saved_players'] = namen_string
+        
+        saved_roles = get_role_counts_from_session()
+        total_roles_selected = sum(saved_roles.values())
+        if len(namen_liste) < total_roles_selected:
+            save_role_counts_to_session({})
+        
+        return render_template('rollen.html', all_roles=ALL_ROLES, player_count=len(namen_liste), saved_roles=saved_roles)
 
-@app.route('/rollen_seite')
+    saved_players_string = session.get('saved_players', '')
+    return render_template('spiel.html', saved_players=saved_players_string)
+
+@app.route('/rollen', methods=['GET', 'POST'])
 def rollen_seite():
-    return send_from_directory(app.static_folder, 'rollen.html')
+    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
+    if player_count == 0:
+        return render_template('spiel.html')
+
+    saved_roles = get_role_counts_from_session()
+
+    return render_template('rollen.html', all_roles=ALL_ROLES, player_count=player_count, saved_roles=saved_roles)
 
 @app.route('/karten')
 def karten_seite():
-    return send_from_directory(app.static_folder, 'karten.html')
+    return render_template('karten.html', all_roles=ALL_ROLES)
 
 @app.route('/neustart')
 def neustart_seite():
-    return send_from_directory(app.static_folder, 'neustart.html')
+    if not game_state["game_started"]:
+        return render_template('spiel.html')
+    
+    players_list_data = []
+    for player_info in game_state["players"]:
+        player_name = player_info["name"]
+        role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
+        status = player_info["status"]
+        players_list_data.append({
+            "name": player_name,
+            "role": role,
+            "status": status
+        })
+    return render_template('neustart.html', players=players_list_data, all_roles=ALL_ROLES)
 
 # --- API-ENDPUNKTE (unverändert) ---
 
@@ -233,24 +264,6 @@ def get_roles_and_players():
         "saved_roles": saved_roles,
         "all_roles": all_roles
     })
-
-@app.route('/api/get_player_list')
-def get_player_list_api():
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
-
-    players_list_data = []
-    for player_info in game_state["players"]:
-        player_name = player_info["name"]
-        role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
-        status = player_info["status"]
-        players_list_data.append({
-            "name": player_name,
-            "role": role,
-            "status": status
-        })
-    return jsonify({"players": players_list_data, "ALL_ROLES": ALL_ROLES})
-
+    
 if __name__ == '__main__':
-    # Setze host='0.0.0.0' um von außen erreichbar zu sein, wichtig für Render
     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))

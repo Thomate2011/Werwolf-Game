@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rollen auswählen</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="rollen-page">
     <div class="container">
         <h1>Rollen auswählen</h1>
-        <p>Wähle genau <span id="player-count"></span> Rollen aus.</p>
+        <p>Wähle genau <span id="player-count">{{ player_count }}</span> Rollen aus.</p>
         <p>Noch zu vergeben: <span id="roles-to-go"></span></p>
 
         <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-            <a href="spiel.html" class="button-link danger-button">Zurück</a>
-            <button id="start-button" class="primary-button" style="display: none;">Mischen</button>
+            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
+            <button id="start-button" class="primary-button" onclick="startGame()" style="display: none;">Mischen</button>
         </div>
         
         <div id="roles-container"></div>
@@ -27,6 +27,13 @@
     </div>
     <div id="overlay" class="overlay" onclick="hideInfo()"></div>
 
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let rolesCount = {{ saved_roles|tojson }};
+            const allRolesDescriptions = {{ all_roles|tojson }};
+            const totalPlayers = {{ player_count }};
+        });
+    </script>
 </body>
 </html>
