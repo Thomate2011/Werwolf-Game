@@ -6,7 +6,6 @@ app = Flask(__name__)
 app.secret_key = 'your_super_secret_key'
 CORS(app)
 
-# --- Rollen-Definition ---
 ALL_ROLES = {
     "Dorfbewohner": "Der normale Dorfbewohner hat keine Sonderfähigkeit.",
     "Werwölfe": "Die Werwölfe werden nachts vom Spielleiter aufgerufen, erkennen sich und einigen sich auf ein Opfer, welches „gefressen“ wird und somit aus dem Spiel ist.",
@@ -38,112 +37,120 @@ ALL_ROLES = {
     "Der Gaukler": "Der Spielleiter wählt vor dem Start drei zusätzliche Rollen aus, die er offen in die Mitte legt. Zu Beginn jeder Nacht wählt sich der Schauspieler eine dieser Rollen aus und spielt sie bis zur folgenden Nacht.",
     "Der stotternde Richter": "Der Spielleiter und der Richter einigen sich in der ersten Nacht auf ein Zeichen. Wenn der Richter nach der regulären Abstimmung des Dorfes und dem Tod eines Spielers dieses Zeichen gibt, führt der Spielleiter sofort noch eine Abstimmung ohne erneute Diskussion durch.",
     "Der Obdachlose": "Wenn du aufgerufen wirst, wählst du eine Person bei der du übernachten willst. Wenn diese Person in der Nacht von den Werwölfen getötet wird, stirbst du auch. Wenn die Werwölfe dich in der Nacht töten wollen, stirbst du nicht, weil du bei der anderen Person schläfst."
-
-   
 }
 
-# --- Globale Spiel-Variablen (vereinfacht, für Demo, nicht Threadsicher) ---
-game_state = {
-    "players": [],
-    "roles": {},
-    "total_roles_count": 0,
-    "game_started": False,
-    "assigned_roles": {},
-    "current_player_index": 0,
-}
+def get_from_session(name, default=None):
+    return session.get(name) if session.get(name) is not None else default
 
-def get_role_counts():
-    return json.loads(session.get('saved_roles', '{}'))
+def save_to_session(name, value):
+    session[name] = value
 
-def save_role_counts(role_counts):
-    session['saved_roles'] = json.dumps(role_counts)
+@app.route('/api/init', methods=['POST'])
+def api_init():
+    """ Startet neue Session (Komplettes Reset, wie "Zur Startseite") """
+    session.clear()
+    return jsonify({"message": "Session komplett resettet."})
 
-@app.route("/api/roles/legend", methods=["GET"])
+@app.route('/api/names', methods=['GET','POST'])
+def api_names():
+    """ Namen verwalten """
+    if request.method == 'GET':
+        return jsonify({"names": get_from_session('names', [])})
+    else:
+        names = request.json.get('names', [])
+        save_to_session('names', names)
+        return jsonify({"message": "Namen gespeichert."})
+
+@app.route('/api/roles', methods=['GET','POST'])
+def api_roles():
+    """ Rollenauswahl verwalten """
+    if request.method == 'GET':
+        return jsonify({"role_counts": get_from_session('role_counts', {}), "all_roles": ALL_ROLES})
+    else:
+        role_counts = request.json.get('role_counts', {})
+        save_to_session('role_counts', role_counts)
+        return jsonify({"message": "Rollenauswahl gespeichert."})
+
+@app.route('/api/mixroles', methods=['POST'])
+def api_mixroles():
+    """ Zuweisung von Rollen zu Spielern starten & Status zurücksetzen """
+    names = get_from_session("names", [])
+    role_counts = get_from_session("role_counts", {})
+    if not names or not role_counts:
+        return jsonify({"error": "Vorher Namen und Rollenauswahl definieren!"}), 400
+    if sum(role_counts.values()) != len(names):
+        return jsonify({"error": "Rollenzahl und Spielernamen stimmen nicht überein!"}), 400
+    player_status = [{"name": name, "status": "alive"} for name in names]
+    # zufällige Rollenverteilung
+    roles_flat = []
+    for r, n in role_counts.items(): roles_flat += [r]*n
+    random.shuffle(roles_flat)
+    assignment = {n: r for n, r in zip(names, roles_flat)}
+    save_to_session("assignment", assignment)
+    save_to_session("player_status", player_status)
+    save_to_session("card_index", 0)
+    save_to_session("game_over", False)
+    return jsonify({"message": "Rollen verteilt", "assignment": assignment})
+
+@app.route('/api/next_card', methods=['GET'])
+def api_next_card():
+    idx = get_from_session("card_index", 0)
+    player_status = get_from_session("player_status", [])
+    if idx >= len(player_status):
+        save_to_session("game_over", True)
+        return jsonify({"done": True})
+    name = player_status[idx]["name"]
+    return jsonify({"player_name": name, "index": idx})
+
+@app.route('/api/reveal_card', methods=['POST'])
+def api_reveal_card():
+    idx = get_from_session("card_index", 0)
+    names = get_from_session("names", [])
+    assignment = get_from_session("assignment", {})
+    if idx >= len(names):
+        return jsonify({"done": True})
+    player = names[idx]
+    role = assignment.get(player)
+    save_to_session("card_index", idx+1)
+    return jsonify({"player_name": player, "role_name": role, "role_desc": ALL_ROLES.get(role,"Keine Beschreibung")})
+
+@app.route('/api/status', methods=['GET','PUT'])
+def api_status():
+    """ ToGetAll or Mark dead (PUT {"kill":"name"}) """
+    status = get_from_session("player_status", [])
+    if request.method == 'GET':
+        assignment = get_from_session("assignment", {})
+        return jsonify([
+            {"name": p["name"], "status": p["status"], "role": assignment.get(p["name"], "?")} for p in status
+        ])
+    else:
+        name = request.json.get('kill','')
+        for p in status:
+            if p["name"] == name: p["status"] = "dead"
+        save_to_session("player_status", status)
+        return jsonify({"message":"Status geändert."})
+
+@app.route('/api/resetsoft', methods=['POST'])
+def api_resetsoft():
+    """ Rollenzuordnung & Status neu mischen, Namen & Rollenauswahl BLEIBEN, CardIndex auf 0 """
+    names = get_from_session("names", [])
+    role_counts = get_from_session("role_counts", {})
+    if not names or not role_counts or sum(role_counts.values()) != len(names):
+        return jsonify({"error":"Unvollständige Daten zum Neustarten!"}), 400
+    player_status = [{"name": name, "status": "alive"} for name in names]
+    roles_flat = []
+    for r, n in role_counts.items(): roles_flat += [r]*n
+    random.shuffle(roles_flat)
+    assignment = {n: r for n, r in zip(names, roles_flat)}
+    save_to_session("assignment", assignment)
+    save_to_session("player_status", player_status)
+    save_to_session("card_index", 0)
+    save_to_session("game_over", False)
+    return jsonify({"message":"Neu gemischt."})
+
+@app.route('/api/roles/legend', methods=['GET'])
 def legend():
-    """ Gibt alle Rollen und ihre Beschreibungen zurück """
     return jsonify(ALL_ROLES)
 
-@app.route("/api/game/save_roles", methods=["POST"])
-def save_roles_api():
-    data = request.get_json()
-    save_role_counts(data.get("role_counts", {}))
-    return jsonify({"message": "Rollen gespeichert."}), 200
-
-@app.route("/api/game/roles", methods=["POST"])
-def set_game_roles():
-    data = request.get_json()
-    role_counts = data.get("role_counts", {})
-    total_players = int(data.get("player_count", len(role_counts)))
-    total_roles_count = sum(role_counts.values())
-
-    if total_roles_count != total_players:
-        return jsonify({
-            "error": "Die Anzahl der Rollen muss genau der Anzahl der Spieler entsprechen.",
-            "players_count": total_players,
-            "roles_count": total_roles_count
-        }), 400
-
-    players_list = [{"name": name, "status": "alive"} for name in data.get("players",[])]
-    game_state["players"] = players_list
-    game_state["roles"] = role_counts
-    game_state["total_roles_count"] = total_roles_count
-
-    roles_to_assign = []
-    for role, count in game_state["roles"].items():
-        roles_to_assign.extend([role] * count)
-    random.shuffle(roles_to_assign)
-
-    assigned_roles = {}
-    for i, player_info in enumerate(game_state["players"]):
-        player_name = player_info["name"]
-        assigned_roles[player_name] = roles_to_assign[i]
-
-    game_state["assigned_roles"] = assigned_roles
-    game_state["game_started"] = True
-    game_state["current_player_index"] = 0
-    return jsonify({"message": "Spiel erfolgreich gestartet."})
-
-@app.route("/api/game/next_card", methods=["GET"])
-def get_next_card():
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde nicht gestartet."}), 400
-    idx = game_state["current_player_index"]
-    if idx >= len(game_state["players"]):
-        return jsonify({"message": "Alle Karten aufgedeckt."}), 200
-    player_name = game_state["players"][idx]["name"]
-    return jsonify({"player_name": player_name, "current_player_index": idx})
-
-@app.route("/api/game/reveal_and_next", methods=["POST"])
-def reveal_and_next():
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel nicht gestartet."}), 400
-
-    idx = game_state["current_player_index"]
-    if idx >= len(game_state["players"]):
-        return jsonify({"error": "Schon alle Karten verteilt."}), 400
-
-    player = game_state["players"][idx]["name"]
-    role_name = game_state["assigned_roles"].get(player)
-    role_desc = ALL_ROLES.get(role_name, "Keine Beschreibung verfügbar.")
-    game_state["current_player_index"] += 1
-    return jsonify({
-        "player_name": player,
-        "role_name": role_name,
-        "role_description": role_desc,
-        "is_last_card": (game_state["current_player_index"] >= len(game_state["players"]))
-    })
-
-@app.route("/api/game/restart", methods=["POST"])
-def restart():
-    game_state.update({
-        "players": [],
-        "roles": {},
-        "total_roles_count": 0,
-        "game_started": False,
-        "assigned_roles": {},
-        "current_player_index": 0,
-    })
-    return jsonify({"message": "Spiel zurückgesetzt."})
-
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000,  debug=True)
+    app.run(port=8000, debug=True)
