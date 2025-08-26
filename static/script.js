@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rolesToGoEl = document.getElementById("roles-to-go");
         const startButtons = document.querySelectorAll(".start-button");
         const playerCounterEl = document.getElementById("player-count");
-
+        
         let rolesCount = {};
         let totalPlayers = 0;
         let allRolesDescriptions = {};
@@ -41,8 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function renderRoles() {
             rolesContainer.innerHTML = '';
-            const allRoles = Object.keys(allRolesDescriptions);
-            for (const role of allRoles) {
+            // Get roles in the correct order from the backend
+            const orderedRoles = Object.keys(allRolesDescriptions);
+            
+            for (const role of orderedRoles) {
                 const count = rolesCount[role] || 0;
                 const div = document.createElement('div');
                 div.className = 'role-list-item';
@@ -158,7 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('role-name').style.display = 'block';
                 revealBtn.style.display = 'none';
                 showDescBtn.style.display = 'inline-block';
-                nextBtn.style.display = 'inline-block';
+                // Only show next button if not the last card
+                if (!data.is_last_card) {
+                    nextBtn.style.display = 'inline-block';
+                }
                 isRevealed = true;
             } else {
                 alert(data.error);
@@ -174,7 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     
         window.nextPlayer = () => {
-            window.location.reload();
+            // Check if this is the last card before reloading
+            if (currentRoleData && currentRoleData.is_last_card) {
+                document.getElementById('final-popup').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+            } else {
+                window.location.reload();
+            }
         };
     
         revealBtn.addEventListener('click', revealCard);

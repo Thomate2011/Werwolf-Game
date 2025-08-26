@@ -200,16 +200,17 @@ textarea {
 
 /* KORRIGIERTE STILE FÜR DAS ROLLEN-POP-UP AUF NEUSTART-SEITE */
 .role-popup-title {
-    font-size: 1.5em; /* Rollenname doppelt so groß wie Erklärung */
+    font-size: 2em; /* Rollenname ist doppelt so groß wie die Erklärung */
     font-weight: bold;
     color: #444;
+    margin: 0;
 }
 
 .role-popup-description {
-    font-size: 0.75em; /* Erklärung klein */
+    font-size: 1em; /* Normale Schriftgröße für die Erklärung */
     line-height: 1.6;
     color: #555;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .overlay {
@@ -221,31 +222,4 @@ textarea {
     height: 100%;
     background: rgba(255, 255, 255, 1);
     z-index: 1000;
-}
-
-.fixed-bottom {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    max-width: 500px;
-    background-color: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 999;
-}
-
-.fixed-bottom p {
-    margin: 0;
-    font-size: 1em;
-}
-
-.fixed-bottom button {
-    font-size: 1em;
-    padding: 8px 15px;
 }
