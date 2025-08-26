@@ -7,6 +7,7 @@ app = Flask(__name__)
 app.secret_key = 'your_super_secret_key'
 
 # --- Konstanten für alle verfügbaren Rollen und ihre detaillierten Erklärungen ---
+# Die Reihenfolge in diesem Dictionary ist nun entscheidend und wird beibehalten
 ALL_ROLES = {
     "Dorfbewohner": "Der normale Dorfbewohner hat keine Sonderfähigkeit.",
     "Werwölfe": "Die Werwölfe werden nachts vom Spielleiter aufgerufen, erkennen sich und einigen sich auf ein Opfer, welches „gefressen“ wird und somit aus dem Spiel ist.",
@@ -112,7 +113,7 @@ def neustart_seite():
         })
     return render_template('neustart.html', players=players_list_data, all_roles=ALL_ROLES)
 
-# --- API-ENDPUNKTE (unverändert) ---
+# --- API-ENDPUNKTE ---
 
 @app.route('/api/game/save_roles', methods=['POST'])
 def save_roles_api():
@@ -256,6 +257,11 @@ def restart_game():
         player_info["status"] = "alive"
     
     return jsonify({"message": "Spiel wurde erfolgreich zurückgesetzt. Du kannst nun wieder zur Rollenauswahl wechseln."})
+
+# NEUE API-ROUTE FÜR GEORDNETE ROLLENLISTE
+@app.route('/api/get_roles_list')
+def get_roles_list():
+    return jsonify(list(ALL_ROLES.keys()))
 
 @app.route('/api/get_roles_and_players')
 def get_roles_and_players():

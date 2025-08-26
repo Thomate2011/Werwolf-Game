@@ -30,19 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
         let allRolesDescriptions = {};
         
         async function fetchData() {
-            const response = await fetch('/api/get_roles_and_players');
-            const data = await response.json();
-            rolesCount = data.saved_roles;
-            totalPlayers = data.player_count;
-            allRolesDescriptions = data.all_roles;
+            const rolesResponse = await fetch('/api/get_roles_list');
+            const orderedRoles = await rolesResponse.json();
+
+            const playersResponse = await fetch('/api/get_roles_and_players');
+            const playersData = await playersResponse.json();
+            rolesCount = playersData.saved_roles;
+            totalPlayers = playersData.player_count;
+            allRolesDescriptions = playersData.all_roles;
             playerCounterEl.textContent = totalPlayers;
-            renderRoles();
+
+            renderRoles(orderedRoles);
         }
 
-        function renderRoles() {
+        function renderRoles(orderedRoles) {
             rolesContainer.innerHTML = '';
-            // Get roles in the correct order from the backend
-            const orderedRoles = Object.keys(allRolesDescriptions);
             
             for (const role of orderedRoles) {
                 const count = rolesCount[role] || 0;
@@ -149,15 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('role-name').style.display = 'none';
                     document.getElementById('role-description').style.display = 'none';
                     isRevealed = false;
-
-                    // Check if it's the last player
-                    const playersResponse = await fetch('/api/get_roles_and_players');
-                    const playersData = await playersResponse.json();
-                    const totalPlayers = playersData.player_count;
-                    if (data.current_player_index === totalPlayers - 1) {
-                         nextPlayerBtn.style.display = 'none';
-                         overviewBtn.style.display = 'none';
-                    }
                 }
             }
         };
