@@ -223,3 +223,45 @@ textarea {
     background: rgba(255, 255, 255, 1);
     z-index: 1000;
 }
+
+/* NEUE STILE FÜR ERZÄHLER-SEITE */
+.erzaehler-page .container {
+    max-width: 800px;
+}
+
+.night-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.night-buttons .button-link {
+    background-color: #ccc;
+    color: #555;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.night-buttons .button-link.active {
+    background-color: #2e7d32;
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    transform: translateY(0);
+}
+
+#narrator-text-container {
+    text-align: left;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+#narrator-text-container p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+#narrator-text-container strong {
+    color: #008CBA;
+    font-size: 1.2em;
+}

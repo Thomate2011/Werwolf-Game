@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Funktionen, die auf allen Seiten benötigt werden
+    // Globale Funktionen für alle Seiten, die Pop-ups benötigen
     window.showInfo = async (role) => {
         const popup = document.getElementById('info-popup');
         const overlay = document.getElementById('overlay');
@@ -245,5 +245,58 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.style.display = 'none';
         };
         fetchRoles();
+    }
+
+    // NEUE ERZÄHLER-SEITE (erzaehler.html)
+    if (document.body.classList.contains('erzaehler-page')) {
+        const narratorTextContainer = document.getElementById('narrator-text-container');
+        const round1Btn = document.getElementById('round-1-btn');
+        const round2Btn = document.getElementById('round-2-btn');
+        let currentRound = 1;
+
+        const loadNarratorText = async (round) => {
+            narratorTextContainer.innerHTML = 'Lade Text...';
+            try {
+                const response = await fetch(`/api/narrator_text/${round}`);
+                const data = await response.json();
+                if (response.ok) {
+                    narratorTextContainer.innerHTML = ''; // Löscht den "Lade Text"-Hinweis
+                    data.text_blocks.forEach(block => {
+                        const p = document.createElement('p');
+                        p.innerHTML = `<strong>${block.role}:</strong> ${block.text}`;
+                        narratorTextContainer.appendChild(p);
+                    });
+                } else {
+                    narratorTextContainer.innerHTML = `<p style="color: red;">Fehler: ${data.error}</p>`;
+                }
+            } catch (error) {
+                narratorTextContainer.innerHTML = `<p style="color: red;">Netzwerkfehler: ${error.message}</p>`;
+            }
+        };
+
+        const updateButtons = (activeRound) => {
+            round1Btn.classList.remove('active');
+            round2Btn.classList.remove('active');
+            if (activeRound === 1) {
+                round1Btn.classList.add('active');
+            } else {
+                round2Btn.classList.add('active');
+            }
+        };
+
+        round1Btn.addEventListener('click', () => {
+            currentRound = 1;
+            updateButtons(currentRound);
+            loadNarratorText(currentRound);
+        });
+
+        round2Btn.addEventListener('click', () => {
+            currentRound = 2;
+            updateButtons(currentRound);
+            loadNarratorText(currentRound);
+        });
+
+        // Initialer Ladevorgang bei Seitenaufruf
+        loadNarratorText(currentRound);
     }
 });
