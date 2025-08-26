@@ -11,12 +11,17 @@
         <h1>Rollen auswählen</h1>
         <p>Wähle genau <span id="player-count"></span> Rollen aus.</p>
 
-        <div id="roles-container"></div>
-        <p id="roles-to-go">Noch zu vergeben: <span></span></p>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
+            <button class="primary-button start-button" style="display: none;">Mischen</button>
+        </div>
+        <p id="roles-to-go" style="font-weight: bold;"></p>
 
+        <div id="roles-container"></div>
+        
         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
             <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
-            <button id="start-button" class="primary-button" onclick="startGame()" style="display: none;">Mischen</button>
+            <button class="primary-button start-button" style="display: none;">Mischen</button>
         </div>
     </div>
 

@@ -12,15 +12,17 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'block';
     };
     window.hideInfo = () => {
-        document.getElementById('info-popup').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
+        const popup = document.getElementById('info-popup');
+        const overlay = document.getElementById('overlay');
+        popup.style.display = 'none';
+        overlay.style.display = 'none';
     };
 
     // Rollen-Seite (rollen.html)
     if (document.body.classList.contains('rollen-page')) {
         const rolesContainer = document.getElementById("roles-container");
         const rolesToGoEl = document.getElementById("roles-to-go");
-        const startButton = document.getElementById("start-button");
+        const startButtons = document.querySelectorAll(".start-button");
         const playerCounterEl = document.getElementById("player-count");
 
         let rolesCount = {};
@@ -63,11 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateRolesToGo() {
             const totalRolesSelected = Object.values(rolesCount).reduce((a, b) => a + b, 0);
             const remainingRoles = totalPlayers - totalRolesSelected;
-            rolesToGoEl.textContent = remainingRoles;
+            rolesToGoEl.textContent = `Noch ${remainingRoles} Rollen zu vergeben`;
+            
             if (remainingRoles === 0) {
-                startButton.style.display = 'inline-block';
+                startButtons.forEach(btn => btn.style.display = 'inline-block');
             } else {
-                startButton.style.display = 'none';
+                startButtons.forEach(btn => btn.style.display = 'none');
             }
         }
 
@@ -114,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         
-        startButton.addEventListener('click', startGame);
+        startButtons.forEach(btn => btn.addEventListener('click', startGame));
         fetchData();
     }
 
@@ -131,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (response.ok) {
                 if (data.message) {
+                    // This is the trigger for the final pop-up
                     document.getElementById('final-popup').style.display = 'block';
                     document.getElementById('overlay').style.display = 'block';
                 } else {
@@ -170,11 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     
         window.nextPlayer = () => {
-            if (currentRoleData && currentRoleData.is_last_card) {
-                window.location.href = '/neustart';
-            } else {
-                window.location.reload();
-            }
+            window.location.reload();
         };
     
         revealBtn.addEventListener('click', revealCard);
@@ -219,8 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         window.hideInfoNeustart = () => {
-            document.getElementById('info-popup').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+            const popup = document.getElementById('info-popup');
+            const overlay = document.getElementById('overlay');
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
         };
         fetchRoles();
     }

@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, session, render_template
 import random
 import json
