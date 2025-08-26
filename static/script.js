@@ -129,8 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let isRevealed = false;
         const revealBtn = document.getElementById('reveal-role-btn');
         const showDescBtn = document.getElementById('show-description-btn');
-        const nextBtn = document.getElementById('next-player-btn');
-        
+        const nextPlayerBtn = document.getElementById('next-player-btn');
+        const overviewBtn = document.getElementById('overview-btn'); // Neuer Button
+
         window.fetchCurrentPlayer = async () => {
             const response = await fetch('/api/game/next_card');
             const data = await response.json();
@@ -143,14 +144,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('player-name').textContent = data.player_name;
                     revealBtn.style.display = 'inline-block';
                     showDescBtn.style.display = 'none';
-                    nextBtn.style.display = 'none';
+                    nextPlayerBtn.style.display = 'none';
+                    overviewBtn.style.display = 'none';
                     document.getElementById('role-name').style.display = 'none';
                     document.getElementById('role-description').style.display = 'none';
                     isRevealed = false;
+
+                    // Check if it's the last player
+                    const playersResponse = await fetch('/api/get_roles_and_players');
+                    const playersData = await playersResponse.json();
+                    const totalPlayers = playersData.player_count;
+                    if (data.current_player_index === totalPlayers - 1) {
+                         nextPlayerBtn.style.display = 'none';
+                         overviewBtn.style.display = 'none';
+                    }
                 }
             }
         };
-        
+
         window.revealCard = async () => {
             const response = await fetch('/api/game/reveal_and_next', { method: 'POST' });
             const data = await response.json();
@@ -160,11 +171,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('role-name').style.display = 'block';
                 revealBtn.style.display = 'none';
                 showDescBtn.style.display = 'inline-block';
-                // Only show next button if not the last card
-                if (!data.is_last_card) {
-                    nextBtn.style.display = 'inline-block';
-                }
                 isRevealed = true;
+
+                // Toggle buttons based on whether it's the last card
+                if (data.is_last_card) {
+                    nextPlayerBtn.style.display = 'none';
+                    overviewBtn.style.display = 'inline-block';
+                } else {
+                    nextPlayerBtn.style.display = 'inline-block';
+                    overviewBtn.style.display = 'none';
+                }
             } else {
                 alert(data.error);
             }
@@ -178,19 +194,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     
-        window.nextPlayer = () => {
-            // Check if this is the last card before reloading
-            if (currentRoleData && currentRoleData.is_last_card) {
-                document.getElementById('final-popup').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-            } else {
-                window.location.reload();
-            }
+        window.locationToOverview = () => {
+            document.getElementById('final-popup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
         };
-    
+
+        window.nextPlayer = () => {
+            window.location.reload();
+        };
+
         revealBtn.addEventListener('click', revealCard);
         showDescBtn.addEventListener('click', showDescription);
-        nextBtn.addEventListener('click', nextPlayer);
+        nextPlayerBtn.addEventListener('click', nextPlayer);
+        overviewBtn.addEventListener('click', locationToOverview);
         
         fetchCurrentPlayer();
     }
