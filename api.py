@@ -62,7 +62,7 @@ NARRATOR_TEXT = {
         {"role": "Der Urwolf", "text": "Ulwolf, du darfst deine Augen jetzt öffnen.<br>Welche Person möchtest du in einen Werwolf verwandeln?<br>(Der Urwolf zeigt auf eine Person, die Werwolf werden soll)<br>Ulwolf, schließe jetzt deine Augen.<br>Ich gehe jetzt herum und tippe die infizierte Person an.<br>(Erzähler geht rum und tippt die infizierte Person an)<br>Die Person die ich angetippt habe wird in der nächsten Nacht zum Werwolf.<br>Sie verliert ihre andere Rolle."},
         {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
         {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten möchtest.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
+        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten möchtest.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch. Wenn die Werwölfe dich in der Nacht töten wollen, stirbst du nicht, weil du bei der anderen Person schläfst.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
         {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
         {"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."},
     ],
@@ -358,31 +358,43 @@ def get_narrator_text(round_number):
     filtered_text = []
     selected_roles = set(game_state["assigned_roles"].values())
 
+    # Hilfsfunktion, um die Anzahl der lebenden Spieler für eine Rolle zu bekommen
+    def get_living_players_count(role_name):
+        count = 0
+        for player_info in game_state["players"]:
+            if player_info["status"] == "alive" and game_state["assigned_roles"].get(player_info["name"]) == role_name:
+                count += 1
+        return count
+
     if round_number == '1':
-        # "Reine Seele" als erster Text, wenn sie im Spiel ist
-        if "Die reine Seele" in selected_roles:
+        # "Reine Seele" als erster Text, wenn sie im Spiel ist UND noch lebt
+        if "Die reine Seele" in selected_roles and get_living_players_count("Die reine Seele") > 0:
             filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Die reine Seele"))
 
         # Festen Beginn-Textblock hinzufügen
         filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Alle Bürger"))
 
-        # Restliche Rollen-Texte hinzufügen, die im Spiel sind
+        # Restliche Rollen-Texte hinzufügen, die im Spiel sind und lebende Spieler haben
         for item in NARRATOR_TEXT["round_1"]:
             if item["role"] in selected_roles and item["role"] != "Alle Bürger" and item["role"] != "Die reine Seele":
-                if game_state["role_counters"].get(item["role"], 0) > 0:
+                if get_living_players_count(item["role"]) > 0:
                     filtered_text.append(item)
+
+        # Festen Schluss-Textblock hinzufügen
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Alle Bürger" and item["text"] == "Alle Bürger öffnen jetzt ihre Augen."))
+
     else: # für Runde 2
         # Festen Beginn-Textblock hinzufügen
-        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger"))
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger" and item["text"] == "Alle Bürger, schließt jetzt bitte eure Augen."))
 
-        # Rollen-Texte hinzufügen, die im Spiel sind
+        # Rollen-Texte hinzufügen, die im Spiel sind und lebende Spieler haben
         for item in NARRATOR_TEXT["round_2"]:
             if item["role"] in selected_roles and item["role"] != "Alle Bürger":
-                if game_state["role_counters"].get(item["role"], 0) > 0:
+                if get_living_players_count(item["role"]) > 0:
                     filtered_text.append(item)
 
-    # Festen Schluss-Textblock hinzufügen
-    filtered_text.append({"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."})
+        # Festen Schluss-Textblock hinzufügen
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger" and item["text"] == "Alle Bürger öffnen jetzt ihre Augen."))
     
     return jsonify({"text_blocks": filtered_text})
     
