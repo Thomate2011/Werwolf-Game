@@ -20,30 +20,6 @@ Spieler 3
         </form>
     </div>
 
-    <script>
-        document.getElementById('namenForm').addEventListener('submit', function(event) {
-            const namenInput = document.getElementById('namenInput');
-            const namenString = namenInput.value;
-            const namenListe = namenString.split('\n').map(name => name.trim()).filter(name => name.length > 0);
-            
-            const seenNames = new Set();
-            let hasDuplicates = false;
-
-            for (const name of namenListe) {
-                if (seenNames.has(name.toLowerCase())) {
-                    hasDuplicates = true;
-                    break;
-                }
-                seenNames.add(name.toLowerCase());
-            }
-
-            if (hasDuplicates) {
-                document.getElementById('nameError').style.display = 'block';
-                event.preventDefault(); // Verhindert das Absenden des Formulars
-            } else {
-                document.getElementById('nameError').style.display = 'none';
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

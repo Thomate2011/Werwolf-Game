@@ -3,24 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erzählertext</title>
+    <title>Erzähler - Werwölfe von Düsterwald</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="erzaehler-page">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <a href="{{ url_for('neustart_seite') }}" class="button-link secondary-button">Zurück</a>
-            <div class="night-buttons">
-                <button id="round-1-btn" class="button-link primary-button active">1. Runde Text</button>
-                <button id="round-2-btn" class="button-link primary-button">2. Runde Text</button>
-            </div>
-            <div></div>
+        <h1>Erzähler</h1>
+        <div class="night-buttons">
+            <button class="button-link night-button active" data-round="1">Nacht 1</button>
+            <button class="button-link night-button" data-round="2">Nacht 2</button>
+            <button class="button-link night-button" data-round="3">Nacht 3</button>
         </div>
-
         <div id="narrator-text-container">
-        </div>
-
+            </div>
+        <hr>
+        <a href="{{ url_for('neustart_seite') }}" class="button-link secondary-button">Zurück zur Übersicht</a>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        function loadNarratorText(roundNumber) {
+            const container = document.getElementById('narrator-text-container');
+            container.innerHTML = 'Lade...';
+
+            // Alle Buttons inaktiv setzen
+            document.querySelectorAll('.night-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.night-button[data-round="${roundNumber}"]`).classList.add('active');
+
+            fetch(`/api/narrator_text/${roundNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        container.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    data.text_blocks.forEach(block => {
+                        const p = document.createElement('p');
+                        p.innerHTML = `<strong>${block.role}:</strong> ${block.text}`;
+                        container.appendChild(p);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching narrator text:', error);
+                    container.innerHTML = '<p style="color:red;">Ein Fehler ist aufgetreten.</p>';
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lade standardmäßig den Text für Runde 1
+            loadNarratorText(1);
+
+            // Füge Event Listener für alle Night Buttons hinzu
+            document.querySelectorAll('.night-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const round = button.dataset.round;
+                    loadNarratorText(round);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
