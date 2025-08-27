@@ -3,17 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namen eingeben</title>
+    <title>Werwölfe von Düsterwald</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="spiel-page">
     <div class="container">
-        <h1>Namen eingeben</h1>
-        <p>Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
-        <form action="{{ url_for('spiel_seite') }}" method="post">
-            <textarea name="namen" rows="10" cols="40" placeholder="Spieler 1&#10;Spieler 2&#10;...">{{ saved_players }}</textarea><br><br>
-            <button type="submit" class="secondary-button">Zu den Rollen</button>
+        <h1>Spieler-Anmeldung</h1>
+        <p>Gib die Namen der Spieler ein, jeder in einer neuen Zeile. Bitte verwende keine doppelten Namen.</p>
+        <form id="namenForm" action="{{ url_for('spiel_seite') }}" method="POST">
+            <textarea id="namenInput" name="namen" placeholder="Spieler 1
+Spieler 2
+Spieler 3
+..." required>{{ saved_players }}</textarea>
+            <p id="nameError" style="color: red; display: none;">Doppelte Namen sind nicht erlaubt. Bitte korrigiere deine Eingabe.</p>
+            <button type="submit" class="primary-button">Weiter zur Rollenauswahl</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('namenForm').addEventListener('submit', function(event) {
+            const namenInput = document.getElementById('namenInput');
+            const namenString = namenInput.value;
+            const namenListe = namenString.split('\n').map(name => name.trim()).filter(name => name.length > 0);
+            
+            const seenNames = new Set();
+            let hasDuplicates = false;
+
+            for (const name of namenListe) {
+                if (seenNames.has(name.toLowerCase())) {
+                    hasDuplicates = true;
+                    break;
+                }
+                seenNames.add(name.toLowerCase());
+            }
+
+            if (hasDuplicates) {
+                document.getElementById('nameError').style.display = 'block';
+                event.preventDefault(); // Verhindert das Absenden des Formulars
+            } else {
+                document.getElementById('nameError').style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
