@@ -3,32 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwolf: Karten ziehen</title>
+    <title>Rollen aufdecken</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="karten-page">
     <div class="container">
-        <h1>Rollen ziehen</h1>
-        <hr>
-        <div class="player-card">
-            <h2 id="player-name"></h2>
-            <h3 id="role-name" style="display: none;"></h3>
-            <p id="role-description" style="display: none;"></p>
+        <h1>Rollen aufdecken</h1>
+        <div id="player-card" class="player-card">
+            <h2 id="player-name" class="card-title"></h2>
+            <p id="role-name" class="card-role" style="display: none;"></p>
+            <p id="role-description" class="card-description" style="display: none;"></p>
+            <button id="reveal-role-btn" class="secondary-button">Rolle aufdecken</button>
+            <button id="show-description-btn" class="secondary-button" style="display: none;">Erklärung</button>
+            <button id="next-player-btn" class="primary-button" style="display: none;">Nächster Spieler</button>
+            <button id="overview-btn" class="primary-button" style="display: none;">Zur Übersicht</button>
         </div>
-        <hr>
-        <button id="reveal-role-btn" onclick="revealCard()" class="primary-button">Rolle aufdecken</button>
-        <button id="show-description-btn" onclick="showDescription()" class="secondary-button" style="display: none;">Beschreibung zeigen</button>
-        <button id="next-player-btn" onclick="nextPlayer()" class="primary-button" style="display: none;">Nächster Spieler</button>
-        <button id="overview-btn" onclick="locationToOverview()" class="primary-button" style="display: none;">Zur Spielübersicht</button>
     </div>
-
-    <div id="final-popup" class="popup">
-        <h2>Alle Rollen verteilt!</h2>
-        <p>Alle Spieler haben ihre Rollen gesehen. Ihr könnt jetzt mit der Spielübersicht fortfahren.</p>
+    
+    <div id="final-popup" class="popup" style="display: none;">
+        <p class="role-popup-description">Alle Rollen wurden aufgedeckt. Du kannst nun zur Spielübersicht wechseln.</p>
         <a href="{{ url_for('neustart_seite') }}" class="button-link primary-button">Zur Spielübersicht</a>
     </div>
-
     <div id="overlay" class="overlay"></div>
 </body>
 </html>

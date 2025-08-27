@@ -10,10 +10,10 @@
 <body class="spiel-page">
     <div class="container">
         <h1>Spieler festlegen</h1>
-        <p>Gib hier die Namen der Spieler ein. Ein Name pro Zeile.</p>
+        <p>Gib hier die Namen der Spieler ein. Ein Name pro Zeile. Mindestens vier Namen. Keine Doppelte Namen.</p>
         <form id="namenForm" action="/spiel" method="post">
             <textarea id="namenInput" name="namen" placeholder="Spieler 1&#10;Spieler 2&#10;..."></textarea>
-            <div id="nameError" style="color: red; display: none;">Jeder Spieler muss einen einzigartigen Namen haben.</div>
+            <div id="nameError" style="color: red; display: none;">Keine doppelte Namen verwenden.</div>
             <div id="playerCountError" style="color: red; display: none;">Du brauchst mindestens 4 Spieler.</div>
             <hr>
             <button type="submit" class="primary-button">Weiter zur Rollenauswahl</button>

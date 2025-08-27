@@ -10,19 +10,19 @@
 <body class="rollen-page">
     <div class="container">
         <h1>Rollen auswählen</h1>
-        <p>
-            Anzahl der Spieler: <strong>{{ player_count }}</strong>
-            <br>
-            <span id="roles-to-go">Noch {{ player_count - saved_roles|dict_sum }} Rollen zu vergeben</span>
-        </p>
-        
-        <button id="special-role-button" style="display: none;"></button>
+        <p>Wähle genau <span id="player-count">{{ player_count }}</span> Rollen aus.</p>
 
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
+            <button id="special-role-button" style="display: none;"></button>
+            <button id="start-button" class="primary-button start-button disabled-button" disabled>Mischen</button>
+        </div>
+        <p id="roles-to-go" style="font-weight: bold;">Noch {{ player_count - saved_roles|dict_sum }} Rollen zu vergeben</p>
+        
         <div id="roles-container">
             </div>
-
+        
         <hr>
-        <button id="start-button" onclick="startGame()" class="primary-button disabled-button" disabled>Spiel mischen</button>
         <a href="{{ url_for('spiel_seite') }}" class="button-link secondary-button">Zurück zu den Namen</a>
     </div>
 

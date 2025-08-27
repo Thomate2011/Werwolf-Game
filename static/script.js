@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const playersResponse = await fetch('/api/get_roles_and_players');
             const playersData = await playersResponse.json();
-            rolesCount = playersData.saved_roles;
+            rolesCount = playersData.saved_roles || {};
             totalPlayers = playersData.player_count;
             
             const specialRolesResponse = await fetch('/api/game/get_special_roles');
@@ -553,8 +553,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('special-action-description').textContent = "Wähle zwei Spieler aus...";
             document.querySelectorAll('.player-list-item').forEach(el => {
                 el.onclick = () => {
-                    if (selectedPlayers.length < 2 && !selectedPlayers.includes(el.dataset.playerName)) {
-                        selectedPlayers.push(el.dataset.playerName);
+                    const playerName = el.dataset.playerName;
+                    if (selectedPlayers.length < 2 && !selectedPlayers.includes(playerName)) {
+                        selectedPlayers.push(playerName);
                         el.classList.add('selected');
                         if (selectedPlayers.length === 2) {
                             fetch('/api/game/amor/pair', {
@@ -566,8 +567,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 fetchRoles();
                             });
                         }
-                    } else if (selectedPlayers.includes(el.dataset.playerName)) {
-                         selectedPlayers = selectedPlayers.filter(name => name !== el.dataset.playerName);
+                    } else if (selectedPlayers.includes(playerName)) {
+                         selectedPlayers = selectedPlayers.filter(name => name !== playerName);
                          el.classList.remove('selected');
                     }
                 };

@@ -126,27 +126,28 @@ def spiel_seite():
         
         session['saved_players'] = namen_string
         
+        # Sicherstellen, dass die Rollenanzahl zurückgesetzt wird, wenn die Spielerzahl sich ändert
         saved_roles = get_role_counts_from_session()
         total_roles_selected = sum(saved_roles.values())
         if len(namen_liste) != total_roles_selected:
             save_role_counts_to_session({})
         
-        return render_template('rollen.html', all_roles=ALL_ROLES, player_count=len(namen_liste), saved_roles=saved_roles)
+        return render_template('rollen.html')
 
     saved_players_string = session.get('saved_players', '')
     return render_template('spiel.html', saved_players=saved_players_string)
 
-@app.route('/rollen', methods=['GET', 'POST'])
+@app.route('/rollen', methods=['GET'])
 def rollen_seite():
-    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
+    players_list = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
+    player_count = len(players_list)
+
     if player_count == 0:
         return redirect(url_for('spiel_seite'))
 
     saved_roles = get_role_counts_from_session()
     
-    special_roles = get_special_roles_from_session()
-
-    return render_template('rollen.html', all_roles=ALL_ROLES, player_count=player_count, saved_roles=saved_roles, special_roles=special_roles)
+    return render_template('rollen.html', player_count=player_count)
 
 @app.route('/karten')
 def karten_seite():
@@ -193,12 +194,14 @@ def save_special_roles_api():
     
     if 'dieb_roles' in data:
         current_special_roles['dieb_roles'] = data['dieb_roles']
-        if not current_special_roles['dieb_roles']:
-            current_special_roles.pop('dieb_roles')
     if 'gaukler_roles' in data:
         current_special_roles['gaukler_roles'] = data['gaukler_roles']
-        if not current_special_roles['gaukler_roles']:
-            current_special_roles.pop('gaukler_roles')
+    
+    # Entfernen, wenn Liste leer ist
+    if not current_special_roles.get('dieb_roles'):
+        current_special_roles.pop('dieb_roles', None)
+    if not current_special_roles.get('gaukler_roles'):
+        current_special_roles.pop('gaukler_roles', None)
 
     save_special_roles_to_session(current_special_roles)
     return jsonify({"message": "Spezielle Rollen wurden in der Session gespeichert."}), 200
@@ -304,7 +307,8 @@ def reveal_and_next():
 
 @app.route('/api/get_roles_and_players')
 def get_roles_and_players():
-    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
+    players_list_raw = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
+    player_count = len(players_list_raw)
     saved_roles = get_role_counts_from_session()
     all_roles = ALL_ROLES
     
@@ -381,6 +385,7 @@ def restart_game():
     })
     session.pop('saved_roles', None)
     session.pop('special_roles', None)
+    session.pop('saved_players', None)
     return jsonify({"message": "Spiel wurde erfolgreich zurückgesetzt. Du kannst nun wieder zur Rollenauswahl wechseln."})
 
 @app.route('/api/get_roles_list')

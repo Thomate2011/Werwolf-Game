@@ -9,16 +9,23 @@
 </head>
 <body class="neustart-page">
     <div class="container">
-        <h1>Spielübersicht</h1>
-        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebend/tot).<br>Klicke auf ein Emoji, um eine Spezialaktion auszuführen.</p>
-        <hr>
-        <ul id="player-list" style="list-style-type: none; padding: 0;">
-            </ul>
-        <hr>
-        <button onclick="restartGame()" class="danger-button">Spiel beenden</button>
-        <a href="{{ url_for('erzaehler_seite') }}" class="button-link secondary-button">Zum Erzählertext</a>
-    </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Spielübersicht</h1>
+            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
+        </div>
+        
+        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
+        
+        <div id="player-list">
+            </div>
+        
+        <button onclick="restartGame()" class="danger-button">Neustart</button>
+        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
 
+        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
+        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
+    </div>
+    
     <div id="special-action-popup" class="popup">
         <button class="popup-close-btn" onclick="hideSpecialActionPopup()">&times;</button>
         <h2 id="special-action-title"></h2>
