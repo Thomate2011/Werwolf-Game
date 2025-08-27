@@ -82,6 +82,26 @@ textarea {
 }
 
 /* Rollen-Seite */
+.roles-list-wrapper {
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.roles-selection-info {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+}
+
+.special-roles-prompt {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #f44336;
+}
+
 .roles-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -144,6 +164,17 @@ textarea {
     border-radius: 8px;
     background-color: #f8f9fa;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.player-card.selectable-player:hover {
+    background-color: #e0f7fa;
+    cursor: pointer;
+}
+
+.player-card.selected-lover {
+    border: 2px solid #ff4d4d;
+    background-color: #ffebee;
 }
 
 .player-name {
@@ -153,6 +184,14 @@ textarea {
 .player-role {
     font-style: italic;
     color: #777;
+    flex-grow: 1;
+    text-align: right;
+    margin-right: 15px;
+}
+
+.player-actions {
+    display: flex;
+    gap: 8px;
 }
 
 .player-actions .info-button {
@@ -189,17 +228,38 @@ textarea {
     background-color: #f44336;
 }
 
+.emoji-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5em;
+    line-height: 1;
+    padding: 0;
+    text-align: center;
+}
+
+.emoji-button span {
+    font-size: 0.5em;
+    display: block;
+    margin-top: 5px;
+}
+
 /* Modales Pop-up für Rollenerklärung */
 .modal {
     display: none;
     position: fixed;
-    z-index: 10;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
     background-color: rgba(0,0,0,0.4);
+}
+
+.modal.special-modal {
+    background-color: rgba(255, 255, 255, 1);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
@@ -214,6 +274,13 @@ textarea {
     text-align: center;
 }
 
+.modal-content.special-modal-content {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    margin-top: 5%;
+}
+
 .close-button {
     color: #aaa;
     position: absolute;
@@ -222,6 +289,7 @@ textarea {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    z-index: 1001;
 }
 
 .close-button:hover,
@@ -231,14 +299,57 @@ textarea {
 }
 
 /* Anpassung für das Rollen-Pop-up in neustart.html */
-.role-modal-content h3 {
-    font-size: 3em; /* Dreifache Größe für den Rollennamen */
+.info-modal-content h3 {
+    font-size: 3em;
     font-weight: bold;
     margin-bottom: 10px;
 }
 
-.role-modal-content p {
-    font-size: 1em; /* Normale Größe für die Erklärung */
+.info-modal-content p {
+    font-size: 1em;
+}
+
+.special-prompt-text {
+    color: #333;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.role-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.role-card-name {
+    font-size: 6em;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1;
+}
+
+.role-card-description {
+    font-size: 1em;
+    margin-top: 10px;
+    color: #666;
 }
 
 /* Erzähler-Seite */

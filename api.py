@@ -44,7 +44,6 @@ ALL_ROLES = {
 # WICHTIG: Die Anordnung hier ist entscheidend für die Reihenfolge der Aufrufe.
 NARRATOR_TEXT = {
     "round_1": [
-        # NEU: "Reine Seele" als erster Block, da sie am Tag aufgerufen wird.
         {"role": "Die reine Seele", "text": "Reine Seele, du darfst dich jetzt allen Dorfbewohnern zu erkennen geben.<br>(Die reine Seele gibt sich zu erkennen)<br>(Sobald das geschehen ist)<br>Alle Bürger, schließt jetzt bitte eure Augen."},
         {"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."},
         {"role": "Dieb", "text": "Dieb, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die zwei übrigen Rollen in der Hand.<br>Du kannst nun deine Rolle mit einer der beiden Rollen tauschen oder deine Rolle behalten.<br>(Erzähler hält die zwei übrigen Karten hoch)<br>Wenn du deine Rolle behältst, bleibst du ein Dorfbewohner.<br>Wenn du eine neue Karte willst, zeig drauf.<br>(Erzähler nimmt die Karte, die der Dieb nicht will, weg)<br>Dieb, schließe jetzt deine Augen."},
@@ -54,7 +53,7 @@ NARRATOR_TEXT = {
         {"role": "Der Wolfshund", "text": "Wolfshund, du darfst deine Augen jetzt öffnen.<br>Ich halte die beiden Hände hoch, die rechte Hand bedeutet Werwolf<br>und die linke Hand bedeutet Dorfbewohner.<br>(Erzähler hält beide Hände hoch)<br>Entscheide dich was du sein willst.<br>(Der Wolfshund zeigt auf einen der Hände)<br>Wolfshund, schließe jetzt deine Augen."},
         {"role": "Die drei Brüder", "text": "Brüder, ihr dürft eure Augen jetzt öffnen.<br>Schaut euch an, damit ihr euch erkennt.<br>(Die drei Brüder schauen sich an)<br>Brüder, schließt bitte wieder die Augen."},
         {"role": "Die zwei Schwestern", "text": "Schwestern, ihr dürft eure Augen jetzt öffnen.<br>Schaut euch an, damit ihr euch erkennt.<br>(Die zwei Schwestern schauen sich an)<br>Schwestern, schließt bitte wieder die Augen."},
-        {"role": "Das wilde Kind", "text": "Wildes Kind, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, die dein Vorbild sein soll.<br>Wenn dein Vorbild stirbt, wirst du zum Werwolf.<br>(Das wilde Kind zeigt auf eine Person)<br>Wildes Kind, schließe jetzt deine Augen."},
+        {"role": "Das wilde Kind", "text": "Wildes Kind, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, die dein Vorbild sein soll.<br>Wenn dein Vorbild stirbt, wird das wilde Kind zum Werwolf.<br>(Das wilde Kind zeigt auf eine Person)<br>Wildes Kind, schließe jetzt deine Augen."},
         {"role": "Der stotternde Richter", "text": "Richter, du darfst deine Augen jetzt öffnen.<br>Zeige mir ein geheimes kleines Zeichen, welches du machst,<br>wenn am heutigen Tag eine zweite Abstimmung stattfinden soll.<br>(Der Richter und der Erzähler vereinbaren ein geheimes Zeichen)<br>Richter, schließe jetzt deine Augen."},
         {"role": "Seherin", "text": "Seherin, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, von der du die Rolle sehen möchtest.<br>(Die Seherin zeigt auf eine Person)<br>(Erzähler tippt auf das I neben der Rolle der Person und zeigt sie der Seherin)<br>Seherin, schließe jetzt deine Augen."},
         {"role": "Heiler/Beschützer", "text": "Heiler/Beschützer, du darfst jetzt deine Augen öffnen.<br>Wähle eine Person aus, die du beschützen möchtest.<br>Diese Person wird egal durch was sie getötet werden würde nicht sterben.<br>Du darfst keine Person zweimal hintereinander beschützen.<br>(Heiler zeigt auf die Person)<br>Heiler/Beschützer, schließe jetzt deine Augen."},
@@ -82,7 +81,6 @@ NARRATOR_TEXT = {
     ]
 }
 
-# Ein Dictionary, um den Zustand des Spiels zu speichern.
 game_state = {
     "players": [],
     "roles": {},
@@ -90,7 +88,13 @@ game_state = {
     "game_started": False,
     "assigned_roles": {},
     "current_player_index": 0,
-    "role_counters": {}, # Zählt die lebenden Spieler pro Rolle
+    "role_counters": {},
+    "special_roles": {
+        "Dieb": {"enabled": False, "extra_roles": []},
+        "Gaukler": {"enabled": False, "extra_roles": []},
+        "Amor": {"enabled": False, "lovers": []},
+        "Ulwolf": {"enabled": False}
+    }
 }
 
 def get_role_counts_from_session():
@@ -99,7 +103,32 @@ def get_role_counts_from_session():
 def save_role_counts_to_session(role_counts):
     session['saved_roles'] = json.dumps(role_counts)
 
-# --- Frontend-Routen (liefern die Templates aus) ---
+def get_special_roles_from_session():
+    return json.loads(session.get('special_roles_data', '{}'))
+
+def save_special_roles_to_session(special_roles):
+    session['special_roles_data'] = json.dumps(special_roles)
+
+def get_living_players_count(role_name):
+    count = 0
+    for player_info in game_state["players"]:
+        if player_info["status"] == "alive" and game_state["assigned_roles"].get(player_info["name"]) == role_name:
+            count += 1
+    return count
+
+def get_player_by_name(player_name):
+    for player in game_state["players"]:
+        if player["name"] == player_name:
+            return player
+    return None
+
+def get_player_by_role(role_name):
+    for player_name, role in game_state["assigned_roles"].items():
+        if role == role_name:
+            player_info = get_player_by_name(player_name)
+            if player_info and player_info["status"] == "alive":
+                return player_name
+    return None
 
 @app.route('/')
 def startseite():
@@ -109,6 +138,12 @@ def startseite():
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
     game_state["role_counters"] = {}
+    game_state["special_roles"] = {
+        "Dieb": {"enabled": False, "extra_roles": []},
+        "Gaukler": {"enabled": False, "extra_roles": []},
+        "Amor": {"enabled": False, "lovers": []},
+        "Ulwolf": {"enabled": False}
+    }
     return render_template('index.html')
 
 @app.route('/spiel', methods=['GET', 'POST'])
@@ -117,10 +152,9 @@ def spiel_seite():
         namen_string = request.form.get("namen")
         namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
         
-        # NEU: Überprüfung auf doppelte Namen im Backend
         if len(namen_liste) != len(set(name.lower() for name in namen_liste)):
             return render_template('spiel.html', saved_players=namen_string, error="Doppelte Namen sind nicht erlaubt.")
-
+        
         session['saved_players'] = namen_string
         
         saved_roles = get_role_counts_from_session()
@@ -140,7 +174,7 @@ def rollen_seite():
         return render_template('spiel.html')
 
     saved_roles = get_role_counts_from_session()
-
+    
     return render_template('rollen.html', all_roles=ALL_ROLES, player_count=player_count, saved_roles=saved_roles)
 
 @app.route('/karten')
@@ -182,6 +216,7 @@ def save_roles_api():
 def set_game_roles():
     data = request.get_json()
     role_counts = data.get("role_counts", {})
+    special_roles_data = data.get("special_roles_data", {})
     
     players_list_raw = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
     total_players = len(players_list_raw)
@@ -201,7 +236,6 @@ def set_game_roles():
             "roles_count": total_roles_count
         }), 400
     
-    # Reset game state
     game_state["players"] = [{"name": name, "status": "alive"} for name in players_list_raw]
     game_state["roles"] = role_counts
     game_state["total_roles_count"] = total_roles_count
@@ -220,9 +254,18 @@ def set_game_roles():
     game_state["assigned_roles"] = assigned_roles
     game_state["game_started"] = True
     game_state["current_player_index"] = 0
-    
     game_state["role_counters"] = {role: count for role, count in role_counts.items()}
+
+    # Spezielle Rollen-Daten speichern
+    game_state["special_roles"]["Dieb"]["enabled"] = "Dieb" in role_counts and role_counts["Dieb"] > 0
+    game_state["special_roles"]["Dieb"]["extra_roles"] = special_roles_data.get("Dieb", [])
+
+    game_state["special_roles"]["Gaukler"]["enabled"] = "Der Gaukler" in role_counts and role_counts["Der Gaukler"] > 0
+    game_state["special_roles"]["Gaukler"]["extra_roles"] = special_roles_data.get("Gaukler", [])
     
+    game_state["special_roles"]["Amor"]["enabled"] = "Amor" in role_counts and role_counts["Amor"] > 0
+    game_state["special_roles"]["Ulwolf"]["enabled"] = "Der Urwolf" in role_counts and role_counts["Der Urwolf"] > 0
+
     return jsonify({"message": "Spiel erfolgreich gestartet. Rollen wurden zugewiesen."}), 200
 
 @app.route('/api/game/next_card', methods=['GET'])
@@ -282,10 +325,21 @@ def get_gamemaster_view():
         player_name = player_info["name"]
         role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
         
+        emojis = []
+        if game_state["special_roles"]["Dieb"]["enabled"] and role == "Dieb":
+            emojis.append({"icon": "💰", "label": "Dieb", "type": "Dieb"})
+        if game_state["special_roles"]["Gaukler"]["enabled"] and role == "Der Gaukler":
+            emojis.append({"icon": "🎭", "label": "Gaukler", "type": "Gaukler"})
+        if game_state["special_roles"]["Amor"]["enabled"] and role == "Amor":
+            emojis.append({"icon": "❤️", "label": "Verlieben", "type": "Amor"})
+        if game_state["special_roles"]["Ulwolf"]["enabled"] and role == "Der Urwolf":
+            emojis.append({"icon": "🐺", "label": "Ulwolf", "type": "Ulwolf"})
+
         overview.append({
             "name": player_name,
             "role": role,
             "status": player_info["status"],
+            "emojis": emojis,
         })
         
     return jsonify(overview)
@@ -305,6 +359,18 @@ def toggle_player_status(player_name):
                 player_info["status"] = "dead"
                 if role in game_state["role_counters"]:
                     game_state["role_counters"][role] -= 1
+                
+                # Check for Amor's lovers
+                if len(game_state["special_roles"]["Amor"]["lovers"]) > 0:
+                    other_lover = [p for p in game_state["special_roles"]["Amor"]["lovers"] if p != player_name]
+                    if len(other_lover) > 0:
+                        other_lover_player = get_player_by_name(other_lover[0])
+                        if other_lover_player and other_lover_player["status"] == "alive":
+                            other_lover_player["status"] = "dead"
+                            other_lover_role = game_state["assigned_roles"].get(other_lover[0])
+                            if other_lover_role in game_state["role_counters"]:
+                                game_state["role_counters"][other_lover_role] -= 1
+
             else:
                 player_info["status"] = "alive"
                 if role in game_state["role_counters"]:
@@ -324,13 +390,18 @@ def restart_game():
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
     game_state["role_counters"] = {}
+    game_state["special_roles"] = {
+        "Dieb": {"enabled": False, "extra_roles": []},
+        "Gaukler": {"enabled": False, "extra_roles": []},
+        "Amor": {"enabled": False, "lovers": []},
+        "Ulwolf": {"enabled": False}
+    }
     
     for player_info in game_state["players"]:
         player_info["status"] = "alive"
     
     return jsonify({"message": "Spiel wurde erfolgreich zurückgesetzt. Du kannst nun wieder zur Rollenauswahl wechseln."})
 
-# NEUE API-ROUTE FÜR GEORDNETE ROLLENLISTE
 @app.route('/api/get_roles_list')
 def get_roles_list():
     return jsonify(list(ALL_ROLES.keys()))
@@ -358,45 +429,113 @@ def get_narrator_text(round_number):
     filtered_text = []
     selected_roles = set(game_state["assigned_roles"].values())
 
-    # Hilfsfunktion, um die Anzahl der lebenden Spieler für eine Rolle zu bekommen
-    def get_living_players_count(role_name):
-        count = 0
-        for player_info in game_state["players"]:
-            if player_info["status"] == "alive" and game_state["assigned_roles"].get(player_info["name"]) == role_name:
-                count += 1
-        return count
-
     if round_number == '1':
-        # "Reine Seele" als erster Text, wenn sie im Spiel ist UND noch lebt
         if "Die reine Seele" in selected_roles and get_living_players_count("Die reine Seele") > 0:
             filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Die reine Seele"))
 
-        # Festen Beginn-Textblock hinzufügen
-        filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Alle Bürger"))
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Alle Bürger" and "schließt" in item["text"]))
 
-        # Restliche Rollen-Texte hinzufügen, die im Spiel sind und lebende Spieler haben
         for item in NARRATOR_TEXT["round_1"]:
-            if item["role"] in selected_roles and item["role"] != "Alle Bürger" and item["role"] != "Die reine Seele":
+            if item["role"] in selected_roles and item["role"] not in ["Alle Bürger", "Die reine Seele"]:
                 if get_living_players_count(item["role"]) > 0:
                     filtered_text.append(item)
 
-        # Festen Schluss-Textblock hinzufügen
-        filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Alle Bürger" and item["text"] == "Alle Bürger öffnen jetzt ihre Augen."))
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Alle Bürger" and "öffnen" in item["text"]))
+    else:
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger" and "schließt" in item["text"]))
 
-    else: # für Runde 2
-        # Festen Beginn-Textblock hinzufügen
-        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger" and item["text"] == "Alle Bürger, schließt jetzt bitte eure Augen."))
-
-        # Rollen-Texte hinzufügen, die im Spiel sind und lebende Spieler haben
         for item in NARRATOR_TEXT["round_2"]:
             if item["role"] in selected_roles and item["role"] != "Alle Bürger":
                 if get_living_players_count(item["role"]) > 0:
                     filtered_text.append(item)
 
-        # Festen Schluss-Textblock hinzufügen
-        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger" and item["text"] == "Alle Bürger öffnen jetzt ihre Augen."))
-    
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_2"] if item["role"] == "Alle Bürger" and "öffnen" in item["text"]))
+
     return jsonify({"text_blocks": filtered_text})
+
+@app.route('/api/special_roles/data', methods=['GET'])
+def get_special_roles_data():
+    return jsonify(game_state["special_roles"])
+
+@app.route('/api/dieb/extra_roles', methods=['GET'])
+def get_dieb_roles():
+    return jsonify(game_state["special_roles"]["Dieb"]["extra_roles"])
+
+@app.route('/api/gaukler/extra_roles', methods=['GET'])
+def get_gaukler_roles():
+    return jsonify(game_state["special_roles"]["Gaukler"]["extra_roles"])
+
+@app.route('/api/dieb/swap_role', methods=['POST'])
+def swap_dieb_role():
+    data = request.get_json()
+    new_role = data.get('new_role')
+    dieb_player_name = get_player_by_role("Dieb")
+
+    if not dieb_player_name:
+        return jsonify({"error": "Dieb-Spieler nicht gefunden."}), 404
+    if new_role not in ALL_ROLES:
+        return jsonify({"error": "Ungültige Rolle."}), 400
+
+    old_dieb_role = game_state["assigned_roles"][dieb_player_name]
     
+    game_state["assigned_roles"][dieb_player_name] = new_role
+    game_state["role_counters"][old_dieb_role] -= 1
+    game_state["role_counters"][new_role] = game_state["role_counters"].get(new_role, 0) + 1
+
+    extra_roles = game_state["special_roles"]["Dieb"]["extra_roles"]
+    if new_role in extra_roles:
+        extra_roles.remove(new_role)
+    extra_roles.append(old_dieb_role)
+    
+    return jsonify({"message": f"Dieb hat die Rolle zu {new_role} getauscht."})
+
+@app.route('/api/gaukler/swap_role', methods=['POST'])
+def swap_gaukler_role():
+    data = request.get_json()
+    new_role = data.get('new_role')
+    gaukler_player_name = get_player_by_role("Der Gaukler")
+
+    if not gaukler_player_name:
+        return jsonify({"error": "Gaukler-Spieler nicht gefunden."}), 404
+    if new_role not in ALL_ROLES:
+        return jsonify({"error": "Ungültige Rolle."}), 400
+
+    old_gaukler_role = game_state["assigned_roles"][gaukler_player_name]
+    
+    game_state["assigned_roles"][gaukler_player_name] = new_role
+    
+    return jsonify({"message": f"Gaukler hat die Rolle zu {new_role} getauscht."})
+
+@app.route('/api/amor/set_lovers', methods=['POST'])
+def set_lovers():
+    data = request.get_json()
+    lovers = data.get('lovers')
+    if len(lovers) != 2:
+        return jsonify({"error": "Es müssen genau zwei Spieler ausgewählt werden."}), 400
+
+    game_state["special_roles"]["Amor"]["lovers"] = lovers
+    return jsonify({"message": "Verliebte wurden gesetzt."})
+
+@app.route('/api/ulwolf/transform_player', methods=['POST'])
+def transform_ulwolf():
+    data = request.get_json()
+    player_name = data.get('player_name')
+    
+    player_info = get_player_by_name(player_name)
+    if not player_info:
+        return jsonify({"error": "Spieler nicht gefunden."}), 404
+    
+    old_role = game_state["assigned_roles"][player_name]
+    new_role = "Werwölfe"
+    
+    if old_role == new_role:
+        return jsonify({"message": "Spieler ist bereits ein Werwolf."})
+        
+    game_state["assigned_roles"][player_name] = new_role
+    game_state["role_counters"][old_role] -= 1
+    game_state["role_counters"][new_role] = game_state["role_counters"].get(new_role, 0) + 1
+    
+    return jsonify({"message": f"{player_name} wurde in einen Werwolf verwandelt."})
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))

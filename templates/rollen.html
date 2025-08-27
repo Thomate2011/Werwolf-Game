@@ -9,29 +9,27 @@
 <body class="rollen-page">
     <div class="container">
         <h1>Rollen auswählen</h1>
-        <p>Wähle genau <span id="player-count"></span> Rollen aus.</p>
-
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
-            <button class="primary-button start-button" style="display: none;">Mischen</button>
-        </div>
-        <p id="roles-to-go" style="font-weight: bold;"></p>
-
-        <div id="roles-container"></div>
+        <p>Wähle die Rollen, die gespielt werden sollen. Die Anzahl der Rollen muss genau der Anzahl der Spieler (<span id="player-count"></span>) entsprechen.</p>
         
-        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
-            <button class="primary-button start-button" style="display: none;">Mischen</button>
+        <div class="roles-selection-info">
+            <span id="roles-count">Gewählte Rollen: 0 / 0</span>
         </div>
-    </div>
 
-    <div id="info-popup" class="popup">
-        <h2 id="popup-role-name" class="role-popup-title"></h2>
-        <p id="popup-role-description" class="role-popup-description"></p>
-        <button onclick="hideInfo()" class="popup-close-btn">&times;</button>
-    </div>
-    <div id="overlay" class="overlay" onclick="hideInfo()"></div>
+        <div id="special-roles-prompt" class="special-roles-prompt" style="display: none;">
+            <p><strong><span id="prompt-text"></span></strong></p>
+        </div>
 
+        <div class="roles-list-wrapper">
+            <div id="roles-list" class="roles-list">
+                </div>
+        </div>
+
+        <div class="button-container">
+            <button id="start-game-button" class="primary-button" disabled>Spiel starten</button>
+        </div>
+        
+    </div>
+    
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
