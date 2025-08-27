@@ -94,13 +94,21 @@ game_state = {
 }
 
 def get_role_counts_from_session():
-    return json.loads(session.get('saved_roles', '{}'))
+    # Stellt sicher, dass ein leerer Dictionary zurückgegeben wird, falls die Daten fehlen
+    try:
+        return json.loads(session.get('saved_roles', '{}'))
+    except json.JSONDecodeError:
+        return {}
 
 def save_role_counts_to_session(role_counts):
     session['saved_roles'] = json.dumps(role_counts)
 
 def get_special_roles_from_session():
-    return json.loads(session.get('special_roles', '{}'))
+    # Stellt sicher, dass ein leerer Dictionary zurückgegeben wird, falls die Daten fehlen
+    try:
+        return json.loads(session.get('special_roles', '{}'))
+    except json.JSONDecodeError:
+        return {}
 
 def save_special_roles_to_session(special_roles):
     session['special_roles'] = json.dumps(special_roles)
@@ -126,14 +134,14 @@ def spiel_seite():
         
         session['saved_players'] = namen_string
         
-        # Sicherstellen, dass die Rollenanzahl zurückgesetzt wird, wenn die Spielerzahl sich ändert
+        # Sicherstellen, dass die Rollenzählung zurückgesetzt wird, wenn die Spieleranzahl nicht übereinstimmt.
         saved_roles = get_role_counts_from_session()
         total_roles_selected = sum(saved_roles.values())
         if len(namen_liste) != total_roles_selected:
             save_role_counts_to_session({})
         
-        return render_template('rollen.html')
-
+        return redirect(url_for('rollen_seite'))
+    
     saved_players_string = session.get('saved_players', '')
     return render_template('spiel.html', saved_players=saved_players_string)
 
@@ -142,19 +150,24 @@ def rollen_seite():
     players_list = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
     player_count = len(players_list)
 
-    if player_count == 0:
+    # Fügt eine robuste Prüfung hinzu, um den Absturz zu verhindern, wenn keine Spieler vorhanden sind
+    if player_count < 4:
         return redirect(url_for('spiel_seite'))
 
     saved_roles = get_role_counts_from_session()
     
-    return render_template('rollen.html', player_count=player_count)
+    return render_template('rollen.html', player_count=player_count, saved_roles=saved_roles)
 
 @app.route('/karten')
 def karten_seite():
+    # Weiterleitung, falls das Spiel nicht gestartet wurde
+    if not game_state.get("game_started"):
+        return redirect(url_for('spiel_seite'))
     return render_template('karten.html', all_roles=ALL_ROLES)
 
 @app.route('/neustart')
 def neustart_seite():
+    # Weiterleitung, falls das Spiel nicht gestartet wurde
     if not game_state.get("game_started"):
         return redirect(url_for('spiel_seite'))
     
@@ -175,6 +188,7 @@ def neustart_seite():
 
 @app.route('/erzaehler')
 def erzaehler_seite():
+    # Weiterleitung, falls das Spiel nicht gestartet wurde
     if not game_state.get("game_started"):
         return redirect(url_for('spiel_seite'))
     return render_template('erzaehler.html')
@@ -197,7 +211,6 @@ def save_special_roles_api():
     if 'gaukler_roles' in data:
         current_special_roles['gaukler_roles'] = data['gaukler_roles']
     
-    # Entfernen, wenn Liste leer ist
     if not current_special_roles.get('dieb_roles'):
         current_special_roles.pop('dieb_roles', None)
     if not current_special_roles.get('gaukler_roles'):
@@ -226,7 +239,6 @@ def set_game_roles():
             "error": f"Die Anzahl der Rollen ({total_roles_count}) muss genau der Anzahl der Spieler ({total_players}) entsprechen."
         }), 400
     
-    # Reset game state
     game_state["players"] = [{"name": name, "status": "alive"} for name in players_list_raw]
     game_state["roles"] = role_counts
     game_state["total_roles_count"] = total_players
@@ -307,6 +319,7 @@ def reveal_and_next():
 
 @app.route('/api/get_roles_and_players')
 def get_roles_and_players():
+    # Robustere Handhabung fehlender Spielerdaten
     players_list_raw = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
     player_count = len(players_list_raw)
     saved_roles = get_role_counts_from_session()
@@ -351,7 +364,6 @@ def toggle_player_status(player_name):
                 if role in game_state["role_counters"]:
                     game_state["role_counters"][role] -= 1
                 
-                # Wenn ein Verliebter stirbt, stirbt auch der andere
                 for couple in game_state["couples"]:
                     if player_name in couple:
                         other_lover = couple[0] if couple[1] == player_name else couple[1]
@@ -408,7 +420,6 @@ def dieb_change_role():
         
     game_state["assigned_roles"][dieb_player_name] = new_role
     
-    # Update role counters
     if old_role in game_state["role_counters"]:
         game_state["role_counters"][old_role] -= 1
     if new_role in game_state["role_counters"]:
