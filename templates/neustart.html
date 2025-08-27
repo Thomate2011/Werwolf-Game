@@ -3,35 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwölfe von Düsterwald</title>
+    <title>Spielübersicht</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="neustart-page">
     <div class="container">
-        <h1>Spielleiter-Übersicht</h1>
-        <p>Hier siehst du alle Spieler und ihre Rollen. Markiere ausgeschiedene Spieler als 'tot', um sie aus den Erzählertexten zu entfernen.</p>
-        <div id="players-list">
-            </div>
-        <div class="button-container">
-            <button onclick="window.location.href='{{ url_for('erzaehler_seite') }}'" class="primary-button">Weiter zum Erzähler</button>
-            <button id="restart-game-button" class="secondary-button">Neues Spiel starten</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Spielübersicht</h1>
+            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
         </div>
-    </div>
+        
+        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
+        
+        <div id="player-list">
+            {% for player in players %}
+                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}">
+                    <span onclick="toggleStatus('{{ player.name }}')">
+                        <b>{{ player.role }}</b> | {{ player.name }}
+                    </span>
+                    <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button onclick="restartGame()" class="danger-button">Neustart</button>
+        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
 
-    <div id="info-modal" class="modal">
-        <div class="modal-content info-modal-content">
-            <span class="close-button">&times;</span>
-            <h3 id="info-modal-role-name"></h3>
-            <p id="info-modal-role-description"></p>
-        </div>
+        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
+        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
     </div>
     
-    <div id="special-modal" class="modal special-modal">
-        <div class="modal-content special-modal-content">
-            <span class="close-button" id="special-close-button">&times;</span>
-            <div id="special-modal-content"></div>
-        </div>
+    <div id="info-popup" class="popup">
+        <h2 id="popup-role-name" class="role-popup-title"></h2>
+        <p id="popup-role-description" class="role-popup-description"></p>
+        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
     </div>
+    <div id="overlay" class="overlay" onclick="hideInfoNeustart()"></div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

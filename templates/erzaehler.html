@@ -3,27 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwölfe von Düsterwald - Erzähler</title>
+    <title>Erzählertext</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="erzaehler-page">
     <div class="container">
-        <h1>Erzähler</h1>
-        <p>Lies die Texte vor, um das Spiel durch die Nacht zu führen. Klicke auf die Buttons, um zwischen den Runden zu wechseln.</p>
-        
-        <div class="button-container narrator-buttons">
-            <button id="round-1-btn" class="secondary-button active">Runde 1: Nachtrunden</button>
-            <button id="round-2-btn" class="secondary-button">Runde 2: Tagrunde</button>
-        </div>
-
-        <div id="narrator-text-container" class="narrator-text">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="{{ url_for('neustart_seite') }}" class="button-link secondary-button">Zurück</a>
+            <div class="night-buttons">
+                <button id="round-1-btn" class="button-link primary-button active">1. Runde Text</button>
+                <button id="round-2-btn" class="button-link primary-button">2. Runde Text</button>
             </div>
-
-        <div class="button-container">
-            <button onclick="window.location.href='{{ url_for('neustart_seite') }}'" class="primary-button">Zurück zur Spielübersicht</button>
+            <div></div>
         </div>
-    </div>
 
+        <div id="narrator-text-container">
+        </div>
+
+    </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

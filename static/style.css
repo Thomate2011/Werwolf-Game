@@ -1,384 +1,267 @@
-/* Allgemeines Styling */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f9;
     color: #333;
     margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    flex-direction: column;
+    padding: 0;
 }
 
 .container {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    width: 100%;
     text-align: center;
-    box-sizing: border-box;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-    color: #333;
+    color: #2e7d32;
+    font-size: 2.5em;
     margin-bottom: 10px;
+}
+
+h2 {
+    color: #444;
 }
 
 p {
-    color: #666;
-    margin-bottom: 20px;
-}
-
-/* Formulare und Eingabefelder */
-textarea {
-    width: 100%;
-    height: 150px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    margin-bottom: 20px;
-}
-
-.button-container {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.primary-button, .secondary-button, button[type="submit"] {
-    padding: 12px 25px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.primary-button, button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.primary-button:hover, button[type="submit"]:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-}
-
-.secondary-button {
-    background-color: #f44336;
-    color: white;
-}
-
-.secondary-button:hover {
-    background-color: #e53935;
-    transform: translateY(-2px);
-}
-
-/* Rollen-Seite */
-.roles-list-wrapper {
-    max-height: 500px;
-    overflow-y: auto;
-    padding: 10px;
-}
-
-.roles-selection-info {
-    margin-bottom: 15px;
     font-size: 1.1em;
-    font-weight: bold;
-    color: #333;
-}
-
-.special-roles-prompt {
-    margin-bottom: 15px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #f44336;
-}
-
-.roles-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-    text-align: left;
-}
-
-.role-item {
-    background-color: #e9ecef;
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.role-item h3 {
-    margin: 0;
-    font-size: 1.2em;
-}
-
-.role-controls {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.count-button {
-    background-color: #ddd;
-    border: 1px solid #ccc;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 1.2em;
-    transition: background-color 0.2s;
-}
-
-.count-button:hover {
-    background-color: #ccc;
-}
-
-.role-count {
-    min-width: 25px;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* Spielleiter-Übersicht */
-.player-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    background-color: #f8f9fa;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    transition: all 0.2s ease-in-out;
-}
-
-.player-card.selectable-player:hover {
-    background-color: #e0f7fa;
-    cursor: pointer;
-}
-
-.player-card.selected-lover {
-    border: 2px solid #ff4d4d;
-    background-color: #ffebee;
-}
-
-.player-name {
-    font-weight: bold;
-}
-
-.player-role {
-    font-style: italic;
-    color: #777;
-    flex-grow: 1;
-    text-align: right;
-    margin-right: 15px;
-}
-
-.player-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.player-actions .info-button {
-    background-color: #2196F3;
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-weight: bold;
-    transition: background-color 0.2s;
-}
-
-.player-actions .info-button:hover {
-    background-color: #0b7dda;
-}
-
-.player-actions .status-button {
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-weight: bold;
-    transition: background-color 0.2s;
-}
-
-.player-card.dead {
-    background-color: #ffcccc;
-    text-decoration: line-through;
-    opacity: 0.7;
-}
-
-.player-card.dead .status-button {
-    background-color: #f44336;
-}
-
-.emoji-button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 1.5em;
-    line-height: 1;
-    padding: 0;
-    text-align: center;
-}
-
-.emoji-button span {
-    font-size: 0.5em;
-    display: block;
-    margin-top: 5px;
-}
-
-/* Modales Pop-up für Rollenerklärung */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal.special-modal {
-    background-color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(5px);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 10px;
-    position: relative;
-    text-align: center;
-}
-
-.modal-content.special-modal-content {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    margin-top: 5%;
-}
-
-.close-button {
-    color: #aaa;
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 1001;
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: black;
-    text-decoration: none;
-}
-
-/* Anpassung für das Rollen-Pop-up in neustart.html */
-.info-modal-content h3 {
-    font-size: 3em;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.info-modal-content p {
-    font-size: 1em;
-}
-
-.special-prompt-text {
-    color: #333;
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.card-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
-
-.role-card {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 200px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.role-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.role-card-name {
-    font-size: 6em;
-    font-weight: bold;
-    margin: 0;
-    line-height: 1;
-}
-
-.role-card-description {
-    font-size: 1em;
-    margin-top: 10px;
-    color: #666;
-}
-
-/* Erzähler-Seite */
-.narrator-text-block {
-    display: none;
-    text-align: center;
-}
-
-.narrator-text-block h2 {
-    font-size: 2.5em;
-    margin-bottom: 15px;
-}
-
-.narrator-text-block p {
-    font-size: 1.2em;
     line-height: 1.6;
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-    .container {
-        padding: 20px;
-    }
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ccc;
+    margin: 30px auto;
+    width: 60%;
+}
 
-    .button-container {
-        flex-direction: column;
-    }
+button, .button-link {
+    font-size: 1.2em;
+    padding: 12px 25px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
 
-    .primary-button, .secondary-button, button[type="submit"] {
-        width: 100%;
-    }
+button:hover, .button-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+}
+
+.primary-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.secondary-button {
+    background-color: #008CBA;
+    color: white;
+}
+
+.danger-button {
+    background-color: #f44336;
+    color: white;
+}
+
+textarea {
+    width: 80%;
+    height: 200px;
+    padding: 15px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 10px;
+    resize: vertical;
+}
+
+.role-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.role-info-btn {
+    font-size: 1em;
+    margin-left: 10px;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 1px solid #008CBA;
+    background-color: #008CBA;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.role-counter-btn {
+    font-size: 1.5em;
+    padding: 5px 12px;
+    cursor: pointer;
+    background-color: #eee;
+    color: #555;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.role-counter-btn:hover {
+    background-color: #ddd;
+}
+
+.player-card {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    border: 2px dashed #008CBA;
+    border-radius: 12px;
+}
+
+.card-title {
+    color: #444;
+}
+
+.card-role {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #f44336;
+    margin: 10px 0;
+}
+
+.card-description {
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
+}
+
+.player-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.player-list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.player-list-item.dead {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    max-width: 450px;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    z-index: 1001;
+    text-align: center;
+}
+
+.popup-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* KORRIGIERTE STILE FÜR DAS ROLLEN-POP-UP AUF NEUSTART-SEITE */
+.role-popup-title {
+    font-size: 2em; /* Rollenname ist doppelt so groß wie die Erklärung */
+    font-weight: bold;
+    color: #444;
+    margin: 0;
+}
+
+.role-popup-description {
+    font-size: 1em; /* Normale Schriftgröße für die Erklärung */
+    line-height: 1.6;
+    color: #555;
+    margin-top: 15px;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 1);
+    z-index: 1000;
+}
+
+/* NEUE STILE FÜR ERZÄHLER-SEITE */
+.erzaehler-page .container {
+    max-width: 800px;
+}
+
+.night-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.night-buttons .button-link {
+    background-color: #ccc;
+    color: #555;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.night-buttons .button-link.active {
+    background-color: #2e7d32;
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    transform: translateY(0);
+}
+
+#narrator-text-container {
+    text-align: left;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+#narrator-text-container p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+#narrator-text-container strong {
+    color: #008CBA;
+    font-size: 1.2em;
 }
