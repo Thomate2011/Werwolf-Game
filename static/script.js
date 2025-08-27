@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     // Globale Funktionen für alle Seiten, die Pop-ups benötigen
     window.showInfo = async (role) => {
         const popup = document.getElementById('info-popup');
@@ -19,24 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'none';
     };
 
-    // Logik für die Spieler-Anmeldeseite (spiel.html)
+    // Spiel-Seite (spiel.html) - NEUE VALIDIERUNG HIER
     if (document.body.classList.contains('spiel-page')) {
         document.getElementById('namenForm').addEventListener('submit', function(event) {
             const namenInput = document.getElementById('namenInput');
             const namenString = namenInput.value;
             const namenListe = namenString.split('\n').map(name => name.trim()).filter(name => name.length > 0);
             
-            const nameErrorEl = document.getElementById('nameError');
-            const playerCountErrorEl = document.getElementById('playerCountError');
-
+            const seenNames = new Set();
             let hasDuplicates = false;
             let hasTooFewPlayers = false;
 
-            if (namenListe.length < 4) {
-                hasTooFewPlayers = true;
-            }
-
-            const seenNames = new Set();
             for (const name of namenListe) {
                 if (seenNames.has(name.toLowerCase())) {
                     hasDuplicates = true;
@@ -45,61 +37,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 seenNames.add(name.toLowerCase());
             }
 
-            if (hasTooFewPlayers || hasDuplicates) {
-                event.preventDefault(); 
-                if (hasTooFewPlayers) {
-                    playerCountErrorEl.style.display = 'block';
-                } else {
-                    playerCountErrorEl.style.display = 'none';
-                }
+            if (namenListe.length < 4) {
+                hasTooFewPlayers = true;
+            }
+
+            if (hasDuplicates || hasTooFewPlayers) {
+                event.preventDefault(); // Verhindert das Absenden des Formulars
+
                 if (hasDuplicates) {
-                    nameErrorEl.style.display = 'block';
+                    document.getElementById('nameError').style.display = 'block';
                 } else {
-                    nameErrorEl.style.display = 'none';
+                    document.getElementById('nameError').style.display = 'none';
                 }
+
+                if (hasTooFewPlayers) {
+                    document.getElementById('playerCountError').style.display = 'block';
+                } else {
+                    document.getElementById('playerCountError').style.display = 'none';
+                }
+
             } else {
-                nameErrorEl.style.display = 'none';
-                playerCountErrorEl.style.display = 'none';
+                document.getElementById('nameError').style.display = 'none';
+                document.getElementById('playerCountError').style.display = 'none';
             }
         });
     }
 
-    // Logik für die Rollen-Seite (rollen.html)
+    // Rollen-Seite (rollen.html)
     if (document.body.classList.contains('rollen-page')) {
         const rolesContainer = document.getElementById("roles-container");
         const rolesToGoEl = document.getElementById("roles-to-go");
-        const startButton = document.getElementById("startGameButton");
-
+        const startButtons = document.querySelectorAll(".start-button");
+        const playerCounterEl = document.getElementById("player-count");
+        
         let rolesCount = {};
         let totalPlayers = 0;
-
+        let allRolesDescriptions = {};
+        
         async function fetchData() {
-            const response = await fetch('/api/get_roles_and_players');
-            const data = await response.json();
-            rolesCount = data.saved_roles;
-            totalPlayers = data.player_count;
-            document.getElementById('player-count-display').textContent = totalPlayers;
-            renderRoles(data.all_roles, rolesCount);
+            const rolesResponse = await fetch('/api/get_roles_list');
+            const orderedRoles = await rolesResponse.json();
+
+            const playersResponse = await fetch('/api/get_roles_and_players');
+            const playersData = await playersResponse.json();
+            rolesCount = playersData.saved_roles;
+            totalPlayers = playersData.player_count;
+            allRolesDescriptions = playersData.all_roles;
+            playerCounterEl.textContent = totalPlayers;
+
+            renderRoles(orderedRoles);
         }
 
-        function renderRoles(allRoles, savedRolesData) {
+        function renderRoles(orderedRoles) {
             rolesContainer.innerHTML = '';
             
-            const sortedRoles = Object.keys(allRoles).sort();
-            
-            for (const role of sortedRoles) {
-                const count = savedRolesData[role] || 0;
+            for (const role of orderedRoles) {
+                const count = rolesCount[role] || 0;
                 const div = document.createElement('div');
                 div.className = 'role-list-item';
                 div.innerHTML = `
                     <div style="display: flex; align-items: center;">
                         <span>${role}</span>
-                        <button data-role="${role}" class="role-info-btn">i</button>
+                        <button onclick="showInfo('${role}')" class="role-info-btn">i</button>
                     </div>
                     <div>
-                        <button data-role="${role}" data-action="decrement" class="role-counter-btn">-</button>
+                        <button onclick="incrementRole('${role}')" class="role-counter-btn">+</button>
                         <span id="${role}-count">${count}</span>
-                        <button data-role="${role}" data-action="increment" class="role-counter-btn">+</button>
+                        <button onclick="decrementRole('${role}')" class="role-counter-btn">-</button>
                     </div>
                 `;
                 rolesContainer.appendChild(div);
@@ -113,52 +117,42 @@ document.addEventListener('DOMContentLoaded', () => {
             rolesToGoEl.textContent = `Noch ${remainingRoles} Rollen zu vergeben`;
             
             if (remainingRoles === 0) {
-                startButton.disabled = false;
-                document.getElementById('role-count-warning').style.display = 'none';
+                startButtons.forEach(btn => btn.style.display = 'inline-block');
             } else {
-                startButton.disabled = true;
-                document.getElementById('role-count-warning').style.display = 'block';
-                document.getElementById('role-count-warning').textContent = `Es müssen genau ${totalPlayers} Rollen vergeben werden.`;
+                startButtons.forEach(btn => btn.style.display = 'none');
             }
         }
 
-        async function saveRoles() {
-            await fetch('/api/game/save_roles', {
+        window.incrementRole = (role) => {
+            if (!rolesCount[role]) {
+                rolesCount[role] = 0;
+            }
+            if (Object.values(rolesCount).reduce((a, b) => a + b, 0) < totalPlayers) {
+                rolesCount[role]++;
+                document.getElementById(role + '-count').textContent = rolesCount[role];
+                updateRolesToGo();
+                saveRoles();
+            }
+        };
+
+        window.decrementRole = (role) => {
+            if (rolesCount[role] > 0) {
+                rolesCount[role]--;
+                document.getElementById(role + '-count').textContent = rolesCount[role];
+                updateRolesToGo();
+                saveRoles();
+            }
+        };
+
+        function saveRoles() {
+            fetch('/api/game/save_roles', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ 'role_counts': rolesCount })
             });
         }
 
-        // Event delegation for counter buttons and info buttons
-        rolesContainer.addEventListener('click', async (event) => {
-            const button = event.target;
-            const role = button.dataset.role;
-            const action = button.dataset.action;
-
-            if (button.classList.contains('role-counter-btn') && role) {
-                if (!rolesCount[role]) {
-                    rolesCount[role] = 0;
-                }
-
-                if (action === 'increment') {
-                    if (Object.values(rolesCount).reduce((a, b) => a + b, 0) < totalPlayers) {
-                        rolesCount[role]++;
-                    }
-                } else if (action === 'decrement') {
-                    if (rolesCount[role] > 0) {
-                        rolesCount[role]--;
-                    }
-                }
-                document.getElementById(role + '-count').textContent = rolesCount[role];
-                updateRolesToGo();
-                await saveRoles();
-            } else if (button.classList.contains('role-info-btn') && role) {
-                showInfo(role);
-            }
-        });
-
-        startButton.addEventListener('click', async () => {
+        window.startGame = async () => {
             const response = await fetch('/api/game/roles', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -170,26 +164,27 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 alert(result.error);
             }
-        });
-
+        };
+        
+        startButtons.forEach(btn => btn.addEventListener('click', startGame));
         fetchData();
     }
 
-    // Logik für die Karten-Seite (karten.html)
+    // Karten-Seite (karten.html)
     if (document.body.classList.contains('karten-page')) {
         let currentRoleData = null;
         let isRevealed = false;
         const revealBtn = document.getElementById('reveal-role-btn');
         const showDescBtn = document.getElementById('show-description-btn');
         const nextPlayerBtn = document.getElementById('next-player-btn');
-        const overviewBtn = document.getElementById('overview-btn');
-        const playerCardEl = document.getElementById('player-card');
+        const overviewBtn = document.getElementById('overview-btn'); // Neuer Button
 
-        const fetchCurrentPlayer = async () => {
+        window.fetchCurrentPlayer = async () => {
             const response = await fetch('/api/game/next_card');
             const data = await response.json();
             if (response.ok) {
                 if (data.message) {
+                    // This is the trigger for the final pop-up
                     document.getElementById('final-popup').style.display = 'block';
                     document.getElementById('overlay').style.display = 'block';
                 } else {
@@ -205,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const revealCard = async () => {
+        window.revealCard = async () => {
             const response = await fetch('/api/game/reveal_and_next', { method: 'POST' });
             const data = await response.json();
             if (response.ok) {
@@ -216,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showDescBtn.style.display = 'inline-block';
                 isRevealed = true;
 
+                // Toggle buttons based on whether it's the last card
                 if (data.is_last_card) {
                     nextPlayerBtn.style.display = 'none';
                     overviewBtn.style.display = 'inline-block';
@@ -228,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         
-        const showDescription = () => {
+        window.showDescription = () => {
             if (currentRoleData && isRevealed) {
                 document.getElementById('role-description').textContent = currentRoleData.role_description;
                 document.getElementById('role-description').style.display = 'block';
@@ -236,12 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
         
-        const locationToOverview = () => {
+        window.locationToOverview = () => {
             document.getElementById('final-popup').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
         };
 
-        const nextPlayer = () => {
+        window.nextPlayer = () => {
             window.location.reload();
         };
 
@@ -253,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchCurrentPlayer();
     }
 
-    // Logik für die Neustart-Seite (neustart.html)
+    // Neustart-Seite (neustart.html)
     if (document.body.classList.contains('neustart-page')) {
         let allRolesDescriptions = {};
 
@@ -263,8 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
             allRolesDescriptions = data.all_roles;
         }
 
-        const toggleStatus = async (playerName) => {
-            const response = await fetch(`/api/gamemaster/toggle_status/${playerName}`, { method: 'PUT' });
+        window.toggleStatus = async (playerName) => {
+            const response = await fetch(`/api/gamemaster/toggle_status/` + playerName, { method: 'PUT' });
             if (response.ok) {
                 window.location.reload();
             } else {
@@ -272,13 +268,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const restartGame = async () => {
+        window.restartGame = async () => {
             const response = await fetch('/api/game/restart', { method: 'POST' });
             const result = await response.json();
             window.location.href = '/rollen';
         };
         
-        const showInfoNeustart = (role) => {
+        window.showInfoNeustart = (role) => {
             const popup = document.getElementById('info-popup');
             const overlay = document.getElementById('overlay');
             document.getElementById('popup-role-name').textContent = role;
@@ -287,41 +283,20 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.style.display = 'block';
         };
 
-        const hideInfoNeustart = () => {
+        window.hideInfoNeustart = () => {
             const popup = document.getElementById('info-popup');
             const overlay = document.getElementById('overlay');
             popup.style.display = 'none';
             overlay.style.display = 'none';
         };
-
-        document.getElementById('neustart-button').addEventListener('click', restartGame);
-
-        // Delegation für die Spielerliste
-        document.getElementById('player-list').addEventListener('click', (event) => {
-            const playerItem = event.target.closest('.player-list-item');
-            if (playerItem) {
-                const playerName = playerItem.dataset.name;
-                toggleStatus(playerName);
-            }
-        });
-
-        // Event delegation for info buttons within the player list
-        document.getElementById('player-list').addEventListener('click', (event) => {
-            const button = event.target.closest('.role-info-btn');
-            if (button) {
-                const role = button.dataset.role;
-                showInfoNeustart(role);
-            }
-        });
-        
         fetchRoles();
     }
 
-    // Logik für die Erzähler-Seite (erzaehler.html)
+    // NEUE ERZÄHLER-SEITE (erzaehler.html)
     if (document.body.classList.contains('erzaehler-page')) {
         const narratorTextContainer = document.getElementById('narrator-text-container');
-        const round1Btn = document.querySelector('.night-button[data-round="1"]');
-        const round2Btn = document.querySelector('.night-button[data-round="2"]');
+        const round1Btn = document.getElementById('round-1-btn');
+        const round2Btn = document.getElementById('round-2-btn');
         let currentRound = 1;
 
         const loadNarratorText = async (round) => {
@@ -330,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`/api/narrator_text/${round}`);
                 const data = await response.json();
                 if (response.ok) {
-                    narratorTextContainer.innerHTML = '';
+                    narratorTextContainer.innerHTML = ''; // Löscht den "Lade Text"-Hinweis
                     data.text_blocks.forEach(block => {
                         const p = document.createElement('p');
                         p.innerHTML = `<strong>${block.role}:</strong> ${block.text}`;
@@ -366,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadNarratorText(currentRound);
         });
 
+        // Initialer Ladevorgang bei Seitenaufruf
         loadNarratorText(currentRound);
     }
 });

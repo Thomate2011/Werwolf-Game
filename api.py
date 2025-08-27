@@ -25,7 +25,7 @@ ALL_ROLES = {
     "Der Urwolf": "Er ist ein Werwolf, der einmalig einen Spieler statt zu fressen in einen Werwolf verwandeln kann. Er signalisiert dem Spielleiter heimlich, nach der Entscheidung aller Werwölfe, wenn eine Umwandlung stattfinden soll.",
     "Der weiße Werwolf": "Der weiße Werwolf wacht jede Runde zusammen mit den anderen Werwölfen auf und verhält sich normal. Zusätzlich wacht er aber jede zweite Runde erneut gesondert auf und kann, wenn er möchte, einen der anderen Werwölfe töten. Sein Ziel ist es, als einziger zu überleben.",
     "Der Wolfshund": "Wenn er vom Spielleiter aufgerufen wird, kann er entscheiden, ob er zum Werwolf werden oder Dorfbewohner bleiben möchte.",
-    "Das wilde Kind": "Wenn er sich vom Spielleiter aufrufen lässt, wählt er eine Person, die sein Vorbild ist, und wenn diese Person stirbt, wird das wilde Kind zum Werwolf.",
+    "Das wilde Kind": "Das wilde Kind wählt am Anfang des Spiels einen anderen Spieler, der ab dann sein Vorbild wird. Stirbt sein Vorbild, wird das wilde Kind zum Werwolf.",
     "Die reine Seele": "Du wirst noch am Tag aufgerufen und jeder weiß, dass du ein Dorfbewohner bist.",
     "Der Engel": "Wenn er in der Abstimmung der ersten Runde eliminiert wird (nicht von den Werwölfen), gewinnt er das Spiel allein.",
     "Die drei Brüder": "Die drei Brüder erwachen zusammen in der ersten Nacht und erkennen sich. Ansonsten sind sie einfache Dorfbewohner.",
@@ -43,9 +43,11 @@ ALL_ROLES = {
 # --- Erzählertext in eine leicht verarbeitbare Struktur umgewandelt ---
 NARRATOR_TEXT = {
     "round_1": [
+        # NEU: Dieser Block erscheint immer am Anfang der 1. Runde
+        {"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."},
         {"role": "Die reine Seele", "text": "Reine Seele, du darfst dich jetzt allen Dorfbewohnern zu erkennen geben.<br>(Die reine Seele gibt sich zu erkennen)<br>(Sobald das geschehen ist)<br>Alle Bürger, schließt jetzt bitte eure Augen."},
         {"role": "Dieb", "text": "Dieb, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die zwei übrigen Rollen in der Hand.<br>Du kannst nun deine Rolle mit einer der beiden Rollen tauschen oder deine Rolle behalten.<br>(Erzähler hält die zwei übrigen Karten hoch)<br>Wenn du deine Rolle behältst, bleibst du ein Dorfbewohner.<br>Wenn du eine neue Karte willst, zeig drauf.<br>(Erzähler nimmt die Karte, die der Dieb nicht will, weg)<br>Dieb, schließe jetzt deine Augen."},
-        {"role": "Der Gaukler", "text": "Gaukler, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die drei für dich ausgewählten Rollen in der Hand.<br>Du kannst dich jetzt entscheiden welche Rolle du für diese Nacht spielen möchtest.<br>(Der Gaukler zeigt auf einer der Rollen)<br>Gaukler schließe deine Augen."},
+        {"role": "Der Gaukler", "text": "Gaukler, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die drei für dich ausgewählten Rollen in der Hand.<br>Du kannst dich jetzt entscheiden welche Rolle du für diese Nacht spielen möchtest.<br>(Der Gaukler zeigt auf einen der Rollen)<br>Gaukler schließe deine Augen."},
         {"role": "Der verbitterte Greis", "text": "Verbitterte Greis, du darfst deine Augen jetzt öffnen.<br>Teile unsere Gruppe in zwei kleinere gleichgroße Gruppen auf.<br>(Z.B. in dunkle Haare und helle Haare)<br>Wird eine dieser Gruppen eliminiert und du lebst noch gewinnst du.<br>(Der verbitterte Greis macht zwei Gruppen)<br>Du darfst deine Augen wieder schließen."},
         {"role": "Amor", "text": "Amor, du darfst deine Augen jetzt öffnen.<br>Wähle zwei Personen aus, die du verkuppeln möchtest.<br>(Amor zeigt auf zwei Personen)<br>Amor, schließe jetzt deine Augen.<br>Ich gehe jetzt rum und tippe die beiden Verliebten an.<br>(Erzähler geht rum und tippt die beiden Verliebten an)<br>Verliebten, ihr dürft jetzt eure Augen öffnen und euch gegenseitig sehen.<br>(Verliebten schauen sich an)<br>Verliebten, schließt eure Augen bitte wieder."},
         {"role": "Der Wolfshund", "text": "Wolfshund, du darfst deine Augen jetzt öffnen.<br>Ich halte die beiden Hände hoch, die rechte Hand bedeutet Werwolf<br>und die linke Hand bedeutet Dorfbewohner.<br>(Erzähler hält beide Hände hoch)<br>Entscheide dich was du sein willst.<br>(Der Wolfshund zeigt auf einen der Hände)<br>Wolfshund, schließe jetzt deine Augen."},
@@ -59,11 +61,10 @@ NARRATOR_TEXT = {
         {"role": "Der Urwolf", "text": "Ulwolf, du darfst deine Augen jetzt öffnen.<br>Welche Person möchtest du in einen Werwolf verwandeln?<br>(Der Urwolf zeigt auf eine Person, die Werwolf werden soll)<br>Ulwolf, schließe jetzt deine Augen.<br>Ich gehe jetzt herum und tippe die infizierte Person an.<br>(Erzähler geht rum und tippt die infizierte Person an)<br>Die Person die ich angetippt habe wird in der nächsten Nacht zum Werwolf.<br>Sie verliert ihre andere Rolle."},
         {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
         {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten willst.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
-        {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
+        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten willst.<br>Wenn diese Person in der Nacht von den Werwölfen getötet wird, stirbst du auch. Wenn die Werwölfe dich in der Nacht töten wollen, stirbst du nicht, weil du bei der anderen Person schläfst."}
     ],
     "round_2": [
-        {"role": "Der Gaukler", "text": "Gaukler, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die drei für dich ausgewählten Rollen in der Hand.<br>Du kannst dich jetzt entscheiden welche Rolle du für diese Nacht spielen möchtest.<br>(Der Gaukler zeigt auf einer der Rollen)<br>Gaukler schließe deine Augen."},
+        {"role": "Der Gaukler", "text": "Gaukler, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die drei für dich ausgewählten Rollen in der Hand.<br>Du kannst dich jetzt entscheiden welche Rolle du für diese Nacht spielen möchtest.<br>(Der Gaukler zeigt auf einen der Rollen)<br>Gaukler schließe deine Augen."},
         {"role": "Seherin", "text": "Seherin, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, von der du die Rolle sehen möchtest.<br>(Die Seherin zeigt auf eine Person)<br>(Erzähler tippt auf das I neben der Rolle der Person und zeigt sie der Seherin)<br>Seherin, schließe jetzt deine Augen."},
         {"role": "Heiler/Beschützer", "text": "Heiler/Beschützer, du darfst jetzt deine Augen öffnen.<br>Wähle eine Person aus, die du beschützen möchtest.<br>Diese Person wird egal durch was sie getötet werden würde nicht sterben.<br>Du darfst keine Person zweimal hintereinander beschützen.<br>(Heiler zeigt auf die Person)<br>Heiler/Beschützer, schließe jetzt deine Augen."},
         {"role": "Werwölfe", "text": "Werwölfe, ihr dürft jetzt eure Augen öffnen.<br>Sucht euch eine Person aus, die ihr fressen wollt.<br>(Die Werwölfe einigen sich auf ein Opfer)<br>Werwölfe, schließt jetzt eure Augen."},
@@ -71,9 +72,10 @@ NARRATOR_TEXT = {
         {"role": "Der weiße Werwolf", "text": "(nur jede zweite Nacht aufrufen)<br>Weißer Werwolf, du darfst jetzt deine Augen öffnen.<br>Welchen deiner Werwolf-Kollegen möchtest du töten?<br>(Der weiße Werwolf zeigt auf einen Werwolf)<br>Weißer Werwolf, schließe jetzt deine Augen."},
         {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
         {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten willst.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
-        {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
-    ]
+        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten willst.<br>Wenn diese Person in der Nacht von den Werwölfen getötet wird, stirbst du auch. Wenn die Werwölfe dich in der Nacht töten wollen, stirbst du nicht, weil du bei der anderen Person schläfst."}
+    ],
+    "always_on_top": {"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."},
+    "always_at_bottom": {"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."}
 }
 
 # Ein Dictionary, um den Zustand des Spiels zu speichern.
@@ -111,13 +113,6 @@ def spiel_seite():
         namen_string = request.form.get("namen")
         namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
         
-        # NEU: Überprüfung auf doppelte Namen und Mindestanzahl im Backend
-        if len(namen_liste) < 4:
-             return render_template('spiel.html', saved_players=namen_string, error="Es müssen mindestens 4 Spieler angemeldet werden.")
-        
-        if len(namen_liste) != len(set(name.lower() for name in namen_liste)):
-            return render_template('spiel.html', saved_players=namen_string, error="Doppelte Namen sind nicht erlaubt.")
-
         session['saved_players'] = namen_string
         
         saved_roles = get_role_counts_from_session()
@@ -183,13 +178,6 @@ def set_game_roles():
     players_list_raw = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
     total_players = len(players_list_raw)
     
-    # NEU: Überprüfung auf doppelte Namen vor der Rollenzuweisung
-    if len(players_list_raw) != len(set(name.lower() for name in players_list_raw)):
-        return jsonify({"error": "Doppelte Namen sind nicht erlaubt."}), 400
-
-    if total_players < 4:
-        return jsonify({"error": "Es müssen mindestens 4 Spieler angemeldet sein."}), 400
-
     total_roles_count = sum(role_counts.values())
 
     if total_roles_count != total_players:
@@ -359,24 +347,22 @@ def get_narrator_text(round_number):
     # Überprüft, welche Rollen überhaupt im Spiel sind
     selected_roles = set(game_state["assigned_roles"].values())
 
-    # Feste Start- und Endblöcke
-    start_block = {"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."}
-    end_block = {"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."}
-    
-    # Sonderregel für "Reine Seele" in Runde 1
-    if round_number == '1' and "Die reine Seele" in selected_roles and game_state["role_counters"].get("Die reine Seele", 0) > 0:
-        reine_seele_text = next((item for item in target_text if item["role"] == "Die reine Seele"), None)
-        if reine_seele_text:
-            filtered_text.append(reine_seele_text)
-        filtered_text.append({"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."})
+    # Fügt den "Alle Bürger, Augen schließen"-Block hinzu, falls er im Original-Text vorhanden ist
+    # und der erste Block ist
+    if round_number == '1' and "Die reine Seele" in selected_roles:
+        for item in NARRATOR_TEXT["round_1"]:
+            if item["role"] == "Die reine Seele":
+                filtered_text.append(item)
+                break
+        filtered_text.append(NARRATOR_TEXT["always_on_top"])
     else:
-        filtered_text.append(start_block)
+        filtered_text.append(NARRATOR_TEXT["always_on_top"])
 
     for item in target_text:
         role_name = item["role"]
         
-        # Überspringt "Alle Bürger" und "Die reine Seele", da sie bereits behandelt wurden
-        if role_name in ["Alle Bürger", "Die reine Seele"]:
+        # Überspringt den ersten "Alle Bürger"-Block, da er schon behandelt wurde
+        if role_name == "Alle Bürger" and (round_number == '1' or "Die reine Seele" in selected_roles):
             continue
         
         # Überprüfen, ob die Rolle überhaupt im Spiel ist UND ob es noch lebende Spieler gibt
@@ -384,7 +370,7 @@ def get_narrator_text(round_number):
             if game_state["role_counters"].get(role_name, 0) > 0:
                 filtered_text.append(item)
     
-    filtered_text.append(end_block)
+    filtered_text.append(NARRATOR_TEXT["always_at_bottom"])
     
     return jsonify({"text_blocks": filtered_text})
     

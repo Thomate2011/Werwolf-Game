@@ -3,30 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielübersicht</title>
+    <title>Erzählertext</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="neustart-page">
+<body class="erzaehler-page">
     <div class="container">
-        <h1>Spielübersicht</h1>
-        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebendig/tot).</p>
-        <div id="player-list">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="{{ url_for('neustart_seite') }}" class="button-link secondary-button">Zurück</a>
+            <div class="night-buttons">
+                <button id="round-1-btn" class="button-link primary-button active">1. Runde Text</button>
+                <button id="round-2-btn" class="button-link primary-button">2. Runde Text</button>
             </div>
-        <div class="button-group">
-            <a href="{{ url_for('erzaehler_seite') }}" class="primary-button">Zum Erzählertext</a>
-            <button id="neustart-button" class="primary-button">Neues Spiel starten</button>
+            <div></div>
         </div>
-    </div>
-    
-    <div id="info-popup" class="popup">
-        <div class="popup-content">
-            <span class="popup-close-btn">&times;</span>
-            <h2 id="popup-role-name"></h2>
-            <p id="popup-role-description"></p>
+
+        <div id="narrator-text-container">
         </div>
+
     </div>
-    <div id="overlay" class="overlay"></div>
-    
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -8,25 +8,38 @@
 </head>
 <body class="neustart-page">
     <div class="container">
-        <h1>Spielübersicht</h1>
-        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebendig/tot).</p>
-        <div id="player-list">
-            </div>
-        <div class="button-group">
-            <a href="{{ url_for('erzaehler_seite') }}" class="primary-button">Zum Erzählertext</a>
-            <button id="neustart-button" class="primary-button">Neues Spiel starten</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Spielübersicht</h1>
+            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
         </div>
+        
+        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
+        
+        <div id="player-list">
+            {% for player in players %}
+                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}">
+                    <span onclick="toggleStatus('{{ player.name }}')">
+                        <b>{{ player.role }}</b> | {{ player.name }}
+                    </span>
+                    <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button onclick="restartGame()" class="danger-button">Neustart</button>
+        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
+
+        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
+        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
     </div>
     
     <div id="info-popup" class="popup">
-        <div class="popup-content">
-            <span class="popup-close-btn">&times;</span>
-            <h2 id="popup-role-name"></h2>
-            <p id="popup-role-description"></p>
-        </div>
+        <h2 id="popup-role-name" class="role-popup-title"></h2>
+        <p id="popup-role-description" class="role-popup-description"></p>
+        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
     </div>
-    <div id="overlay" class="overlay"></div>
-    
+    <div id="overlay" class="overlay" onclick="hideInfoNeustart()"></div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
