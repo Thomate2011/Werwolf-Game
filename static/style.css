@@ -198,16 +198,15 @@ textarea {
     color: #aaa;
 }
 
-/* KORRIGIERTE STILE FÜR DAS ROLLEN-POP-UP AUF NEUSTART-SEITE */
 .role-popup-title {
-    font-size: 2em; /* Rollenname ist doppelt so groß wie die Erklärung */
+    font-size: 2em;
     font-weight: bold;
     color: #444;
     margin: 0;
 }
 
 .role-popup-description {
-    font-size: 1em; /* Normale Schriftgröße für die Erklärung */
+    font-size: 1em;
     line-height: 1.6;
     color: #555;
     margin-top: 15px;
@@ -224,7 +223,6 @@ textarea {
     z-index: 1000;
 }
 
-/* NEUE STILE FÜR ERZÄHLER-SEITE */
 .erzaehler-page .container {
     max-width: 800px;
 }
@@ -264,4 +262,48 @@ textarea {
 #narrator-text-container strong {
     color: #008CBA;
     font-size: 1.2em;
+}
+
+.special-role-popup {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+}
+
+.special-role-card {
+    border: 2px solid #333;
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+}
+
+.special-role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.special-role-card-name {
+    font-size: 3em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.special-role-card-description {
+    font-size: 0.5em;
+}
+
+.selection-mode {
+    cursor: pointer;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    padding: 10px;
+    transition: background-color 0.2s;
+}
+
+.selection-mode:hover {
+    background-color: #e8f5e9;
 }

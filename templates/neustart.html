@@ -13,15 +13,33 @@
             <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
         </div>
         
+        <p id="special-action-text" style="color: green; font-weight: bold;"></p>
         <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
         
         <div id="player-list">
             {% for player in players %}
-                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}">
+                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}" data-player-name="{{ player.name }}">
                     <span onclick="toggleStatus('{{ player.name }}')">
                         <b>{{ player.role }}</b> | {{ player.name }}
                     </span>
-                    <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
+                    <div>
+                        {% if player.role == 'Dieb' and special_roles.dieb %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('dieb')">💰</button>
+                        {% endif %}
+                        {% if player.role == 'Der Gaukler' and special_roles.gaukler %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('gaukler')">🎭</button>
+                        {% endif %}
+                        {% if player.role == 'Amor' and special_roles.amor %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('amor')">❤️</button>
+                        {% endif %}
+                        {% if player.role == 'Der Urwolf' and special_roles.urwolf %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('urwolf')">🐺</button>
+                        {% endif %}
+                        {% if player.role == 'Die ergebene Magd' and special_roles.magd %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('magd')">👩🏼</button>
+                        {% endif %}
+                        <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
+                    </div>
                 </div>
             {% endfor %}
         </div>
@@ -38,7 +56,9 @@
         <p id="popup-role-description" class="role-popup-description"></p>
         <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
     </div>
-    <div id="overlay" class="overlay" onclick="hideInfoNeustart()"></div>
+
+    <div id="special-role-popup" class="popup"></div>
+    <div id="overlay" class="overlay"></div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
