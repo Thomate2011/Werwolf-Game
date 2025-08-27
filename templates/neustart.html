@@ -3,126 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neustart - Werwölfe von Düsterwald</title>
+    <title>Spielübersicht</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="neustart-page">
     <div class="container">
         <h1>Spielübersicht</h1>
-        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebend/tot).</p>
-        
+        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebendig/tot).</p>
         <div id="player-list">
             </div>
-
-        <hr>
-
-        <h2>Erklärungen der Rollen</h2>
-        <p>Klicke auf das 'i'-Symbol, um eine Rollenbeschreibung zu sehen.</p>
-        <div id="roles-list">
-            </div>
-
-        <hr>
-
-        <a href="{{ url_for('erzaehler_seite') }}" class="primary-button button-link">Zum Erzählertext</a>
-        <button id="neustart-button" class="danger-button">Spiel zurücksetzen</button>
-
+        <div class="button-group">
+            <a href="{{ url_for('erzaehler_seite') }}" class="primary-button">Zum Erzählertext</a>
+            <button id="neustart-button" class="primary-button">Neues Spiel starten</button>
+        </div>
     </div>
-
-    <div id="role-popup" class="popup" style="display: none;">
-        <button class="popup-close-btn" onclick="hidePopup()">&times;</button>
-        <h3 id="popup-role-name" class="role-popup-title"></h3>
-        <p id="popup-role-description" class="role-popup-description"></p>
+    
+    <div id="info-popup" class="popup">
+        <div class="popup-content">
+            <span class="popup-close-btn">&times;</span>
+            <h2 id="popup-role-name"></h2>
+            <p id="popup-role-description"></p>
+        </div>
     </div>
-    <div id="overlay" class="overlay" onclick="hidePopup()" style="display: none;"></div>
-
-
-    <script>
-        const allRoles = {{ all_roles | tojson }};
-
-        function showPopup(roleName) {
-            const roleDescription = allRoles[roleName];
-            if (roleDescription) {
-                document.getElementById('popup-role-name').textContent = roleName;
-                document.getElementById('popup-role-description').innerHTML = roleDescription.replace(/\n/g, '<br>');
-                document.getElementById('role-popup').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-            }
-        }
-
-        function hidePopup() {
-            document.getElementById('role-popup').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-
-        function updatePlayerList() {
-            fetch('/api/gamemaster/view')
-                .then(response => response.json())
-                .then(players => {
-                    const playerListEl = document.getElementById('player-list');
-                    playerListEl.innerHTML = '';
-                    players.forEach(player => {
-                        const playerItem = document.createElement('div');
-                        playerItem.className = `player-list-item ${player.status}`;
-                        playerItem.innerHTML = `
-                            <span>${player.name} (${player.role})</span>
-                            <span style="font-size: 1.2em;">${player.status === 'alive' ? '❤️' : '💀'}</span>
-                        `;
-                        playerItem.onclick = () => {
-                            togglePlayerStatus(player.name);
-                        };
-                        playerListEl.appendChild(playerItem);
-                    });
-                })
-                .catch(error => console.error('Error fetching player list:', error));
-        }
-
-        function togglePlayerStatus(playerName) {
-            fetch(`/api/gamemaster/toggle_status/${playerName}`, {
-                method: 'PUT'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    updatePlayerList();
-                }
-            })
-            .catch(error => console.error('Error toggling status:', error));
-        }
-        
-        function updateRolesList() {
-            fetch('/api/get_roles_list')
-                .then(response => response.json())
-                .then(roles => {
-                    const rolesListEl = document.getElementById('roles-list');
-                    rolesListEl.innerHTML = '';
-                    roles.forEach(roleName => {
-                        const roleItem = document.createElement('div');
-                        roleItem.className = 'role-list-item';
-                        roleItem.innerHTML = `
-                            <span>${roleName}</span>
-                            <button class="role-info-btn" onclick="showPopup('${roleName}')">i</button>
-                        `;
-                        rolesListEl.appendChild(roleItem);
-                    });
-                })
-                .catch(error => console.error('Error fetching roles list:', error));
-        }
-        
-        document.getElementById('neustart-button').addEventListener('click', () => {
-            fetch('/api/game/restart', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        window.location.href = "{{ url_for('spiel_seite') }}";
-                    }
-                })
-                .catch(error => console.error('Error restarting game:', error));
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updatePlayerList();
-            updateRolesList();
-        });
-    </script>
+    <div id="overlay" class="overlay"></div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
