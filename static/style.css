@@ -230,6 +230,7 @@ textarea {
 .night-buttons {
     display: flex;
     gap: 10px;
+    justify-content: center;
 }
 
 .night-buttons .button-link {
@@ -306,4 +307,24 @@ textarea {
 
 .selection-mode:hover {
     background-color: #e8f5e9;
+}
+
+.disabled-button {
+    background-color: #bbb;
+    cursor: not-allowed;
+}
+
+.special-action-emoji {
+    cursor: pointer;
+}
+
+.player-action-selection.selected {
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 5px #4CAF50;
+    background-color: #e8f5e9;
+}
+
+.love-heart {
+    margin-left: 5px;
+    color: #f44336;
 }

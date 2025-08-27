@@ -85,13 +85,12 @@ game_state = {
     "game_started": False,
     "assigned_roles": {},
     "current_player_index": 0,
-    "role_counters": {}, # Zählt die lebenden Spieler pro Rolle
+    "role_counters": {},
     "special_roles": {
         "dieb_roles": [],
         "gaukler_roles": []
     },
-    "couples": [],
-    "magd_player": None
+    "couples": []
 }
 
 def get_role_counts_from_session():
@@ -111,14 +110,12 @@ def save_special_roles_to_session(special_roles):
 @app.route('/')
 def startseite():
     session.clear()
-    game_state["players"] = []
-    game_state["game_started"] = False
-    game_state["assigned_roles"] = {}
-    game_state["current_player_index"] = 0
-    game_state["role_counters"] = {}
-    game_state["special_roles"] = {"dieb_roles": [], "gaukler_roles": []}
-    game_state["couples"] = []
-    game_state["magd_player"] = None
+    game_state.clear()
+    game_state.update({
+        "players": [], "roles": {}, "total_roles_count": 0, "game_started": False,
+        "assigned_roles": {}, "current_player_index": 0, "role_counters": {},
+        "special_roles": {"dieb_roles": [], "gaukler_roles": []}, "couples": []
+    })
     return render_template('index.html')
 
 @app.route('/spiel', methods=['GET', 'POST'])
@@ -131,7 +128,7 @@ def spiel_seite():
         
         saved_roles = get_role_counts_from_session()
         total_roles_selected = sum(saved_roles.values())
-        if len(namen_liste) < total_roles_selected:
+        if len(namen_liste) != total_roles_selected:
             save_role_counts_to_session({})
         
         return render_template('rollen.html', all_roles=ALL_ROLES, player_count=len(namen_liste), saved_roles=saved_roles)
@@ -143,11 +140,13 @@ def spiel_seite():
 def rollen_seite():
     player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
     if player_count == 0:
-        return render_template('spiel.html')
+        return redirect(url_for('spiel_seite'))
 
     saved_roles = get_role_counts_from_session()
+    
+    special_roles = get_special_roles_from_session()
 
-    return render_template('rollen.html', all_roles=ALL_ROLES, player_count=player_count, saved_roles=saved_roles)
+    return render_template('rollen.html', all_roles=ALL_ROLES, player_count=player_count, saved_roles=saved_roles, special_roles=special_roles)
 
 @app.route('/karten')
 def karten_seite():
@@ -155,7 +154,7 @@ def karten_seite():
 
 @app.route('/neustart')
 def neustart_seite():
-    if not game_state["game_started"]:
+    if not game_state.get("game_started"):
         return redirect(url_for('spiel_seite'))
     
     players_list_data = []
@@ -163,25 +162,19 @@ def neustart_seite():
         player_name = player_info["name"]
         role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
         status = player_info["status"]
+        is_special = role in ["Dieb", "Der Gaukler", "Amor", "Der Urwolf", "Die ergebene Magd"]
         players_list_data.append({
             "name": player_name,
             "role": role,
-            "status": status
+            "status": status,
+            "role_is_special": is_special
         })
     
-    special_roles_present = {
-        "dieb": "Dieb" in game_state["assigned_roles"].values(),
-        "gaukler": "Der Gaukler" in game_state["assigned_roles"].values(),
-        "amor": "Amor" in game_state["assigned_roles"].values(),
-        "urwolf": "Der Urwolf" in game_state["assigned_roles"].values(),
-        "magd": "Die ergebene Magd" in game_state["assigned_roles"].values()
-    }
-    
-    return render_template('neustart.html', players=players_list_data, all_roles=ALL_ROLES, special_roles=special_roles_present)
+    return render_template('neustart.html', players=players_list_data, all_roles=ALL_ROLES)
 
 @app.route('/erzaehler')
 def erzaehler_seite():
-    if not game_state["game_started"]:
+    if not game_state.get("game_started"):
         return redirect(url_for('spiel_seite'))
     return render_template('erzaehler.html')
 
@@ -197,7 +190,16 @@ def save_roles_api():
 def save_special_roles_api():
     data = request.get_json()
     current_special_roles = get_special_roles_from_session()
-    current_special_roles.update(data)
+    
+    if 'dieb_roles' in data:
+        current_special_roles['dieb_roles'] = data['dieb_roles']
+        if not current_special_roles['dieb_roles']:
+            current_special_roles.pop('dieb_roles')
+    if 'gaukler_roles' in data:
+        current_special_roles['gaukler_roles'] = data['gaukler_roles']
+        if not current_special_roles['gaukler_roles']:
+            current_special_roles.pop('gaukler_roles')
+
     save_special_roles_to_session(current_special_roles)
     return jsonify({"message": "Spezielle Rollen wurden in der Session gespeichert."}), 200
     
@@ -218,15 +220,13 @@ def set_game_roles():
 
     if total_roles_count != total_players:
         return jsonify({
-            "error": f"Die Anzahl der Rollen ({total_roles_count}) muss genau der Anzahl der Spieler ({total_players}) entsprechen.",
-            "players_count": total_players,
-            "roles_count": total_roles_count
+            "error": f"Die Anzahl der Rollen ({total_roles_count}) muss genau der Anzahl der Spieler ({total_players}) entsprechen."
         }), 400
     
     # Reset game state
     game_state["players"] = [{"name": name, "status": "alive"} for name in players_list_raw]
     game_state["roles"] = role_counts
-    game_state["total_roles_count"] = total_roles_count
+    game_state["total_roles_count"] = total_players
     game_state["special_roles"] = special_roles_data
     game_state["couples"] = []
     
@@ -235,7 +235,6 @@ def set_game_roles():
         if role not in ["Dieb", "Der Gaukler"]:
             roles_to_assign.extend([role] * count)
     
-    # Füge Dieb/Gaukler Rollen nur als 1 hinzu, wenn sie im Spiel sind
     if 'Dieb' in role_counts and role_counts['Dieb'] > 0:
         roles_to_assign.append('Dieb')
     if 'Der Gaukler' in role_counts and role_counts['Der Gaukler'] > 0:
@@ -258,7 +257,7 @@ def set_game_roles():
 
 @app.route('/api/game/next_card', methods=['GET'])
 def get_next_card():
-    if not game_state["game_started"]:
+    if not game_state.get("game_started"):
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
     current_index = game_state["current_player_index"]
@@ -277,7 +276,7 @@ def get_next_card():
 
 @app.route('/api/game/reveal_and_next', methods=['POST'])
 def reveal_and_next():
-    if not game_state["game_started"]:
+    if not game_state.get("game_started"):
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
     current_index = game_state["current_player_index"]
@@ -303,27 +302,38 @@ def reveal_and_next():
         "is_last_card": (game_state["current_player_index"] >= len(game_state["players"]))
     })
 
-@app.route('/api/gamemaster/view', methods=['GET'])
-def get_gamemaster_view():
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
+@app.route('/api/get_roles_and_players')
+def get_roles_and_players():
+    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
+    saved_roles = get_role_counts_from_session()
+    all_roles = ALL_ROLES
     
-    overview = []
-    for player_info in game_state["players"]:
-        player_name = player_info["name"]
-        role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
-        
-        overview.append({
-            "name": player_name,
-            "role": role,
-            "status": player_info["status"],
-        })
-        
-    return jsonify(overview)
+    players_list_data = []
+    if game_state.get("game_started"):
+        for player_info in game_state["players"]:
+            player_name = player_info["name"]
+            role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
+            status = player_info["status"]
+            is_special = role in ["Dieb", "Der Gaukler", "Amor", "Der Urwolf", "Die ergebene Magd"]
+            players_list_data.append({
+                "name": player_name,
+                "role": role,
+                "status": status,
+                "role_is_special": is_special
+            })
+
+    return jsonify({
+        "player_count": player_count,
+        "saved_roles": saved_roles,
+        "all_roles": all_roles,
+        "players_list": players_list_data,
+        "couples": game_state.get("couples", [])
+    })
+
 
 @app.route('/api/gamemaster/toggle_status/<player_name>', methods=['PUT'])
 def toggle_player_status(player_name):
-    if not game_state["game_started"]:
+    if not game_state.get("game_started"):
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
     player_found = False
@@ -336,6 +346,18 @@ def toggle_player_status(player_name):
                 player_info["status"] = "dead"
                 if role in game_state["role_counters"]:
                     game_state["role_counters"][role] -= 1
+                
+                # Wenn ein Verliebter stirbt, stirbt auch der andere
+                for couple in game_state["couples"]:
+                    if player_name in couple:
+                        other_lover = couple[0] if couple[1] == player_name else couple[1]
+                        for other_player_info in game_state["players"]:
+                            if other_player_info["name"] == other_lover:
+                                other_player_info["status"] = "dead"
+                                other_role = game_state["assigned_roles"].get(other_lover)
+                                if other_role in game_state["role_counters"]:
+                                    game_state["role_counters"][other_role] -= 1
+                                break
             else:
                 player_info["status"] = "alive"
                 if role in game_state["role_counters"]:
@@ -351,70 +373,39 @@ def toggle_player_status(player_name):
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
-    game_state["game_started"] = False
-    game_state["assigned_roles"] = {}
-    game_state["current_player_index"] = 0
-    game_state["role_counters"] = {}
-    game_state["special_roles"] = {"dieb_roles": [], "gaukler_roles": []}
-    game_state["couples"] = []
-    
-    for player_info in game_state["players"]:
-        player_info["status"] = "alive"
-    
+    game_state.clear()
+    game_state.update({
+        "players": [], "roles": {}, "total_roles_count": 0, "game_started": False,
+        "assigned_roles": {}, "current_player_index": 0, "role_counters": {},
+        "special_roles": {"dieb_roles": [], "gaukler_roles": []}, "couples": []
+    })
+    session.pop('saved_roles', None)
+    session.pop('special_roles', None)
     return jsonify({"message": "Spiel wurde erfolgreich zurückgesetzt. Du kannst nun wieder zur Rollenauswahl wechseln."})
 
-# NEUE API-ROUTE FÜR GEORDNETE ROLLENLISTE
 @app.route('/api/get_roles_list')
 def get_roles_list():
     return jsonify(list(ALL_ROLES.keys()))
-
-@app.route('/api/get_roles_and_players')
-def get_roles_and_players():
-    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
-    saved_roles = get_role_counts_from_session()
-    all_roles = ALL_ROLES
-    
-    players_list_data = []
-    if game_state["game_started"]:
-        for player_info in game_state["players"]:
-            player_name = player_info["name"]
-            role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
-            status = player_info["status"]
-            players_list_data.append({
-                "name": player_name,
-                "role": role,
-                "status": status,
-                "is_special": role in ["Dieb", "Der Gaukler", "Amor", "Der Urwolf", "Die ergebene Magd"]
-            })
-
-    return jsonify({
-        "player_count": player_count,
-        "saved_roles": saved_roles,
-        "all_roles": all_roles,
-        "players_list": players_list_data
-    })
 
 @app.route('/api/game/dieb/change_role', methods=['POST'])
 def dieb_change_role():
     data = request.get_json()
     new_role = data.get('new_role')
     
-    # Find the Dieb
     dieb_player_name = next((name for name, role in game_state["assigned_roles"].items() if role == "Dieb"), None)
     if not dieb_player_name:
         return jsonify({"error": "Kein Dieb im Spiel."}), 400
 
-    # Get the current roles to update counters correctly
     old_role = game_state["assigned_roles"][dieb_player_name]
     
-    # Check if the new role is valid (from the dieb's special roles)
     if new_role not in game_state["special_roles"]["dieb_roles"]:
         return jsonify({"error": "Ungültige Rolle für den Dieb."}), 400
         
     game_state["assigned_roles"][dieb_player_name] = new_role
-    game_state["role_counters"][old_role] -= 1
     
-    # Add new role to counter
+    # Update role counters
+    if old_role in game_state["role_counters"]:
+        game_state["role_counters"][old_role] -= 1
     if new_role in game_state["role_counters"]:
         game_state["role_counters"][new_role] += 1
     else:
@@ -447,7 +438,6 @@ def urwolf_transform():
     data = request.get_json()
     player_name = data.get('player')
 
-    # Get the player's old role and update counters
     old_role = game_state["assigned_roles"].get(player_name)
     if not old_role:
         return jsonify({"error": "Spieler nicht gefunden."}), 404
@@ -455,9 +445,8 @@ def urwolf_transform():
     if old_role in game_state["role_counters"]:
         game_state["role_counters"][old_role] -= 1
         
-    # Set the new role
     game_state["assigned_roles"][player_name] = "Werwölfe"
-    game_state["role_counters"]["Werwölfe"] += 1
+    game_state["role_counters"]["Werwölfe"] = game_state["role_counters"].get("Werwölfe", 0) + 1
     
     return jsonify({"message": f"{player_name} wurde in einen Werwolf verwandelt."})
 
@@ -473,23 +462,21 @@ def magd_takeover():
     target_player = next((p for p in game_state["players"] if p["name"] == target_player_name), None)
     magd_player = next((p for p in game_state["players"] if p["name"] == magd_player_name), None)
     
-    if not target_player or target_player["status"] == "dead":
-        return jsonify({"error": "Ungültiger Spieler für die Rollenübernahme."}), 400
+    if not target_player or target_player["status"] == "alive":
+        return jsonify({"error": "Ungültiger Spieler für die Rollenübernahme. Spieler muss tot sein."}), 400
     
-    # Magd übernimmt die Rolle des Ziels
+    magd_player_status_index = game_state["players"].index(magd_player)
+    game_state["players"][magd_player_status_index]["status"] = "alive"
+    
     target_role = game_state["assigned_roles"][target_player_name]
-    game_state["assigned_roles"][magd_player_name] = target_role
     
-    # Ziel stirbt und verliert seine Rolle
-    target_player["status"] = "dead"
-    if game_state["role_counters"].get(target_role, 0) > 0:
-        game_state["role_counters"][target_role] -= 1
-    
-    # Magds alte Rolle wird "tot"
-    if "Die ergebene Magd" in game_state["role_counters"]:
-        game_state["role_counters"]["Die ergebene Magd"] -= 1
+    old_magd_role = game_state["assigned_roles"][magd_player_name]
+    if old_magd_role in game_state["role_counters"]:
+        game_state["role_counters"][old_magd_role] -= 1
 
-    # Die neue Rolle der Magd wird als "lebendig" gezählt
+    game_state["assigned_roles"][magd_player_name] = target_role
+    game_state["assigned_roles"][target_player_name] = "Keine Rolle mehr"
+
     if target_role in game_state["role_counters"]:
         game_state["role_counters"][target_role] += 1
     else:
@@ -499,7 +486,7 @@ def magd_takeover():
     
 @app.route('/api/narrator_text/<round_number>', methods=['GET'])
 def get_narrator_text(round_number):
-    if not game_state["game_started"]:
+    if not game_state.get("game_started"):
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
 
     target_text = NARRATOR_TEXT.get(f"round_{round_number}")
@@ -507,21 +494,19 @@ def get_narrator_text(round_number):
         return jsonify({"error": "Ungültige Runden-Nummer."}), 400
 
     filtered_text = []
-    
-    # Überprüft, welche Rollen überhaupt im Spiel sind
     selected_roles = set(game_state["assigned_roles"].values())
 
-    # Fügt den "Alle Bürger, Augen schließen"-Block hinzu
-    filtered_text.append(NARRATOR_TEXT["always_on_top"])
+    if "Die reine Seele" in selected_roles and game_state["role_counters"].get("Die reine Seele", 0) > 0:
+        filtered_text.append(next(item for item in NARRATOR_TEXT["round_1"] if item["role"] == "Die reine Seele"))
+
+    filtered_text.append({"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."})
 
     for item in target_text:
-        role_name = item["role"]
-        
-        # Überprüfen, ob die Rolle im Spiel ist UND ob es noch lebende Spieler mit dieser Rolle gibt
-        if role_name in selected_roles and game_state["role_counters"].get(role_name, 0) > 0:
-            filtered_text.append(item)
+        if item["role"] != "Die reine Seele":
+            if item["role"] in selected_roles and game_state["role_counters"].get(item["role"], 0) > 0:
+                filtered_text.append(item)
     
-    filtered_text.append(NARRATOR_TEXT["always_at_bottom"])
+    filtered_text.append({"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."})
     
     return jsonify({"text_blocks": filtered_text})
 

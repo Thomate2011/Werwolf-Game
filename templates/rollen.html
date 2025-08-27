@@ -3,37 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rollen auswählen</title>
+    <title>Werwolf: Rollen</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="rollen-page">
     <div class="container">
         <h1>Rollen auswählen</h1>
-        <p>Wähle genau <span id="player-count"></span> Rollen aus.</p>
-
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
-            <button class="primary-button start-button" style="display: none;">Mischen</button>
-        </div>
-        <p id="roles-to-go" style="font-weight: bold;"></p>
-
-        <div id="roles-container"></div>
-
-        <div id="special-roles-selection" style="display: none;"></div>
+        <p>
+            Anzahl der Spieler: <strong>{{ player_count }}</strong>
+            <br>
+            <span id="roles-to-go">Noch {{ player_count - saved_roles|dict_sum }} Rollen zu vergeben</span>
+        </p>
         
-        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
-            <button class="primary-button start-button" style="display: none;">Mischen</button>
-        </div>
+        <button id="special-role-button" style="display: none;"></button>
+
+        <div id="roles-container">
+            </div>
+
+        <hr>
+        <button id="start-button" onclick="startGame()" class="primary-button disabled-button" disabled>Spiel mischen</button>
+        <a href="{{ url_for('spiel_seite') }}" class="button-link secondary-button">Zurück zu den Namen</a>
     </div>
 
     <div id="info-popup" class="popup">
+        <button class="popup-close-btn" onclick="hideInfo()">&times;</button>
         <h2 id="popup-role-name" class="role-popup-title"></h2>
         <p id="popup-role-description" class="role-popup-description"></p>
-        <button onclick="hideInfo()" class="popup-close-btn">&times;</button>
     </div>
-    <div id="overlay" class="overlay" onclick="hideInfo()"></div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div id="role-selection-popup" class="popup">
+        <button class="popup-close-btn" onclick="hidePopup('role-selection-popup')">&times;</button>
+        <h2 id="selection-popup-title"></h2>
+        <p id="selection-popup-description"></p>
+        <hr>
+        <button id="selection-popup-action-btn" class="primary-button"></button>
+        <button id="selection-popup-change-btn" class="secondary-button">Rollen verändern</button>
+    </div>
+    
+    <div id="special-role-popup" class="popup">
+        </div>
+
+    <div id="overlay" class="overlay"></div>
 </body>
 </html>

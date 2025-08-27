@@ -3,63 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielübersicht</title>
+    <title>Werwolf: Spielübersicht</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="neustart-page">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">Spielübersicht</h1>
-            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
-        </div>
-        
-        <p id="special-action-text" style="color: green; font-weight: bold;"></p>
-        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
-        
-        <div id="player-list">
-            {% for player in players %}
-                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}" data-player-name="{{ player.name }}">
-                    <span onclick="toggleStatus('{{ player.name }}')">
-                        <b>{{ player.role }}</b> | {{ player.name }}
-                    </span>
-                    <div>
-                        {% if player.role == 'Dieb' and special_roles.dieb %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('dieb')">💰</button>
-                        {% endif %}
-                        {% if player.role == 'Der Gaukler' and special_roles.gaukler %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('gaukler')">🎭</button>
-                        {% endif %}
-                        {% if player.role == 'Amor' and special_roles.amor %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('amor')">❤️</button>
-                        {% endif %}
-                        {% if player.role == 'Der Urwolf' and special_roles.urwolf %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('urwolf')">🐺</button>
-                        {% endif %}
-                        {% if player.role == 'Die ergebene Magd' and special_roles.magd %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('magd')">👩🏼</button>
-                        {% endif %}
-                        <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        
-        <button onclick="restartGame()" class="danger-button">Neustart</button>
-        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
+        <h1>Spielübersicht</h1>
+        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebend/tot).<br>Klicke auf ein Emoji, um eine Spezialaktion auszuführen.</p>
+        <hr>
+        <ul id="player-list" style="list-style-type: none; padding: 0;">
+            </ul>
+        <hr>
+        <button onclick="restartGame()" class="danger-button">Spiel beenden</button>
+        <a href="{{ url_for('erzaehler_seite') }}" class="button-link secondary-button">Zum Erzählertext</a>
+    </div>
 
-        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
-        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
+    <div id="special-action-popup" class="popup">
+        <button class="popup-close-btn" onclick="hideSpecialActionPopup()">&times;</button>
+        <h2 id="special-action-title"></h2>
+        <p id="special-action-description"></p>
+        <button id="special-action-proceed-btn" class="primary-button" style="display: none;">Zur Handlung</button>
+    </div>
+
+    <div id="special-role-select-popup" class="popup">
+        <button class="popup-close-btn" onclick="hidePopup('special-role-select-popup')">&times;</button>
+        <h2 id="special-role-select-title"></h2>
+        <p>Wähle eine der folgenden Rollen.</p>
+        <div id="special-role-list-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+            </div>
     </div>
     
     <div id="info-popup" class="popup">
+        <button class="popup-close-btn" onclick="hideInfo()">&times;</button>
         <h2 id="popup-role-name" class="role-popup-title"></h2>
         <p id="popup-role-description" class="role-popup-description"></p>
-        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
     </div>
 
-    <div id="special-role-popup" class="popup"></div>
     <div id="overlay" class="overlay"></div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
