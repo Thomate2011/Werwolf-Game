@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwolf: Das Spiel</title>
+    <title>Werwolf-Spiel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
-        <p>Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
-        <hr>
-        <a href="{{ url_for('spiel_seite') }}" class="button-link primary-button">Spiel starten</a>
+        <h1>Werwolf-Spiel</h1>
+        <p>Willkommen zum Werwolf-Spiel! Wählen Sie die Rolle, die Sie spielen möchten: als Spieler oder Spielleiter.</p>
+        <a href="{{ url_for('spiel_seite') }}" class="button-link primary-button">Spieler</a>
+        <a href="{{ url_for('erzaehler_seite') }}" class="button-link secondary-button">Spielleiter (Erzähler)</a>
     </div>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>

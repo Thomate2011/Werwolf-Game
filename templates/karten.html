@@ -3,21 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rollen aufdecken</title>
+    <title>Rollen verteilen - Werwolf-Spiel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="karten-page">
     <div class="container">
-        <h1>Rollen aufdecken</h1>
-        <div id="player-card" class="player-card">
-            <h2 id="player-name" class="card-title"></h2>
-            <p id="role-name" class="card-role" style="display: none;"></p>
-            <p id="role-description" class="card-description" style="display: none;"></p>
-            <button id="reveal-role-btn" class="secondary-button">Rolle aufdecken</button>
-            <button id="show-description-btn" class="secondary-button" style="display: none;">Erklärung</button>
-            <button id="next-player-btn" class="primary-button" style="display: none;">Nächster Spieler</button>
-            <button id="overview-btn" class="primary-button" style="display: none;">Zur Übersicht</button>
+        <h1>Rolle verteilen</h1>
+        
+        <button id="start-btn" class="primary-button">Start</button>
+        
+        <div id="card-display" style="display: none;">
+            <div class="card-container">
+                <div class="card-content">
+                    <div class="card-face card-back">
+                        <p class="card-title">Werwolf-Spiel</p>
+                    </div>
+                    <div class="card-face card-front">
+                        <p class="card-owner">Hallo, <span id="player-name"></span></p>
+                        <p class="card-role" id="role-name">???</p>
+                        <p class="card-description" id="role-description" style="display: none;"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="reveal-btn" class="primary-button">Aufdecken</button>
+                <button id="show-description-btn" class="secondary-button" style="display: none;">Erklärung</button>
+                <button id="next-player-btn" class="primary-button" style="display: none;">Nächster Spieler</button>
+                <button id="overview-btn" class="primary-button" style="display: none;">Zur Übersicht</button>
+            </div>
         </div>
     </div>
     
@@ -26,5 +40,7 @@
         <a href="{{ url_for('neustart_seite') }}" class="button-link primary-button">Zur Spielübersicht</a>
     </div>
     <div id="overlay" class="overlay"></div>
+
+    <script src="{{ url_for('static', filename='karten.js') }}"></script>
 </body>
 </html>

@@ -3,47 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwolf: Rollen</title>
+    <title>Rollen auswählen - Werwolf-Spiel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="rollen-page">
     <div class="container">
         <h1>Rollen auswählen</h1>
-        <p>Wähle genau <span id="player-count">{{ player_count }}</span> Rollen aus.</p>
+        <p class="player-counter">Spieler: <span id="playerCount">{{ player_count }}</span> / Rollen: <span id="rolesCount">0</span></p>
+        <div id="playerCounter" data-player-count="{{ player_count }}" data-saved-roles="{{ saved_roles|tojson }}"></div>
 
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
-            <button id="special-role-button" style="display: none;"></button>
-            <button id="start-button" class="primary-button start-button disabled-button" disabled>Mischen</button>
-        </div>
-        <p id="roles-to-go" style="font-weight: bold;">Noch {{ player_count - saved_roles|dict_sum }} Rollen zu vergeben</p>
-        
-        <div id="roles-container">
+        <div class="roles-grid">
+            {% for role_name, role_description in all_roles.items() %}
+            <div class="role-card" data-role="{{ role_name }}">
+                <div class="role-info">
+                    <span class="role-name-text">{{ role_name }}</span>
+                </div>
+                <div class="role-count-controls">
+                    <button class="minus-btn" style="display: none;">-</button>
+                    <span class="role-count">0</span>
+                    <button class="plus-btn">+</button>
+                </div>
+                <button class="info-btn" onclick="showInfo('{{ role_name }}')">i</button>
             </div>
+            {% endfor %}
+        </div>
         
-        <hr>
-        <a href="{{ url_for('spiel_seite') }}" class="button-link secondary-button">Zurück zu den Namen</a>
+        <div id="dieb-roles-container" style="display: none;">
+            <label for="dieb-roles">Rollen für den Dieb (kommagetrennt):</label>
+            <input type="text" id="dieb-roles" name="dieb_roles" value="Dorfbewohner, Werwölfe, Hexe, Seherin, Jäger, Amor">
+        </div>
+
+        <div id="gaukler-roles-container" style="display: none;">
+            <label for="gaukler-roles">Rollen für den Gaukler (kommagetrennt):</label>
+            <input type="text" id="gaukler-roles" name="gaukler_roles" value="Dorfbewohner, Werwölfe, Hexe, Seherin">
+        </div>
+
+        <button id="start-game-btn" class="primary-button">Spiel starten</button>
     </div>
 
-    <div id="info-popup" class="popup">
-        <button class="popup-close-btn" onclick="hideInfo()">&times;</button>
+    <div id="info-popup" class="popup" style="display: none;">
+        <span class="close-btn" onclick="hideInfo()">&times;</span>
         <h2 id="popup-role-name" class="role-popup-title"></h2>
         <p id="popup-role-description" class="role-popup-description"></p>
     </div>
-
-    <div id="role-selection-popup" class="popup">
-        <button class="popup-close-btn" onclick="hidePopup('role-selection-popup')">&times;</button>
-        <h2 id="selection-popup-title"></h2>
-        <p id="selection-popup-description"></p>
-        <hr>
-        <button id="selection-popup-action-btn" class="primary-button"></button>
-        <button id="selection-popup-change-btn" class="secondary-button">Rollen verändern</button>
-    </div>
-    
-    <div id="special-role-popup" class="popup">
-        </div>
-
     <div id="overlay" class="overlay"></div>
+
+    <script src="{{ url_for('static', filename='rollen.js') }}"></script>
 </body>
 </html>

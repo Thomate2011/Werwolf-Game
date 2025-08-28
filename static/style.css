@@ -1,330 +1,374 @@
+:root {
+    --primary-color: #d32f2f;
+    --secondary-color: #616161;
+    --background-color: #f5f5f5;
+    --card-background-color: #ffffff;
+    --border-color: #e0e0e0;
+    --text-color: #212121;
+    --dead-color: #9e9e9e;
+    --status-alive-color: #4caf50;
+    --status-dead-color: #f44336;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7f9;
-    color: #333;
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
     margin: 0;
-    padding: 0;
-}
-
-.container {
-    text-align: center;
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 30px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    color: #2e7d32;
-    font-size: 2.5em;
-    margin-bottom: 10px;
-}
-
-h2 {
-    color: #444;
-}
-
-p {
-    font-size: 1.1em;
-    line-height: 1.6;
-}
-
-hr {
-    border: 0;
-    height: 1px;
-    background-color: #ccc;
-    margin: 30px auto;
-    width: 60%;
-}
-
-button, .button-link {
-    font-size: 1.2em;
-    padding: 12px 25px;
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
-}
-
-button:hover, .button-link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
-}
-
-.primary-button {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.secondary-button {
-    background-color: #008CBA;
-    color: white;
-}
-
-.danger-button {
-    background-color: #f44336;
-    color: white;
-}
-
-textarea {
-    width: 80%;
-    height: 200px;
-    padding: 15px;
-    font-size: 1em;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    margin-top: 10px;
-    resize: vertical;
-}
-
-.role-list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fafafa;
-}
-
-.role-info-btn {
-    font-size: 1em;
-    margin-left: 10px;
-    padding: 0;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    border: 1px solid #008CBA;
-    background-color: #008CBA;
-    color: white;
-    cursor: pointer;
+    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+    text-align: center;
 }
 
-.role-counter-btn {
-    font-size: 1.5em;
-    padding: 5px 12px;
-    cursor: pointer;
-    background-color: #eee;
-    color: #555;
-    border: none;
+.container {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--card-background-color);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.button-link,
+.primary-button,
+.secondary-button {
+    display: inline-block;
+    padding: 12px 25px;
+    margin: 10px;
     border-radius: 5px;
-    transition: background-color 0.2s;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    border: none;
 }
 
-.role-counter-btn:hover {
-    background-color: #ddd;
+.primary-button {
+    background-color: var(--primary-color);
+    color: white;
 }
 
-.player-card {
-    min-height: 250px;
+.primary-button:hover {
+    background-color: #b71c1c;
+    transform: translateY(-2px);
+}
+
+.secondary-button {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.secondary-button:hover {
+    background-color: #424242;
+    transform: translateY(-2px);
+}
+
+.button-link {
+    text-align: center;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    min-height: 150px;
+    resize: vertical;
+}
+
+.info-box {
+    background-color: #fff3e0;
+    border: 1px solid #ffb74d;
+    color: #e65100;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* Rollen-Seite */
+.player-counter {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.role-card {
+    background-color: var(--card-background-color);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    text-align: center;
+}
+
+.role-name-text {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.role-count-controls {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.minus-btn,
+.plus-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.role-count {
+    margin: 0 10px;
+    font-size: 18px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Karten-Seite */
+.card-container {
+    perspective: 1000px;
+    margin-bottom: 20px;
+}
+
+.card-content {
+    width: 300px;
+    height: 400px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    margin: 0 auto;
+}
+
+.card-content.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 25px;
-    border: 2px dashed #008CBA;
-    border-radius: 12px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
-.card-title {
-    color: #444;
+.card-back {
+    background: linear-gradient(45deg, #d32f2f, #b71c1c);
+    color: white;
 }
 
-.card-role {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #f44336;
-    margin: 10px 0;
-}
-
-.card-description {
-    font-size: 1em;
-    color: #555;
-    margin-top: 10px;
-}
-
-.player-list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.player-list-item:hover {
-    background-color: #f9f9f9;
-}
-
-.player-list-item.dead {
-    text-decoration: line-through;
-    color: #888;
-}
-
-.popup {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 85%;
-    max-width: 450px;
-    background: #ffffff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-    z-index: 1001;
+.card-front {
+    background-color: var(--card-background-color);
+    transform: rotateY(180deg);
     text-align: center;
 }
 
-.popup-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 2em;
-    cursor: pointer;
-    color: #aaa;
-}
-
-.role-popup-title {
-    font-size: 2em;
+.card-role {
+    font-size: 24px;
     font-weight: bold;
-    color: #444;
-    margin: 0;
+    margin-top: 10px;
+    color: var(--primary-color);
 }
 
-.role-popup-description {
-    font-size: 1em;
-    line-height: 1.6;
-    color: #555;
-    margin-top: 15px;
+.card-description {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--secondary-color);
 }
 
+/* Neustart-Seite */
+.gamemaster-view {
+    text-align: left;
+}
+
+.player-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.player-item {
+    background-color: var(--card-background-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-item.dead .player-info {
+    color: var(--dead-color);
+    text-decoration: line-through;
+}
+
+.player-info {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.player-name {
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.player-role {
+    color: var(--secondary-color);
+}
+
+.status-toggle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.status-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+.status-indicator.alive {
+    background-color: var(--status-alive-color);
+}
+
+.status-indicator.dead {
+    background-color: var(--status-dead-color);
+}
+
+/* Popups und Overlay */
 .overlay {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 1);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    display: none;
 }
 
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--card-background-color);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--secondary-color);
+}
+
+.role-popup-title {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+.role-popup-description {
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+/* Erzähler-Seite */
 .erzaehler-page .container {
     max-width: 800px;
-}
-
-.night-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.night-buttons .button-link {
-    background-color: #ccc;
-    color: #555;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.night-buttons .button-link.active {
-    background-color: #2e7d32;
-    color: white;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
-    transform: translateY(0);
-}
-
-#narrator-text-container {
     text-align: left;
-    margin-top: 30px;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    border: 1px solid #ddd;
 }
 
-#narrator-text-container p {
-    margin-bottom: 20px;
-    line-height: 1.8;
+.text-block {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
 }
 
-#narrator-text-container strong {
-    color: #008CBA;
-    font-size: 1.2em;
-}
-
-.special-role-popup {
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-}
-
-.special-role-card {
-    border: 2px solid #333;
-    padding: 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 15px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    text-align: center;
-}
-
-.special-role-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.special-role-card-name {
-    font-size: 3em;
+.narrator-role {
     font-weight: bold;
-    margin-bottom: 10px;
+    color: var(--primary-color);
+    font-size: 1.1em;
+    margin-bottom: 5px;
 }
 
-.special-role-card-description {
-    font-size: 0.5em;
+.narrator-text-content {
+    line-height: 1.6;
 }
 
-.selection-mode {
-    cursor: pointer;
-    border: 2px solid #4CAF50;
-    border-radius: 8px;
-    padding: 10px;
-    transition: background-color 0.2s;
+.narrator-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
 }
 
-.selection-mode:hover {
-    background-color: #e8f5e9;
+/* Allgemeine Utility-Klassen */
+.hidden {
+    display: none;
 }
 
-.disabled-button {
-    background-color: #bbb;
-    cursor: not-allowed;
-}
-
-.special-action-emoji {
-    cursor: pointer;
-}
-
-.player-action-selection.selected {
-    border: 2px solid #4CAF50;
-    box-shadow: 0 0 5px #4CAF50;
-    background-color: #e8f5e9;
-}
-
-.love-heart {
-    margin-left: 5px;
-    color: #f44336;
+.error-message {
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-top: 10px;
 }

@@ -3,50 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwolf: Spielübersicht</title>
+    <title>Spielleiter-Ansicht - Werwolf-Spiel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="neustart-page">
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">Spielübersicht</h1>
-            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
-        </div>
-        
-        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
-        
-        <div id="player-list">
-            </div>
-        
-        <button onclick="restartGame()" class="danger-button">Neustart</button>
-        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
-
-        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
-        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
+    <div class="container gamemaster-view">
+        <h1>Spielleiter-Ansicht</h1>
+        <p>Hier siehst du die Rollen aller Spieler. Tippe auf den Kreis neben einem Spieler, um seinen Status (lebendig/tot) zu ändern.</p>
+        <ul id="player-list" class="player-list">
+            {% for player in players %}
+            <li class="player-item {% if player.status == 'dead' %}dead{% endif %}">
+                <div class="player-info">
+                    <span class="player-name">{{ player.name }}</span>
+                    <span class="player-role">{{ player.role }}</span>
+                </div>
+                <div class="status-toggle" data-player-name="{{ player.name }}" data-status="{{ player.status }}">
+                    <div class="status-indicator {{ player.status }}"></div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <button id="restart-btn" class="secondary-button">Spiel neu starten</button>
     </div>
-    
-    <div id="special-action-popup" class="popup">
-        <button class="popup-close-btn" onclick="hideSpecialActionPopup()">&times;</button>
-        <h2 id="special-action-title"></h2>
-        <p id="special-action-description"></p>
-        <button id="special-action-proceed-btn" class="primary-button" style="display: none;">Zur Handlung</button>
-    </div>
-
-    <div id="special-role-select-popup" class="popup">
-        <button class="popup-close-btn" onclick="hidePopup('special-role-select-popup')">&times;</button>
-        <h2 id="special-role-select-title"></h2>
-        <p>Wähle eine der folgenden Rollen.</p>
-        <div id="special-role-list-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-            </div>
-    </div>
-    
-    <div id="info-popup" class="popup">
-        <button class="popup-close-btn" onclick="hideInfo()">&times;</button>
-        <h2 id="popup-role-name" class="role-popup-title"></h2>
-        <p id="popup-role-description" class="role-popup-description"></p>
-    </div>
-
-    <div id="overlay" class="overlay"></div>
+    <script src="{{ url_for('static', filename='neustart.js') }}"></script>
 </body>
 </html>

@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwolf: Erzähler</title>
+    <title>Erzähler-Ansicht - Werwolf-Spiel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 <body class="erzaehler-page">
     <div class="container">
-        <h1>Erzähler</h1>
-        <p>Wähle die Runde aus, die du leiten möchtest.</p>
-        <hr>
-        <div class="night-buttons">
-            <button id="round-1-btn" class="button-link secondary-button">Nacht 1</button>
-            <button id="round-2-btn" class="button-link secondary-button">Nacht 2</button>
+        <h1>Erzähler-Ansicht</h1>
+        <p>Wählen Sie eine Runde, um den Erzählertext für die Nachtphase zu sehen.</p>
+        <div class="narrator-buttons">
+            <button id="round-1-btn" class="primary-button">Runde 1</button>
+            <button id="round-2-btn" class="primary-button">Runde 2</button>
         </div>
-        <div id="narrator-text-container">
+        <div id="narrator-text" class="narrator-text-container">
             </div>
-        <hr>
-        <a href="{{ url_for('neustart_seite') }}" class="button-link primary-button">Zurück zur Spielübersicht</a>
     </div>
+    <script src="{{ url_for('static', filename='erzaehler.js') }}"></script>
 </body>
 </html>
