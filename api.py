@@ -4,7 +4,10 @@ import json
 import os
 
 # Wichtige Anpassung der Flask-App, um die Ordner korrekt zu finden
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+# os.path.dirname(__file__) liefert den Pfad zum aktuellen Skript ('Backend')
+app = Flask(__name__,
+            template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'),
+            static_folder=os.path.join(os.path.dirname(__file__), '..', 'static'))
 app.secret_key = 'your_super_secret_key'
 
 # --- Konstanten für alle verfügbaren Rollen und ihre detaillierten Erklärungen ---
