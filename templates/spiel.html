@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Werwolf-Spiel</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Werwölfe von Düsterwald</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <div class="card-container">
-        <h1>Spielerliste</h1>
-        <div id="players-list">
-            <p>Spieler wurden erfolgreich hinzugefügt.</p>
-        </div>
-        <button id="start-btn" class="primary-button">Rollen zuweisen</button>
-    </div>
-    <script src="{{ url_for('static', filename='spiel.js') }}"></script>
-</body>
+<body class="spiel-page">
+    <div class="container">
+        <h1>Spieler-Anmeldung</h1>
+        <p>Gib die Namen der Spieler ein, jeder in einer neuen Zeile. Bitte verwende keine doppelten Namen und seid mindestens 4 Spieler.</p>
+        <form id="namenForm" action="{{ url_for('spiel_seite') }}" method="POST">
+            <textarea id="namenInput" name="namen" placeholder="Spieler 1
+Spieler 2
+Spieler 3
+..." required>{{ saved_players }}</textarea>
+            <p id="nameError" style="color: red; display: none;">Doppelte Namen sind nicht erlaubt.</p>
+            <p id="playerCountError" style="color: red; display: none;">Es müssen mindestens 4 Spieler angemeldet sein.</p>
+            <button type="submit" class="primary-button">Weiter zur Rollenauswahl</button>
+        </form>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>    
 </html>

@@ -1,76 +1,65 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielübersicht</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spielübersicht</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <div class="card-container">
-        <h1>Spielübersicht</h1>
-        <div id="players-list-neustart">
-            </div>
-        
-        <div class="special-roles-view">
-            <h3>Spezialrollen Nacht</h3>
-            <button id="dieb-btn" class="secondary-button" style="display:none;">Dieb</button>
-            <button id="gaukler-btn" class="secondary-button" style="display:none;">Gaukler</button>
-            <button id="amor-btn" class="secondary-button" style="display:none;">Amor</button>
-            <button id="urwolf-btn" class="secondary-button" style="display:none;">Urwolf</button>
-            <button id="magd-btn" class="secondary-button" style="display:none;">Ergebene Magd</button>
-        </div>
+<body class="neustart-page">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Spielübersicht</h1>
+            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
+        </div>
+        
+        <p id="special-action-text" style="color: green; font-weight: bold;"></p>
+        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
+        
+        <div id="player-list">
+            {% for player in players %}
+                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}" data-player-name="{{ player.name }}">
+                    <span onclick="toggleStatus('{{ player.name }}')">
+                        <b>{{ player.role }}</b> | {{ player.name }}
+                    </span>
+                    <div>
+                        {% if player.role == 'Dieb' and special_roles.dieb %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('dieb')">💰</button>
+                        {% endif %}
+                        {% if player.role == 'Der Gaukler' and special_roles.gaukler %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('gaukler')">🎭</button>
+                        {% endif %}
+                        {% if player.role == 'Amor' and special_roles.amor %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('amor')">❤️</button>
+                        {% endif %}
+                        {% if player.role == 'Der Urwolf' and special_roles.urwolf %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('urwolf')">🐺</button>
+                        {% endif %}
+                        {% if player.role == 'Die ergebene Magd' and special_roles.magd %}
+                            <button class="emoji-btn" onclick="activateSpecialAction('magd')">👩🏼</button>
+                        {% endif %}
+                        <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button onclick="restartGame()" class="danger-button">Neustart</button>
+        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
 
-        <button id="restart-game-btn" class="primary-button">Spiel neustarten</button>
-    </div>
+        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
+        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
+    </div>
+    
+    <div id="info-popup" class="popup">
+        <h2 id="popup-role-name" class="role-popup-title"></h2>
+        <p id="popup-role-description" class="role-popup-description"></p>
+        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
+    </div>
 
-    <div id="dieb-modal" class="popup">
-        <div class="popup-content">
-            <h2>Rolle des Diebs</h2>
-            <p>Wähle eine neue Rolle aus den übriggebliebenen Rollen:</p>
-            <div id="dieb-roles-list"></div>
-            <button id="dieb-confirm-btn" class="primary-button">Rolle wählen</button>
-        </div>
-    </div>
+    <div id="special-role-popup" class="popup"></div>
+    <div id="overlay" class="overlay"></div>
 
-    <div id="gaukler-modal" class="popup">
-        <div class="popup-content">
-            <h2>Rolle des Gauklers</h2>
-            <p>Wähle eine Rolle für diese Nacht:</p>
-            <div id="gaukler-roles-list"></div>
-            <button id="gaukler-confirm-btn" class="primary-button">Rolle wählen</button>
-        </div>
-    </div>
-    
-    <div id="amor-modal" class="popup">
-        <div class="popup-content">
-            <h2>Amors Wahl</h2>
-            <p>Wähle die beiden Verliebten aus:</p>
-            <div id="amor-player-list"></div>
-            <button id="amor-confirm-btn" class="primary-button">Verkuppeln</button>
-        </div>
-    </div>
-    
-    <div id="urwolf-modal" class="popup">
-        <div class="popup-content">
-            <h2>Ulwolfs Verwandlung</h2>
-            <p>Wähle eine Person aus, die in einen Werwolf verwandelt werden soll:</p>
-            <div id="urwolf-player-list"></div>
-            <button id="urwolf-confirm-btn" class="primary-button">Verwandeln</button>
-        </div>
-    </div>
-
-    <div id="magd-modal" class="popup">
-        <div class="popup-content">
-            <h2>Die Ergebene Magd</h2>
-            <p>Wähle eine Person, deren Rolle du übernehmen willst. Diese Person stirbt sofort.</p>
-            <div id="magd-player-list"></div>
-            <button id="magd-confirm-btn" class="primary-button">Rolle übernehmen</button>
-        </div>
-    </div>
-
-    <div id="overlay" class="overlay"></div>
-
-    <script src="{{ url_for('static', filename='neustart.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
