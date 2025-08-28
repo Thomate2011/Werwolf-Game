@@ -7,11 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <div class="card-container">
         <h1>Werwolf-Spiel</h1>
-        <p>Willkommen zum Werwolf-Spiel! Wählen Sie die Rolle, die Sie spielen möchten: als Spieler oder Spielleiter.</p>
-        <a href="{{ url_for('spiel_seite') }}" class="button-link primary-button">Spieler</a>
-        <a href="{{ url_for('erzaehler_seite') }}" class="button-link secondary-button">Spielleiter (Erzähler)</a>
+        <p>Geben Sie die Namen der Spieler ein (jeder Name in einer neuen Zeile):</p>
+        <form id="names-form" method="POST" action="{{ url_for('spiel_seite') }}">
+            <textarea id="names-input" name="namen" rows="10" placeholder="Spieler 1
+Spieler 2
+Spieler 3"></textarea>
+            <button type="submit" class="primary-button">Zum Spiel</button>
+        </form>
     </div>
     <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>

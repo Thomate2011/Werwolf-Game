@@ -3,28 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielleiter-Ansicht - Werwolf-Spiel</title>
+    <title>Spielübersicht</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="neustart-page">
-    <div class="container gamemaster-view">
-        <h1>Spielleiter-Ansicht</h1>
-        <p>Hier siehst du die Rollen aller Spieler. Tippe auf den Kreis neben einem Spieler, um seinen Status (lebendig/tot) zu ändern.</p>
-        <ul id="player-list" class="player-list">
-            {% for player in players %}
-            <li class="player-item {% if player.status == 'dead' %}dead{% endif %}">
-                <div class="player-info">
-                    <span class="player-name">{{ player.name }}</span>
-                    <span class="player-role">{{ player.role }}</span>
-                </div>
-                <div class="status-toggle" data-player-name="{{ player.name }}" data-status="{{ player.status }}">
-                    <div class="status-indicator {{ player.status }}"></div>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
-        <button id="restart-btn" class="secondary-button">Spiel neu starten</button>
+<body>
+    <div class="card-container">
+        <h1>Spielübersicht</h1>
+        <div id="players-list-neustart">
+            </div>
+        
+        <div class="special-roles-view">
+            <h3>Spezialrollen Nacht</h3>
+            <button id="dieb-btn" class="secondary-button" style="display:none;">Dieb</button>
+            <button id="gaukler-btn" class="secondary-button" style="display:none;">Gaukler</button>
+            <button id="amor-btn" class="secondary-button" style="display:none;">Amor</button>
+            <button id="urwolf-btn" class="secondary-button" style="display:none;">Urwolf</button>
+            <button id="magd-btn" class="secondary-button" style="display:none;">Ergebene Magd</button>
+        </div>
+
+        <button id="restart-game-btn" class="primary-button">Spiel neustarten</button>
     </div>
+
+    <div id="dieb-modal" class="popup">
+        <div class="popup-content">
+            <h2>Rolle des Diebs</h2>
+            <p>Wähle eine neue Rolle aus den übriggebliebenen Rollen:</p>
+            <div id="dieb-roles-list"></div>
+            <button id="dieb-confirm-btn" class="primary-button">Rolle wählen</button>
+        </div>
+    </div>
+
+    <div id="gaukler-modal" class="popup">
+        <div class="popup-content">
+            <h2>Rolle des Gauklers</h2>
+            <p>Wähle eine Rolle für diese Nacht:</p>
+            <div id="gaukler-roles-list"></div>
+            <button id="gaukler-confirm-btn" class="primary-button">Rolle wählen</button>
+        </div>
+    </div>
+    
+    <div id="amor-modal" class="popup">
+        <div class="popup-content">
+            <h2>Amors Wahl</h2>
+            <p>Wähle die beiden Verliebten aus:</p>
+            <div id="amor-player-list"></div>
+            <button id="amor-confirm-btn" class="primary-button">Verkuppeln</button>
+        </div>
+    </div>
+    
+    <div id="urwolf-modal" class="popup">
+        <div class="popup-content">
+            <h2>Ulwolfs Verwandlung</h2>
+            <p>Wähle eine Person aus, die in einen Werwolf verwandelt werden soll:</p>
+            <div id="urwolf-player-list"></div>
+            <button id="urwolf-confirm-btn" class="primary-button">Verwandeln</button>
+        </div>
+    </div>
+
+    <div id="magd-modal" class="popup">
+        <div class="popup-content">
+            <h2>Die Ergebene Magd</h2>
+            <p>Wähle eine Person, deren Rolle du übernehmen willst. Diese Person stirbt sofort.</p>
+            <div id="magd-player-list"></div>
+            <button id="magd-confirm-btn" class="primary-button">Rolle übernehmen</button>
+        </div>
+    </div>
+
+    <div id="overlay" class="overlay"></div>
+
     <script src="{{ url_for('static', filename='neustart.js') }}"></script>
 </body>
 </html>

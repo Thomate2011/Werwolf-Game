@@ -3,8 +3,6 @@ import random
 import json
 import os
 
-# Wichtige Anpassung der Flask-App, um die Ordner korrekt zu finden
-# os.path.dirname(__file__) liefert den Pfad zum aktuellen Skript ('Backend')
 app = Flask(__name__,
             template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'),
             static_folder=os.path.join(os.path.dirname(__file__), '..', 'static'))

@@ -1,4 +1,2 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Es gibt keine speziellen Funktionen für die Startseite.
-    // Der Code kann bei Bedarf erweitert werden.
-});
+// Diese Datei ist absichtlich leer, da die Startseite keinen JavaScript-Code benötigt.
+// Die Navigation wird direkt über einen HTML-Link gesteuert.

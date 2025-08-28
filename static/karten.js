@@ -1,77 +1,96 @@
-document.addEventListener('DOMContentLoaded', () => {
-    let currentPlayerIndex = 0;
-    let isLastCard = false;
-    
-    const cardDisplay = document.getElementById('card-display');
-    const playerNameEl = document.getElementById('player-name');
-    const roleNameEl = document.getElementById('role-name');
-    const roleDescriptionEl = document.getElementById('role-description');
-    const startBtn = document.getElementById('start-btn');
-    const revealBtn = document.getElementById('reveal-btn');
+document.addEventListener('DOMContentLoaded', function() {
+    const showRoleBtn = document.getElementById('show-role-btn');
     const showDescriptionBtn = document.getElementById('show-description-btn');
     const nextPlayerBtn = document.getElementById('next-player-btn');
     const overviewBtn = document.getElementById('overview-btn');
+    const coverCard = document.getElementById('cover-card');
+    const roleInfo = document.getElementById('role-info');
+    const playerNameDisplay = document.getElementById('player-name');
+    const roleNameDisplay = document.getElementById('role-name');
+    const roleDescriptionDisplay = document.getElementById('role-description');
     const finalPopup = document.getElementById('final-popup');
+    const overlay = document.getElementById('overlay');
 
-    const showCardFront = (player) => {
-        playerNameEl.textContent = player;
-        roleNameEl.textContent = "???";
-        roleDescriptionEl.textContent = "Drehe die Karte um, um deine Rolle zu sehen.";
-        revealBtn.style.display = 'block';
+    let isDescriptionShown = false;
+
+    async function fetchNextCard() {
+        try {
+            const response = await fetch('/api/game/next_card');
+            const data = await response.json();
+
+            if (data.message) {
+                // Alle Karten wurden gezeigt
+                showFinalPopup();
+            } else {
+                playerNameDisplay.textContent = data.player_name;
+                resetCardView();
+            }
+        } catch (error) {
+            console.error('Fehler beim Abrufen der nächsten Karte:', error);
+        }
+    }
+
+    async function revealRole() {
+        try {
+            const response = await fetch('/api/game/reveal_and_next', { method: 'POST' });
+            const data = await response.json();
+
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            roleNameDisplay.textContent = data.role_name;
+            roleDescriptionDisplay.textContent = data.role_description;
+
+            // Karte umdrehen
+            coverCard.style.transform = 'rotateY(180deg)';
+            roleInfo.style.transform = 'rotateY(0deg)';
+
+            // Button-Sichtbarkeit anpassen
+            showRoleBtn.style.display = 'none';
+            showDescriptionBtn.style.display = 'inline-block';
+            nextPlayerBtn.style.display = data.is_last_card ? 'none' : 'inline-block';
+            overviewBtn.style.display = data.is_last_card ? 'inline-block' : 'none';
+
+        } catch (error) {
+            console.error('Fehler beim Aufdecken der Rolle:', error);
+        }
+    }
+
+    function resetCardView() {
+        coverCard.style.transform = 'rotateY(0deg)';
+        roleInfo.style.transform = 'rotateY(-180deg)';
+        showRoleBtn.style.display = 'inline-block';
         showDescriptionBtn.style.display = 'none';
         nextPlayerBtn.style.display = 'none';
         overviewBtn.style.display = 'none';
-    };
+        isDescriptionShown = false;
+    }
+    
+    function showFinalPopup() {
+        finalPopup.style.display = 'block';
+        overlay.style.display = 'block';
+    }
 
-    const showCardBack = (role, description) => {
-        roleNameEl.textContent = role;
-        roleDescriptionEl.textContent = description;
-        revealBtn.style.display = 'none';
-        showDescriptionBtn.style.display = 'block';
-        nextPlayerBtn.style.display = 'block';
-        if (isLastCard) {
-            nextPlayerBtn.style.display = 'none';
-            overviewBtn.style.display = 'block';
-        }
-    };
+    showRoleBtn.addEventListener('click', revealRole);
 
-    const fetchNextPlayer = async () => {
-        const response = await fetch('/api/game/next_card');
-        const data = await response.json();
-        if (data.message) {
-            showPopup('final-popup', false);
+    showDescriptionBtn.addEventListener('click', function() {
+        isDescriptionShown = !isDescriptionShown;
+        if (isDescriptionShown) {
+            roleInfo.style.transform = 'rotateY(0deg)';
+            coverCard.style.transform = 'rotateY(180deg)';
         } else {
-            showCardFront(data.player_name);
-            currentPlayerIndex = data.current_player_index;
+            roleInfo.style.transform = 'rotateY(-180deg)';
+            coverCard.style.transform = 'rotateY(0deg)';
         }
-    };
-
-    const fetchAndReveal = async () => {
-        const response = await fetch('/api/game/reveal_and_next', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await response.json();
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
-        showCardBack(data.role_name, data.role_description);
-        isLastCard = data.is_last_card;
-    };
-
-    startBtn.addEventListener('click', () => {
-        startBtn.style.display = 'none';
-        cardDisplay.style.display = 'block';
-        fetchNextPlayer();
     });
 
-    revealBtn.addEventListener('click', fetchAndReveal);
-    nextPlayerBtn.addEventListener('click', fetchNextPlayer);
-    showDescriptionBtn.addEventListener('click', () => {
-        roleDescriptionEl.style.display = 'block';
-    });
-    overviewBtn.addEventListener('click', () => {
+    nextPlayerBtn.addEventListener('click', fetchNextCard);
+    overviewBtn.addEventListener('click', function() {
         window.location.href = '/neustart';
     });
+
+    // Startet den Prozess, indem die erste Karte geladen wird
+    fetchNextCard();
 });

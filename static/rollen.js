@@ -1,129 +1,159 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const roleCounts = {};
-    const playerCounter = document.getElementById('playerCounter');
-    const playerCount = parseInt(playerCounter.dataset.playerCount);
-    const playerCounterSpan = document.getElementById('playerCount');
-    const rolesCounterSpan = document.getElementById('rolesCount');
-    
-    let savedRolesData = JSON.parse(playerCounter.dataset.savedRoles);
-    
-    // Populate roleCounts from saved data
-    for (const role in savedRolesData) {
-        roleCounts[role] = savedRolesData[role];
+document.addEventListener('DOMContentLoaded', function() {
+    const rolesListContainer = document.getElementById('roles-list-container');
+    const rolesCountDisplay = document.getElementById('roles-count-display');
+    const startBtn = document.getElementById('start-game-btn');
+    const playerCount = parseInt(document.getElementById('player-count-display').textContent);
+
+    let selectedRoles = {};
+    let specialRoles = {};
+
+    function updateRolesCount() {
+        const count = Object.values(selectedRoles).reduce((sum, current) => sum + current, 0);
+        rolesCountDisplay.textContent = count;
+        startBtn.disabled = count !== playerCount;
     }
 
-    const updateCounters = () => {
-        const rolesCount = Object.values(roleCounts).reduce((sum, count) => sum + count, 0);
-        rolesCounterSpan.textContent = rolesCount;
-        if (rolesCount === playerCount) {
-            rolesCounterSpan.style.color = 'green';
-        } else {
-            rolesCounterSpan.style.color = 'red';
+    // Funktion zum Abrufen der Rollen und Spieler von der API
+    async function fetchRolesAndPlayers() {
+        try {
+            const response = await fetch('/api/get_roles_and_players');
+            const data = await response.json();
+            
+            // Spieleranzahl und Rollen aktualisieren
+            document.getElementById('player-count-display').textContent = data.player_count;
+            
+            // Gespeicherte Rollen laden
+            selectedRoles = data.saved_roles;
+            updateRolesCount();
+            
+            // Rollen-UI generieren
+            generateRolesList(data.all_roles);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Rollen:', error);
         }
-    };
+    }
 
-    document.querySelectorAll('.role-card').forEach(card => {
-        const roleName = card.dataset.role;
-        const countDisplay = card.querySelector('.role-count');
-        const minusBtn = card.querySelector('.minus-btn');
-        const plusBtn = card.querySelector('.plus-btn');
-
-        let count = roleCounts[roleName] || 0;
-        countDisplay.textContent = count;
-
-        if (count > 0) {
-            minusBtn.style.display = 'inline-block';
-        }
-
-        minusBtn.addEventListener('click', () => {
-            if (count > 0) {
-                count--;
-                roleCounts[roleName] = count;
-                countDisplay.textContent = count;
-                if (count === 0) {
-                    minusBtn.style.display = 'none';
+    function generateRolesList(allRoles) {
+        rolesListContainer.innerHTML = '';
+        const sortedRoles = Object.keys(allRoles).sort();
+        
+        sortedRoles.forEach(role => {
+            const roleContainer = document.createElement('div');
+            roleContainer.className = 'role-item';
+            
+            const roleName = document.createElement('span');
+            roleName.className = 'role-name';
+            roleName.textContent = role;
+            
+            const roleCounter = document.createElement('div');
+            roleCounter.className = 'role-counter-group';
+            
+            const minusBtn = document.createElement('button');
+            minusBtn.textContent = '-';
+            minusBtn.className = 'role-btn';
+            minusBtn.addEventListener('click', () => {
+                if (selectedRoles[role] > 0) {
+                    selectedRoles[role]--;
+                    if (selectedRoles[role] === 0) {
+                        delete selectedRoles[role];
+                    }
+                    updateRolesCount();
+                    saveRolesToSession();
+                    updateCounterDisplay(role, selectedRoles[role] || 0);
                 }
-                updateCounters();
+            });
+            
+            const countDisplay = document.createElement('span');
+            countDisplay.className = 'role-count';
+            countDisplay.id = `count-${role}`;
+            countDisplay.textContent = selectedRoles[role] || 0;
+            
+            const plusBtn = document.createElement('button');
+            plusBtn.textContent = '+';
+            plusBtn.className = 'role-btn';
+            plusBtn.addEventListener('click', () => {
+                if (Object.values(selectedRoles).reduce((sum, current) => sum + current, 0) < playerCount) {
+                    selectedRoles[role] = (selectedRoles[role] || 0) + 1;
+                    updateRolesCount();
+                    saveRolesToSession();
+                    updateCounterDisplay(role, selectedRoles[role]);
+                }
+            });
+            
+            const infoBtn = document.createElement('button');
+            infoBtn.textContent = 'i';
+            infoBtn.className = 'role-info-btn';
+            infoBtn.title = allRoles[role];
+
+            roleCounter.appendChild(minusBtn);
+            roleCounter.appendChild(countDisplay);
+            roleCounter.appendChild(plusBtn);
+            
+            roleContainer.appendChild(roleName);
+            roleContainer.appendChild(roleCounter);
+            roleContainer.appendChild(infoBtn);
+            
+            rolesListContainer.appendChild(roleContainer);
+        });
+    }
+
+    function updateCounterDisplay(role, count) {
+        const display = document.getElementById(`count-${role}`);
+        if (display) {
+            display.textContent = count;
+        }
+    }
+
+    // Funktion zum Speichern der Rollen in der Session
+    async function saveRolesToSession() {
+        try {
+            await fetch('/api/game/save_roles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role_counts: selectedRoles })
+            });
+        } catch (error) {
+            console.error('Fehler beim Speichern der Rollen:', error);
+        }
+    }
+
+    // Event-Listener für den "Spiel starten"-Button
+    startBtn.addEventListener('click', async function() {
+        try {
+            // Spezielle Rollen für Dieb und Gaukler bestimmen, falls vorhanden
+            if (selectedRoles['Dieb']) {
+                const availableRoles = Object.keys(ALL_ROLES).filter(r => r !== 'Dieb');
+                specialRoles['dieb_roles'] = availableRoles.slice(0, 2);
             }
-        });
-
-        plusBtn.addEventListener('click', () => {
-            count++;
-            roleCounts[roleName] = count;
-            countDisplay.textContent = count;
-            minusBtn.style.display = 'inline-block';
-            updateCounters();
-        });
-    });
-
-    updateCounters();
-
-    document.getElementById('start-game-btn').addEventListener('click', async () => {
-        const rolesCount = Object.values(roleCounts).reduce((sum, count) => sum + count, 0);
-        if (rolesCount !== playerCount) {
-            alert(`Die Anzahl der Rollen (${rolesCount}) muss genau der Anzahl der Spieler (${playerCount}) entsprechen.`);
-            return;
-        }
-
-        // Save role counts to session
-        await fetch('/api/game/save_roles', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role_counts: roleCounts })
-        });
-
-        // Gather and save special roles for Dieb and Gaukler
-        const specialRoles = {};
-        if (roleCounts['Dieb'] > 0) {
-            const diebRolesInput = document.getElementById('dieb-roles');
-            const diebRoles = diebRolesInput.value.split(',').map(role => role.trim()).filter(role => role.length > 0);
-            specialRoles['dieb_roles'] = diebRoles;
-        }
-        if (roleCounts['Der Gaukler'] > 0) {
-            const gauklerRolesInput = document.getElementById('gaukler-roles');
-            const gauklerRoles = gauklerRolesInput.value.split(',').map(role => role.trim()).filter(role => role.length > 0);
-            specialRoles['gaukler_roles'] = gauklerRoles;
-        }
-        if (Object.keys(specialRoles).length > 0) {
+            if (selectedRoles['Der Gaukler']) {
+                const availableRoles = Object.keys(ALL_ROLES).filter(r => r !== 'Der Gaukler');
+                specialRoles['gaukler_roles'] = availableRoles.slice(0, 3);
+            }
+            
             await fetch('/api/game/save_special_roles', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(specialRoles)
             });
-        }
 
-        // Start the game on the backend
-        const response = await fetch('/api/game/roles', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                role_counts: roleCounts,
-                special_roles: specialRoles
-            })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            window.location.href = '/karten';
-        } else {
-            alert("Fehler beim Starten des Spiels: " + data.error);
+            const response = await fetch('/api/game/roles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role_counts: selectedRoles, special_roles: specialRoles })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                window.location.href = '/karten';
+            } else {
+                alert('Fehler: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Fehler beim Starten des Spiels:', error);
+            alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
         }
     });
 
-    // Hide/Show special roles input fields
-    const diebCard = document.querySelector('.role-card[data-role="Dieb"]');
-    const gauklerCard = document.querySelector('.role-card[data-role="Der Gaukler"]');
-
-    const toggleSpecialRoleInputs = () => {
-        const diebInput = document.getElementById('dieb-roles-container');
-        const gauklerInput = document.getElementById('gaukler-roles-container');
-        diebInput.style.display = roleCounts['Dieb'] > 0 ? 'block' : 'none';
-        gauklerInput.style.display = roleCounts['Der Gaukler'] > 0 ? 'block' : 'none';
-    };
-
-    diebCard.querySelector('.plus-btn').addEventListener('click', toggleSpecialRoleInputs);
-    diebCard.querySelector('.minus-btn').addEventListener('click', toggleSpecialRoleInputs);
-    gauklerCard.querySelector('.plus-btn').addEventListener('click', toggleSpecialRoleInputs);
-    gauklerCard.querySelector('.minus-btn').addEventListener('click', toggleSpecialRoleInputs);
-    toggleSpecialRoleInputs();
+    fetchRolesAndPlayers();
 });

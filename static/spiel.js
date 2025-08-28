@@ -1,29 +1,13 @@
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('namenForm').addEventListener('submit', function(event) {
-        const namenInput = document.getElementById('namenInput');
-        const namenString = namenInput.value;
-        const namenListe = namenString.split('\n').map(name => name.trim()).filter(name => name.length > 0);
-        
-        const seenNames = new Set();
-        let hasDuplicates = false;
-        let hasTooFewPlayers = false;
+document.addEventListener('DOMContentLoaded', function() {
+    const playersList = document.getElementById('players-list');
+    const startBtn = document.getElementById('start-btn');
+    
+    // Annahme: Die Namen werden von der vorherigen Seite über die Session gespeichert
+    // und hier über das Template geladen oder direkt von einer API abgerufen.
+    // Für dieses Beispiel gehen wir davon aus, dass die Namen bereits vorhanden sind.
 
-        for (const name of namenListe) {
-            if (seenNames.has(name.toLowerCase())) {
-                hasDuplicates = true;
-                break;
-            }
-            seenNames.add(name.toLowerCase());
-        }
-
-        if (namenListe.length < 4) {
-            hasTooFewPlayers = true;
-        }
-
-        if (hasDuplicates || hasTooFewPlayers) {
-            event.preventDefault();
-            document.getElementById('duplicateNameError').style.display = hasDuplicates ? 'block' : 'none';
-            document.getElementById('tooFewPlayersError').style.display = hasTooFewPlayers ? 'block' : 'none';
-        }
+    startBtn.addEventListener('click', function() {
+        // Leitet zur Rollenauswahl weiter
+        window.location.href = '/rollen';
     });
 });

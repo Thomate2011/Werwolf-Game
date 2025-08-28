@@ -3,51 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rollen auswählen - Werwolf-Spiel</title>
+    <title>Rollen zuweisen</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="rollen-page">
-    <div class="container">
-        <h1>Rollen auswählen</h1>
-        <p class="player-counter">Spieler: <span id="playerCount">{{ player_count }}</span> / Rollen: <span id="rolesCount">0</span></p>
-        <div id="playerCounter" data-player-count="{{ player_count }}" data-saved-roles="{{ saved_roles|tojson }}"></div>
-
-        <div class="roles-grid">
-            {% for role_name, role_description in all_roles.items() %}
-            <div class="role-card" data-role="{{ role_name }}">
-                <div class="role-info">
-                    <span class="role-name-text">{{ role_name }}</span>
-                </div>
-                <div class="role-count-controls">
-                    <button class="minus-btn" style="display: none;">-</button>
-                    <span class="role-count">0</span>
-                    <button class="plus-btn">+</button>
-                </div>
-                <button class="info-btn" onclick="showInfo('{{ role_name }}')">i</button>
+<body>
+    <div class="card-container">
+        <h1>Rollen zuweisen</h1>
+        <div class="player-counter">
+            <span id="player-count-display">{{ player_count }}</span> Spieler
+        </div>
+        <div class="role-counter">
+            Rollen: <span id="roles-count-display">0</span> / {{ player_count }}
+        </div>
+        <div id="roles-list-container">
             </div>
-            {% endfor %}
-        </div>
-        
-        <div id="dieb-roles-container" style="display: none;">
-            <label for="dieb-roles">Rollen für den Dieb (kommagetrennt):</label>
-            <input type="text" id="dieb-roles" name="dieb_roles" value="Dorfbewohner, Werwölfe, Hexe, Seherin, Jäger, Amor">
-        </div>
-
-        <div id="gaukler-roles-container" style="display: none;">
-            <label for="gaukler-roles">Rollen für den Gaukler (kommagetrennt):</label>
-            <input type="text" id="gaukler-roles" name="gaukler_roles" value="Dorfbewohner, Werwölfe, Hexe, Seherin">
-        </div>
-
-        <button id="start-game-btn" class="primary-button">Spiel starten</button>
+        <button id="start-game-btn" class="primary-button" disabled>Spiel starten</button>
     </div>
-
-    <div id="info-popup" class="popup" style="display: none;">
-        <span class="close-btn" onclick="hideInfo()">&times;</span>
-        <h2 id="popup-role-name" class="role-popup-title"></h2>
-        <p id="popup-role-description" class="role-popup-description"></p>
-    </div>
-    <div id="overlay" class="overlay"></div>
-
     <script src="{{ url_for('static', filename='rollen.js') }}"></script>
 </body>
 </html>

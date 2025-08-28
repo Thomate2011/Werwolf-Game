@@ -3,30 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Namen eingeben - Werwolf-Spiel</title>
+    <title>Werwolf-Spiel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="spiel-page">
-    <div class="container">
-        <h1>Spieler-Namen eingeben</h1>
-        <form id="namenForm" method="post" action="{{ url_for('spiel_seite') }}">
-            <div class="input-group">
-                <label for="namenInput">Geben Sie die Namen aller Spieler ein (jeder Name in einer neuen Zeile):</label>
-                <textarea id="namenInput" name="namen" placeholder="Name 1&#10;Name 2&#10;Name 3" required>{{ saved_players }}</textarea>
-            </div>
-            <p id="duplicateNameError" class="error-message" style="display: none;">Bitte geben Sie keine doppelten Namen ein.</p>
-            <p id="tooFewPlayersError" class="error-message" style="display: none;">Für das Spiel werden mindestens 4 Spieler benötigt.</p>
-            <button type="submit" class="primary-button">Weiter</button>
-        </form>
+<body>
+    <div class="card-container">
+        <h1>Spielerliste</h1>
+        <div id="players-list">
+            <p>Spieler wurden erfolgreich hinzugefügt.</p>
+        </div>
+        <button id="start-btn" class="primary-button">Rollen zuweisen</button>
     </div>
-
-    <div id="info-popup" class="popup" style="display: none;">
-        <span class="close-btn" onclick="hideInfo()">&times;</span>
-        <h2 id="popup-role-name" class="role-popup-title"></h2>
-        <p id="popup-role-description" class="role-popup-description"></p>
-    </div>
-    <div id="overlay" class="overlay"></div>
-
     <script src="{{ url_for('static', filename='spiel.js') }}"></script>
 </body>
 </html>
