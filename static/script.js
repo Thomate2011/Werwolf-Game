@@ -2,11 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- GLOBALE VARIABLEN & HILFSFUNKTIONEN ----
     const API_URL = '/api';
 
-    const getPlayerCount = () => {
-        const namenString = sessionStorage.getItem('saved_players') || '';
-        return namenString.split('\n').map(name => name.trim()).filter(name => name.length > 0).length;
-    };
-
     const fetchPlayers = async () => {
         try {
             const response = await fetch(`${API_URL}/gamemaster/view`);
@@ -71,12 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const rolesContainer = document.getElementById('roles-container');
         const playerCountSpan = document.getElementById('player-count');
         const rolesToGoSpan = document.getElementById('roles-to-go');
-        const mixButton = document.querySelector('.start-button');
-        const player_count = getPlayerCount();
+        const mixButtonTop = document.getElementById('mix-button');
+        const mixButtonBottom = document.getElementById('mix-button-bottom');
+        const player_count = parseInt(playerCountSpan.textContent);
         let role_counts = JSON.parse(sessionStorage.getItem('role_counts') || '{}');
         let total_roles = 0;
-
-        playerCountSpan.textContent = player_count;
 
         const renderRoles = async () => {
             const allRoles = await fetchAllRoles();
@@ -90,12 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const roleDiv = document.createElement('div');
                 roleDiv.className = 'role-list-item';
                 roleDiv.innerHTML = `
-                    <span>${role}</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span>${role}</span>
+                        <button class="role-info-btn" data-role="${role}">i</button>
+                    </div>
                     <div>
                         <button class="role-counter-btn minus-btn" data-role="${role}">-</button>
                         <span class="role-count">${count}</span>
                         <button class="role-counter-btn plus-btn" data-role="${role}">+</button>
-                        <button class="role-info-btn" data-role="${role}">i</button>
                     </div>
                 `;
                 rolesContainer.appendChild(roleDiv);
@@ -109,15 +105,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rolesLeft > 0) {
                 rolesToGoSpan.textContent = `Wähle noch ${rolesLeft} Rollen aus.`;
                 rolesToGoSpan.style.color = 'red';
-                mixButton.style.display = 'none';
+                mixButtonTop.style.display = 'none';
+                mixButtonBottom.style.display = 'none';
             } else if (rolesLeft < 0) {
                 rolesToGoSpan.textContent = `Du hast ${-rolesLeft} Rollen zu viel ausgewählt.`;
                 rolesToGoSpan.style.color = 'red';
-                mixButton.style.display = 'none';
+                mixButtonTop.style.display = 'none';
+                mixButtonBottom.style.display = 'none';
             } else {
                 rolesToGoSpan.textContent = `Alle ${player_count} Rollen ausgewählt.`;
                 rolesToGoSpan.style.color = 'green';
-                mixButton.style.display = 'block';
+                mixButtonTop.style.display = 'block';
+                mixButtonBottom.style.display = 'block';
             }
             sessionStorage.setItem('role_counts', JSON.stringify(role_counts));
         };
@@ -170,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const roleName = e.target.dataset.role;
             if (!roleName) return;
 
-            const roleCountElement = e.target.closest('div').querySelector('.role-count');
+            const roleCountElement = e.target.closest('.role-list-item').querySelector('.role-count');
             
             if (e.target.classList.contains('plus-btn')) {
                 if (total_roles < player_count) {
@@ -198,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateRolesToGo();
         });
 
-        mixButton.addEventListener('click', async () => {
+        const handleMixButton = async () => {
             if (checkSpecialRoles()) {
                 const extra_roles = {
                     Dieb: JSON.parse(sessionStorage.getItem('dieb_extra_roles') || '[]'),
@@ -218,7 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Fehler: ' + data.error);
                 }
             }
-        });
+        };
+
+        mixButtonTop.addEventListener('click', handleMixButton);
+        mixButtonBottom.addEventListener('click', handleMixButton);
 
         renderRoles();
     }

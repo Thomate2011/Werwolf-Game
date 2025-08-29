@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielübersicht</title>
+    <title>Spielleiter-Übersicht</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="neustart-page">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">Spielübersicht</h1>
-            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
-        </div>
-        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
+        <h1>Spielleiter-Übersicht</h1>
+        <hr>
+        <p>Klicke auf einen Spieler, um seinen Status zu ändern (lebend/tot).</p>
         <div id="player-list">
             </div>
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-            <button onclick="restartGame()" class="danger-button">Neustart</button>
-            <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
+        <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+            <a href="{{ url_for('erzaehler_seite') }}" class="button-link secondary-button">Erzählertext</a>
+            <button class="danger-button">Neustart</button>
         </div>
-        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
     </div>
+
     <div id="info-popup" class="popup">
         <h2 id="popup-role-name" class="role-popup-title"></h2>
         <p id="popup-role-description" class="role-popup-description"></p>
@@ -28,6 +26,7 @@
     </div>
     <div id="generic-popup" class="popup"></div>
     <div id="overlay" class="overlay" onclick="hideInfo()"></div>
+    
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

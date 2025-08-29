@@ -61,7 +61,7 @@ NARRATOR_TEXT = {
         {"role": "Der Urwolf", "text": "Ulwolf, du darfst deine Augen jetzt öffnen.<br>Welche Person möchtest du in einen Werwolf verwandeln?<br>(Der Urwolf zeigt auf eine Person, die Werwolf werden soll)<br>Ulwolf, schließe jetzt deine Augen.<br>Ich gehe jetzt herum und tippe die infizierte Person an.<br>(Erzähler geht rum und tippt die infizierte Person an)<br>Die Person die ich angetippt habe wird in der nächsten Nacht zum Werwolf.<br>Sie verliert ihre andere Rolle."},
         {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
         {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten willst.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
+        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten möchtest.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
         {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
     ],
     "round_2": [
@@ -73,7 +73,7 @@ NARRATOR_TEXT = {
         {"role": "Der weiße Werwolf", "text": "(nur jede zweite Nacht aufrufen)<br>Weißer Werwolf, du darfst jetzt deine Augen öffnen.<br>Welchen deiner Werwolf-Kollegen möchtest du töten?<br>(Der weiße Werwolf zeigt auf einen Werwolf)<br>Weißer Werwolf, schließe jetzt deine Augen."},
         {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
         {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten willst.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
+        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten möchtest.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
         {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
         {"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."},
     ]
@@ -88,7 +88,6 @@ game_state = {
     "assigned_roles": {},
     "current_player_index": 0,
     "role_counters": {}, # Zählt die lebenden Spieler pro Rolle
-    "lovers": [], # NEU: Verliebte Spieler
 }
 
 def get_role_counts_from_session():
@@ -96,9 +95,6 @@ def get_role_counts_from_session():
 
 def save_role_counts_to_session(role_counts):
     session['saved_roles'] = json.dumps(role_counts)
-    
-def get_players_from_session():
-    return [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
 
 # --- Frontend-Routen (liefern die Templates aus) ---
 
@@ -110,7 +106,6 @@ def startseite():
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
     game_state["role_counters"] = {}
-    game_state["lovers"] = []
     return render_template('index.html')
 
 @app.route('/spiel', methods=['GET', 'POST'])
@@ -119,11 +114,9 @@ def spiel_seite():
         namen_string = request.form.get("namen")
         namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
         
+        # NEU: Überprüfung auf doppelte Namen im Backend
         if len(namen_liste) != len(set(name.lower() for name in namen_liste)):
             return render_template('spiel.html', saved_players=namen_string, error="Doppelte Namen sind nicht erlaubt.")
-        
-        if len(namen_liste) < 4:
-            return render_template('spiel.html', saved_players=namen_string, error="Es müssen mindestens 4 Spieler angemeldet sein.")
 
         session['saved_players'] = namen_string
         
@@ -132,16 +125,16 @@ def spiel_seite():
         if len(namen_liste) < total_roles_selected:
             save_role_counts_to_session({})
         
-        return redirect(url_for('rollen_seite'))
+        return render_template('rollen.html', all_roles=ALL_ROLES, player_count=len(namen_liste), saved_roles=saved_roles)
 
     saved_players_string = session.get('saved_players', '')
     return render_template('spiel.html', saved_players=saved_players_string)
 
 @app.route('/rollen', methods=['GET', 'POST'])
 def rollen_seite():
-    player_count = len(get_players_from_session())
+    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
     if player_count == 0:
-        return redirect(url_for('spiel_seite'))
+        return render_template('spiel.html')
 
     saved_roles = get_role_counts_from_session()
 
@@ -174,41 +167,36 @@ def erzaehler_seite():
         return redirect(url_for('spiel_seite'))
     return render_template('erzaehler.html')
 
-@app.route('/special-roles-selection')
-def special_roles_selection():
-    role_type = request.args.get('type')
-    count = request.args.get('count', type=int)
-    
-    extra_roles = session.get(f'{role_type.lower()}_extra_roles', [])
-    
-    all_roles_list = sorted(list(ALL_ROLES.keys()))
-    
-    return render_template('special-roles-selection.html', all_roles=all_roles_list, role_type=role_type, count=count, selected_roles=extra_roles)
-
 # --- API-ENDPUNKTE ---
 
-@app.route('/api/game/save_extra_roles', methods=['POST'])
-def save_extra_roles():
+@app.route('/api/game/save_roles', methods=['POST'])
+def save_roles_api():
     data = request.get_json()
-    role_type = data.get('role_type')
-    selected_roles = data.get('selected_roles')
-    session[f'{role_type.lower()}_extra_roles'] = selected_roles
-    return jsonify({"message": "Extra roles saved."}), 200
+    save_role_counts_to_session(data.get('role_counts', {}))
+    return jsonify({"message": "Rollen wurden in der Session gespeichert."}), 200
 
 @app.route('/api/game/roles', methods=['POST'])
 def set_game_roles():
     data = request.get_json()
     role_counts = data.get("role_counts", {})
-    extra_roles = data.get("extra_roles", {})
     
-    players_list_raw = get_players_from_session()
+    players_list_raw = [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
     total_players = len(players_list_raw)
+    
+    # NEU: Überprüfung auf doppelte Namen vor der Rollenzuweisung
+    if len(players_list_raw) != len(set(name.lower() for name in players_list_raw)):
+        return jsonify({"error": "Doppelte Namen sind nicht erlaubt."}), 400
+
+    if total_players < 4:
+        return jsonify({"error": "Es müssen mindestens 4 Spieler angemeldet sein."}), 400
 
     total_roles_count = sum(role_counts.values())
 
     if total_roles_count != total_players:
         return jsonify({
             "error": f"Die Anzahl der Rollen ({total_roles_count}) muss genau der Anzahl der Spieler ({total_players}) entsprechen.",
+            "players_count": total_players,
+            "roles_count": total_roles_count
         }), 400
     
     # Reset game state
@@ -230,8 +218,9 @@ def set_game_roles():
     game_state["assigned_roles"] = assigned_roles
     game_state["game_started"] = True
     game_state["current_player_index"] = 0
+    
+    # NEU: Initialisierung der Rollenzähler
     game_state["role_counters"] = {role: count for role, count in role_counts.items()}
-    game_state["extra_roles"] = extra_roles
     
     return jsonify({"message": "Spiel erfolgreich gestartet. Rollen wurden zugewiesen."}), 200
 
@@ -327,118 +316,6 @@ def toggle_player_status(player_name):
         return jsonify({"message": f"Status von '{player_name}' wurde geändert."})
     else:
         return jsonify({"error": "Spieler nicht gefunden."}), 404
-        
-@app.route('/api/perform_action', methods=['POST'])
-def perform_action():
-    data = request.get_json()
-    action = data.get('action')
-    params = data.get('params', {})
-
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
-
-    if action == 'swap_roles_dieb':
-        player_name = params.get('player_name')
-        target_role = params.get('target_role')
-        
-        dieb_player = next((p for p in game_state["players"] if p["name"] == player_name), None)
-        if not dieb_player or game_state["assigned_roles"].get(dieb_player["name"]) != 'Dieb':
-            return jsonify({"error": "Aktion fehlgeschlagen. Spieler ist kein Dieb."}), 400
-
-        # Finde eine unzugewiesene Rolle, die dem Ziel entspricht
-        current_dieb_role = game_state["assigned_roles"][dieb_player["name"]]
-        
-        game_state["assigned_roles"][dieb_player["name"]] = target_role
-        
-        # Markiere die alte Dieb-Rolle als "nicht da" (oder handle sie entsprechend)
-        game_state["roles"][current_dieb_role] -= 1
-        
-        # Markiere die neue Dieb-Rolle als "da"
-        game_state["roles"][target_role] += 1
-        
-        return jsonify({"message": f"Dieb ({player_name}) hat die Rolle mit {target_role} getauscht."})
-
-    elif action == 'swap_roles_gaukler':
-        player_name = params.get('player_name')
-        target_role = params.get('target_role')
-
-        gaukler_player = next((p for p in game_state["players"] if p["name"] == player_name), None)
-        if not gaukler_player or game_state["assigned_roles"].get(gaukler_player["name"]) != 'Gaukler':
-            return jsonify({"error": "Aktion fehlgeschlagen. Spieler ist kein Gaukler."}), 400
-
-        # Temporäre Rollenänderung für den Gaukler
-        # In dieser Logik setzen wir die Rolle einfach um, die eigentliche temporäre
-        # Natur wird vom Erzähler und den Spielern selbst gehandhabt
-        game_state["assigned_roles"][gaukler_player["name"]] = target_role
-        
-        # Logik, die Rolle für diese Nacht als "da" zu markieren (kann optional sein)
-        # Hier nicht als Zähler implementiert, da es eine temporäre Aktion ist
-        
-        return jsonify({"message": f"Gaukler ({player_name}) spielt nun die Rolle {target_role} für diese Nacht."})
-        
-    elif action == 'verwandeln_urwolf':
-        player_name = params.get('player_name')
-        
-        urwolf_player = next((p for p in game_state["players"] if p["name"] == player_name), None)
-        if not urwolf_player:
-            return jsonify({"error": "Spieler nicht gefunden."}), 400
-            
-        old_role = game_state["assigned_roles"][player_name]
-        
-        # Ändere die Rolle zu "Werwölfe"
-        game_state["assigned_roles"][player_name] = 'Werwölfe'
-        
-        # Aktualisiere die Rollenzähler
-        if old_role in game_state["role_counters"]:
-            game_state["role_counters"][old_role] -= 1
-        if 'Werwölfe' in game_state["role_counters"]:
-            game_state["role_counters"]['Werwölfe'] += 1
-        else:
-            game_state["role_counters"]['Werwölfe'] = 1
-
-        return jsonify({"message": f"Ulwolf hat {player_name} in einen Werwolf verwandelt. Alte Rolle war {old_role}."})
-
-    elif action == 'tauschen_magd':
-        magd_name = params.get('magd_name')
-        target_name = params.get('target_name')
-
-        magd_player = next((p for p in game_state["players"] if p["name"] == magd_name), None)
-        target_player = next((p for p in game_state["players"] if p["name"] == target_name), None)
-
-        if not magd_player or not target_player:
-            return jsonify({"error": "Spieler nicht gefunden."}), 400
-
-        # Hole die Rollen
-        magd_role = game_state["assigned_roles"][magd_name]
-        target_role = game_state["assigned_roles"][target_name]
-        
-        if magd_role != "Die ergebene Magd":
-            return jsonify({"error": "Nur die ergebene Magd kann diese Aktion ausführen."}), 400
-            
-        # Tausche die Rollen
-        game_state["assigned_roles"][magd_name] = target_role
-        
-        # Setze den Status des Ziels auf "dead"
-        target_player["status"] = "dead"
-        
-        # Aktualisiere die Rollenzähler
-        game_state["role_counters"][magd_role] -= 1
-        game_state["role_counters"][target_role] += 1
-        
-        return jsonify({"message": f"Magd ({magd_name}) hat die Rolle von {target_name} übernommen. {target_name} ist jetzt tot."})
-
-    elif action == 'verlieben_amor':
-        selected_players = params.get('selected_players')
-
-        if len(selected_players) != 2:
-            return jsonify({"error": "Amor muss genau zwei Spieler auswählen."}), 400
-        
-        player1, player2 = selected_players
-        game_state["lovers"] = [player1, player2]
-        
-        return jsonify({"message": f"{player1} und {player2} sind jetzt verliebt."})
-        
-    return jsonify({"error": "Unbekannte Aktion."}), 400
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
@@ -446,7 +323,6 @@ def restart_game():
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
     game_state["role_counters"] = {}
-    game_state["lovers"] = []
     
     for player_info in game_state["players"]:
         player_info["status"] = "alive"
@@ -460,7 +336,7 @@ def get_roles_list():
 
 @app.route('/api/get_roles_and_players')
 def get_roles_and_players():
-    player_count = len(get_players_from_session())
+    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
     saved_roles = get_role_counts_from_session()
     all_roles = ALL_ROLES
     return jsonify({
@@ -479,30 +355,27 @@ def get_narrator_text(round_number):
         return jsonify({"error": "Ungültige Runden-Nummer."}), 400
 
     filtered_text = []
+    
+    # Überprüft, welche Rollen überhaupt im Spiel sind
     selected_roles = set(game_state["assigned_roles"].values())
 
+    # Fügt den "Alle Bürger, Augen schließen"-Block hinzu, falls er im Original-Text vorhanden ist
+    # und der erste Block ist
     if round_number == '1' and NARRATOR_TEXT["round_1"][0]["role"] == "Alle Bürger":
         filtered_text.append(NARRATOR_TEXT["round_1"][0])
 
     for item in target_text:
         role_name = item["role"]
+        
+        # Überspringt den ersten "Alle Bürger"-Block, da er schon behandelt wurde
         if role_name == "Alle Bürger" and round_number == '1':
             continue
         
-        # NEU: Überprüfung, ob die Rolle überhaupt existiert
-        if role_name in ALL_ROLES.keys():
-            # Nur hinzufügen, wenn die Rolle im Spiel ist und noch lebende Spieler hat
-            if role_name in selected_roles and game_state["role_counters"].get(role_name, 0) > 0:
-                 # Sonderbehandlung für die "Reine Seele", die nur in der 1. Runde kommt
-                if role_name == "Die reine Seele" and round_number == '1':
-                     filtered_text.insert(1, item)  # Füge nach dem ersten Block ein
-                else:
-                    filtered_text.append(item)
+        # Überprüfen, ob die Rolle überhaupt im Spiel ist UND ob es noch lebende Spieler gibt
+        if role_name in selected_roles:
+            if game_state["role_counters"].get(role_name, 0) > 0:
+                filtered_text.append(item)
     
-    # Füge den letzten "Alle Bürger" Block am Ende hinzu
-    if round_number == '2' and target_text[-1]["role"] == "Alle Bürger":
-        filtered_text.append(target_text[-1])
-
     return jsonify({"text_blocks": filtered_text})
     
 if __name__ == '__main__':

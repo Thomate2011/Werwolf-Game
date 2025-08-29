@@ -11,15 +11,15 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <a href="{{ url_for('neustart_seite') }}" class="button-link secondary-button">Zurück</a>
             <div class="night-buttons">
-                <button id="round-1-btn" class="button-link primary-button active">1. Runde Text</button>
-                <button id="round-2-btn" class="button-link primary-button">2. Runde Text</button>
+                <button id="round-1-btn" class="button-link primary-button">Nacht 1</button>
+                <button id="round-2-btn" class="button-link primary-button">Nächste Nächte</button>
             </div>
-            <div></div>
         </div>
-        <h1>Erzählertext</h1>
+
         <div id="narrator-text-container">
             </div>
     </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

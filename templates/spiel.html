@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spieler-Anmeldung</title>
+    <title>Spieler hinzufügen</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="spiel-page">
+<body>
     <div class="container">
-        <h1>Spieler-Anmeldung</h1>
-        <p>Gib die Namen der Spieler ein, jeder in einer neuen Zeile. Bitte verwende keine doppelten Namen.</p>
-        <form method="post" action="{{ url_for('spiel_seite') }}">
-            <textarea id="namen" name="namen" placeholder="Spieler 1&#10;Spieler 2&#10;Spieler 3&#10;Spieler 4">{{ saved_players }}</textarea>
+        <h1>Spieler hinzufügen</h1>
+        <hr>
+        <form action="{{ url_for('spiel_seite') }}" method="post">
+            <p>Gib hier die Namen aller Spieler ein, jeder in einer neuen Zeile.</p>
+            <textarea name="namen" rows="10" placeholder="Spieler 1&#10;Spieler 2&#10;..."></textarea>
             {% if error %}
-                <p style="color: red; margin-top: 10px;">{{ error }}</p>
+            <p style="color: red; margin-top: 10px;">{{ error }}</p>
             {% endif %}
-            <br>
-            <button type="submit" class="primary-button">Weiter zur Rollenauswahl</button>
+            <div style="margin-top: 20px;">
+                <button type="submit" class="primary-button">Weiter zur Rollenauswahl</button>
+            </div>
         </form>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
