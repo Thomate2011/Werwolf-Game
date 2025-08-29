@@ -1,65 +1,33 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spielübersicht</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spielübersicht</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="neustart-page">
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1 style="margin: 0;">Spielübersicht</h1>
-            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
-        </div>
-        
-        <p id="special-action-text" style="color: green; font-weight: bold;"></p>
-        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
-        
-        <div id="player-list">
-            {% for player in players %}
-                <div class="player-list-item {{ 'dead' if player.status == 'dead' }}" data-player-name="{{ player.name }}">
-                    <span onclick="toggleStatus('{{ player.name }}')">
-                        <b>{{ player.role }}</b> | {{ player.name }}
-                    </span>
-                    <div>
-                        {% if player.role == 'Dieb' and special_roles.dieb %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('dieb')">💰</button>
-                        {% endif %}
-                        {% if player.role == 'Der Gaukler' and special_roles.gaukler %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('gaukler')">🎭</button>
-                        {% endif %}
-                        {% if player.role == 'Amor' and special_roles.amor %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('amor')">❤️</button>
-                        {% endif %}
-                        {% if player.role == 'Der Urwolf' and special_roles.urwolf %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('urwolf')">🐺</button>
-                        {% endif %}
-                        {% if player.role == 'Die ergebene Magd' and special_roles.magd %}
-                            <button class="emoji-btn" onclick="activateSpecialAction('magd')">👩🏼</button>
-                        {% endif %}
-                        <button onclick="showInfoNeustart('{{ player.role }}')" class="role-info-btn">i</button>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-        
-        <button onclick="restartGame()" class="danger-button">Neustart</button>
-        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
-
-        <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
-        <p style="font-size: 0.8em; margin-top: 5px;">Kompletter Reset</p>
-    </div>
-    
-    <div id="info-popup" class="popup">
-        <h2 id="popup-role-name" class="role-popup-title"></h2>
-        <p id="popup-role-description" class="role-popup-description"></p>
-        <button onclick="hideInfoNeustart()" class="popup-close-btn">&times;</button>
-    </div>
-
-    <div id="special-role-popup" class="popup"></div>
-    <div id="overlay" class="overlay"></div>
-
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="margin: 0;">Spielübersicht</h1>
+            <a href="{{ url_for('erzaehler_seite') }}" class="button-link primary-button">Erzählertext</a>
+        </div>
+        <p>Tippe auf einen Namen, um den Spielerstatus zu ändern.<br>Einmal tippen für "tot", zweimal für "lebendig".</p>
+        <div id="player-list">
+            </div>
+        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+            <button onclick="restartGame()" class="danger-button">Neustart</button>
+            <a href="{{ url_for('startseite') }}" class="button-link secondary-button">Zur Startseite</a>
+        </div>
+        <p style="font-size: 0.8em; margin-top: 5px;">Namen und Rollen gespeichert</p>
+    </div>
+    <div id="info-popup" class="popup">
+        <h2 id="popup-role-name" class="role-popup-title"></h2>
+        <p id="popup-role-description" class="role-popup-description"></p>
+        <button onclick="hideInfo()" class="popup-close-btn">&times;</button>
+    </div>
+    <div id="generic-popup" class="popup"></div>
+    <div id="overlay" class="overlay" onclick="hideInfo()"></div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

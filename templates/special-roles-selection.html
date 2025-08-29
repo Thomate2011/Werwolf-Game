@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rollen für {{ role_type }} auswählen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="special-roles-selection-page">
+    <div class="container special-roles-selection-container">
+        <h1>Wähle Rollen für den {{ role_type }} aus</h1>
+        <p>Wähle **{{ count }}** Rollen für den {{ role_type }} aus.</p>
+        <div id="roles-container">
+            </div>
+        <button id="save-selection-btn" class="primary-button" data-role-type="{{ role_type }}" data-count="{{ count }}">Auswahl speichern</button>
+        <a href="{{ url_for('rollen_seite') }}" class="button-link secondary-button">Zurück</a>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

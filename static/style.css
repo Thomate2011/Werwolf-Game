@@ -1,374 +1,317 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: #e0e0e0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
 }
 
 .container {
-    width: 90%;
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
     text-align: center;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
-.main-title {
-    color: #f7a300;
+h1 {
+    color: #2e7d32;
     font-size: 2.5em;
-    margin-bottom: 20px;
-}
-
-.content-box {
-    background-color: #1e1e1e;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    border: 1px solid #333;
-}
-
-/* --- Formular-Elemente --- */
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
     margin-bottom: 10px;
+}
+
+h2 {
+    color: #444;
+}
+
+p {
     font-size: 1.1em;
-    color: #ccc;
+    line-height: 1.6;
 }
 
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #444;
-    border-radius: 5px;
-    background-color: #2b2b2b;
-    color: #e0e0e0;
-    resize: vertical;
-    box-sizing: border-box;
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ccc;
+    margin: 30px auto;
+    width: 60%;
 }
 
-textarea::placeholder {
-    color: #888;
-}
-
-/* --- Buttons --- */
-.primary-button, .secondary-button, .button-link {
+button, .button-link {
+    font-size: 1.2em;
     padding: 12px 25px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
     text-decoration: none;
     display: inline-block;
-    margin: 5px;
+}
+
+button:hover, .button-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
 }
 
 .primary-button {
-    background-color: #f7a300;
-    color: #1e1e1e;
-}
-
-.primary-button:hover {
-    background-color: #e69500;
-    transform: translateY(-2px);
+    background-color: #4CAF50;
+    color: white;
 }
 
 .secondary-button {
-    background-color: #444;
-    color: #e0e0e0;
-    border: 1px solid #666;
+    background-color: #008CBA;
+    color: white;
 }
 
-.secondary-button:hover {
-    background-color: #555;
-    transform: translateY(-2px);
+.danger-button {
+    background-color: #f44336;
+    color: white;
 }
 
-.button-link.primary-button {
-    display: block;
-    width: fit-content;
-    margin: 15px auto 0;
-}
-
-.full-width-btn {
-    display: block;
-    width: 100%;
-    margin-top: 20px;
-}
-
-/* --- Rollen-Auswahl --- */
-.roles-container, .roles-container-small {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.roles-container-small {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-}
-
-.role-card, .role-card-small {
-    background-color: #2b2b2b;
+textarea {
+    width: 80%;
+    height: 200px;
     padding: 15px;
+    font-size: 1em;
+    border: 1px solid #ccc;
     border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    border: 2px solid transparent;
-}
-
-.role-card-small {
-    padding: 10px;
-    font-size: 0.9em;
-}
-
-.role-card:hover, .role-card-small:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
-}
-
-.role-card.selected, .role-card-small.selected {
-    border-color: #f7a300;
-    box-shadow: 0 0 10px #f7a300;
-}
-
-.role-name {
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.counter-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-top: 10px;
+    resize: vertical;
 }
 
-.counter-btn {
-    background-color: #383838;
-    color: #e0e0e0;
-    border: 1px solid #555;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 1.2em;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.counter-btn:hover {
-    background-color: #555;
-}
-
-.role-count {
-    margin: 0 10px;
-    font-size: 1.2em;
-}
-
-/* --- Karten-Ansicht --- */
-.card-box {
-    padding-top: 40px;
-    padding-bottom: 40px;
-}
-
-.role-display {
-    min-height: 150px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #2b2b2b;
-    border-radius: 10px;
-    margin: 20px 0;
-    padding: 20px;
-    text-transform: capitalize;
-}
-
-.role-display h1 {
-    font-size: 3em;
-    margin: 0;
-    color: #f7a300;
-}
-
-/* --- Spielübersicht (Neustart) --- */
-.player-list {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 20px;
-    text-align: left;
-}
-
-.player-item {
+.role-list-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
-    margin-bottom: 10px;
-    background-color: #2b2b2b;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
     border-radius: 8px;
+    background-color: #fafafa;
 }
 
-.player-item.dead {
-    background-color: #4b2c2c;
-    text-decoration: line-through;
-    opacity: 0.7;
-}
-
-.player-name {
-    font-weight: bold;
-    flex-grow: 1;
-}
-
-.player-role {
-    font-style: italic;
-    color: #ccc;
-    margin-left: 15px;
-}
-
-.player-item .buttons {
-    display: flex;
-    gap: 5px;
-}
-
-.info-btn {
-    background-color: #f7a300;
-    color: #1e1e1e;
-    border: none;
+.role-info-btn {
+    font-size: 1em;
+    margin-left: 10px;
+    padding: 0;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-weight: bold;
+    border: 1px solid #008CBA;
+    background-color: #008CBA;
+    color: white;
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.info-btn:hover {
-    background-color: #e69500;
-}
-
-.toggle-status-btn {
-    background-color: #3a86ff;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.toggle-status-btn:hover {
-    background-color: #2e6bc0;
-}
-
-/* --- Erzähler-Modus --- */
-.round-selection-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
 }
 
-select {
-    padding: 8px;
+.role-counter-btn {
+    font-size: 1.5em;
+    padding: 5px 12px;
+    cursor: pointer;
+    background-color: #eee;
+    color: #555;
+    border: none;
     border-radius: 5px;
-    background-color: #2b2b2b;
-    color: #e0e0e0;
-    border: 1px solid #444;
+    transition: background-color 0.2s;
 }
 
-.narrator-text-container {
-    text-align: left;
-    margin-top: 20px;
-    background-color: #2b2b2b;
-    padding: 20px;
-    border-radius: 8px;
+.role-counter-btn:hover {
+    background-color: #ddd;
 }
 
-.text-block {
-    margin-bottom: 25px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 15px;
+.player-card {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    border: 2px dashed #008CBA;
+    border-radius: 12px;
 }
 
-.text-block:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+.card-title {
+    color: #444;
 }
 
-.text-block h3 {
-    margin-top: 0;
-    color: #f7a300;
+.card-role {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #f44336;
+    margin: 10px 0;
 }
 
-.text-block p {
+.card-description {
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
+}
+
+.player-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.player-list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.player-list-item.dead {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    max-width: 450px;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    z-index: 1001;
+    text-align: center;
+}
+
+.popup-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* KORRIGIERTE STILE FÜR DAS ROLLEN-POP-UP AUF NEUSTART-SEITE */
+.role-popup-title {
+    font-size: 2em;
+    /* Rollenname ist doppelt so groß wie die Erklärung */
+    font-weight: bold;
+    color: #444;
+    margin: 0;
+}
+
+.role-popup-description {
+    font-size: 1em;
+    /* Normale Schriftgröße für die Erklärung */
     line-height: 1.6;
-    margin-top: 5px;
-    white-space: pre-wrap;
+    color: #555;
+    margin-top: 15px;
 }
 
-/* --- Popups und Overlay --- */
 .overlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 999;
-    display: none;
-}
-
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #1e1e1e;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.7);
+    background: rgba(255, 255, 255, 1);
     z-index: 1000;
-    max-width: 400px;
-    width: 80%;
-    text-align: center;
-    display: none;
 }
 
-.popup h3 {
-    margin-top: 0;
-    color: #f7a300;
+/* NEUE STILE FÜR ERZÄHLER-SEITE */
+.erzaehler-page .container {
+    max-width: 800px;
 }
 
-.popup p {
-    line-height: 1.5;
-    margin-bottom: 20px;
+.night-buttons {
+    display: flex;
+    gap: 10px;
 }
 
-.special-roles-counter {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin: 15px 0;
+.night-buttons .button-link {
+    background-color: #ccc;
+    color: #555;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.error-message {
-    color: #ff6b6b;
-    font-size: 0.9em;
-    margin-top: 5px;
+.night-buttons .button-link.active {
+    background-color: #2e7d32;
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    transform: translateY(0);
 }
 
-.info-text-value {
-    font-weight: bold;
-    color: #f7a300;
+#narrator-text-container {
+    text-align: left;
+    margin-top: 30px;
+    padding-left: 20px;
+}
+
+#narrator-text-container h3 {
+    margin-top: 25px;
+    color: #2e7d32;
+    border-bottom: 2px solid #2e7d32;
+    padding-bottom: 5px;
+}
+
+/* NEUE STILE FÜR SPEZIALROLLEN-AUSWAHL */
+.special-roles-selection-container .role-list-item {
+    cursor: pointer;
+}
+.special-roles-selection-container .role-list-item.selected {
+    border-color: #4CAF50;
+    background-color: #e8f5e9;
+    box-shadow: 0 0 5px #4CAF50;
+}
+
+/* NEUE STILE FÜR POP-UPS */
+.special-role-card {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.special-role-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.special-role-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+.player-list-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.player-selectable {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.player-selectable.selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
 }
