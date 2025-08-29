@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rolle aufdecken</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="karten-page">
+    <div class="container">
+        <h1>Rollen aufdecken</h1>
+        <p>Weitergeben an: <span id="player-name"></span></p>
+        <div class="player-card">
+            <h2 id="card-title" class="card-title">Deine Rolle:</h2>
+            <h3 id="role-name" class="card-role" style="display:none;"></h3>
+            <p id="role-description" class="card-description" style="display:none;"></p>
+        </div>
+        <div style="margin-top: 20px;">
+            <button id="reveal-role-btn" class="primary-button">Rolle aufdecken</button>
+            <button id="show-description-btn" class="secondary-button" style="display:none;">Erklärung</button>
+            <button id="next-player-btn" class="primary-button" style="display:none;">Nächster Spieler</button>
+            <a id="overview-btn" class="button-link primary-button" href="{{ url_for('neustart_seite') }}" style="display:none;">Zur Übersicht</a>
+        </div>
+    </div>
+    <div id="final-popup" class="popup" style="display:none;">
+        <h2>Fertig!</h2>
+        <p>Alle Rollen wurden aufgedeckt. Du kannst nun zur Spielübersicht wechseln.</p>
+        <a href="{{ url_for('neustart_seite') }}" class="button-link primary-button">Zur Übersicht</a>
+    </div>
+    <div id="overlay" class="overlay"></div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

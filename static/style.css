@@ -1,0 +1,269 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    text-align: center;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #2e7d32;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: #444;
+}
+
+p {
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ccc;
+    margin: 30px auto;
+    width: 60%;
+}
+
+button, .button-link {
+    font-size: 1.2em;
+    padding: 12px 25px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover, .button-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+}
+
+.primary-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.secondary-button {
+    background-color: #008CBA;
+    color: white;
+}
+
+.danger-button {
+    background-color: #f44336;
+    color: white;
+}
+
+textarea {
+    width: 80%;
+    height: 200px;
+    padding: 15px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-top: 10px;
+    resize: vertical;
+}
+
+.role-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+.role-info-btn {
+    font-size: 1em;
+    margin-left: 10px;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    border: 1px solid #008CBA;
+    background-color: #008CBA;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.role-counter-btn {
+    font-size: 1.5em;
+    padding: 5px 12px;
+    cursor: pointer;
+    background-color: #eee;
+    color: #555;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.role-counter-btn:hover {
+    background-color: #ddd;
+}
+
+.player-card {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    border: 2px dashed #008CBA;
+    border-radius: 12px;
+}
+
+.card-title {
+    color: #444;
+}
+
+.card-role {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #f44336;
+    margin: 10px 0;
+}
+
+.card-description {
+    font-size: 1em;
+    color: #555;
+    margin-top: 10px;
+}
+
+.player-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.player-list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.player-list-item.dead {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    max-width: 450px;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    z-index: 1001;
+    text-align: center;
+}
+
+.popup-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* KORRIGIERTE STILE FÜR DAS ROLLEN-POP-UP AUF NEUSTART-SEITE */
+.role-popup-title {
+    font-size: 2em;
+    /* Rollenname ist doppelt so groß wie die Erklärung */
+    font-weight: bold;
+    color: #444;
+    margin: 0;
+}
+
+.role-popup-description {
+    font-size: 1em;
+    /* Normale Schriftgröße für die Erklärung */
+    line-height: 1.6;
+    color: #555;
+    margin-top: 15px;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 1);
+    z-index: 1000;
+}
+
+/* NEUE STILE FÜR ERZÄHLER-SEITE */
+.erzaehler-page .container {
+    max-width: 800px;
+}
+
+.night-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.night-buttons .button-link {
+    background-color: #ccc;
+    color: #555;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.night-buttons .button-link.active {
+    background-color: #2e7d32;
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    transform: translateY(0);
+}
+
+#narrator-text-container {
+    text-align: left;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+#narrator-text-container p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+#narrator-text-container strong {
+    color: #008CBA;
+    font-size: 1.2em;
+}
