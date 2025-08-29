@@ -1,10 +1,19 @@
-from flask import Flask, request, jsonify, session, render_template, redirect, url_for
+from flask import Flask, request, jsonify, redirect, url_for, render_template_string, session
 import random
 import json
-import os
 
 app = Flask(__name__)
-app.secret_key = 'your_super_secret_key'
+app.secret_key = 'your_super_secret_key' # Ein geheimer Schlüssel wird für Sessions benötigt
+
+# Ein Dictionary, um den Zustand des Spiels zu speichern.
+game_state = {
+    "players": [],
+    "roles": {},
+    "total_roles_count": 0,
+    "game_started": False,
+    "assigned_roles": {},
+    "current_player_index": 0,
+}
 
 # --- Konstanten für alle verfügbaren Rollen und ihre detaillierten Erklärungen ---
 ALL_ROLES = {
@@ -30,7 +39,7 @@ ALL_ROLES = {
     "Der Engel": "Wenn er in der Abstimmung der ersten Runde eliminiert wird (nicht von den Werwölfen), gewinnt er das Spiel allein.",
     "Die drei Brüder": "Die drei Brüder erwachen zusammen in der ersten Nacht und erkennen sich. Ansonsten sind sie einfache Dorfbewohner.",
     "Die zwei Schwestern": "Die zwei Schwestern erwachen zusammen in der ersten Nacht und erkennen sich. Ansonsten sind sie einfache Dorfbewohner.",
-    "Der Fuchs": "Wenn er in der Nacht aufgerufen wird, wählt er einen Spieler aus und erfährt vom Spielleiter, ob dieser oder einer ihrer beiden Nachbarn ein Werwolf ist oder nicht. Ist bei dem Trio mindestens ein Werwolf dabei, darf er es in der nächsten Nacht ein weiteres Mal versuchen. Ist aber keiner der drei ein Werwolf, verliert er seine Fähigkeit.",
+    "Der Fuchs": "Wenn er in der Nacht aufgerufen wird, wählt er einen Spieler aus und erfährt vom Spielleiter, ob dieser oder einer seiner beiden Nachbarn ein Werwolf ist oder nicht. Ist bei dem Trio mindestens ein Werwolf dabei, darf er es in der nächsten Nacht ein weiteres Mal versuchen. Ist aber keiner der drei ein Werwolf, verliert er seine Fähigkeit.",
     "Die ergebene Magd": "Wenn jemand stirbt kann die ergebene Magd bevor erfahren wird welche Rolle die tote Person hat ihre Rolle mit der, der toten Person tauschen und ihre Rolle weiterspielen.",
     "Der Bärenführer": "Wenn sich der Bärenführer am Morgen in seiner Sitzposition unmittelbar neben einem Werwolf befindet (ausgeschiedene Spieler werden ignoriert), zeigt der Spielleiter dies durch ein Bärenknurren. Ist der Bärenführer vom Urwolf infiziert, knurrt der Spielleiter jeden Morgen.",
     "Der Ritter mit der verrosteten Klinge": "Der Ritter infiziert mit seinem rostigen Schwert den Werwolf zu seiner Linken mit Tetanus, wenn er von ihnen in der Nacht gefressen wird. Dieser Werwolf stirbt dann in der folgenden Nacht.",
@@ -40,78 +49,30 @@ ALL_ROLES = {
     "Der Obdachlose": "Wenn du aufgerufen wirst, wählst du eine Person bei der du übernachten willst. Wenn diese Person in der Nacht von den Werwölfen getötet wird, stirbst du auch. Wenn die Werwölfe dich in der Nacht töten wollen, stirbst du nicht, weil du bei der anderen Person schläfst."
 }
 
-# --- Erzählertext in eine leicht verarbeitbare Struktur umgewandelt ---
-NARRATOR_TEXT = {
-    "round_1": [
-        # NEU: Dieser Block erscheint immer am Anfang der 1. Runde
-        {"role": "Alle Bürger", "text": "Alle Bürger, schließt jetzt bitte eure Augen."},
-        {"role": "Die reine Seele", "text": "Reine Seele, du darfst dich jetzt allen Dorfbewohnern zu erkennen geben.<br>(Die reine Seele gibt sich zu erkennen)<br>(Sobald das geschehen ist)<br>Alle Bürger, schließt jetzt bitte eure Augen."},
-        {"role": "Dieb", "text": "Dieb, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die zwei übrigen Rollen in der Hand.<br>Du kannst nun deine Rolle mit einer der beiden Rollen tauschen oder deine Rolle behalten.<br>(Erzähler hält die zwei übrigen Karten hoch)<br>Wenn du deine Rolle behältst, bleibst du ein Dorfbewohner.<br>Wenn du eine neue Karte willst, zeig drauf.<br>(Erzähler nimmt die Karte, die der Dieb nicht will, weg)<br>Dieb, schließe jetzt deine Augen."},
-        {"role": "Der Gaukler", "text": "Gaukler, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die drei für dich ausgewählten Rollen in der Hand.<br>Du kannst dich jetzt entscheiden welche Rolle du für diese Nacht spielen möchtest.<br>(Der Gaukler zeigt auf einer der Rollen)<br>Gaukler schließe deine Augen."},
-        {"role": "Der verbitterte Greis", "text": "Verbitterte Greis, du darfst deine Augen jetzt öffnen.<br>Teile unsere Gruppe in zwei kleinere gleichgroße Gruppen auf.<br>(Z.B. in dunkle Haare und helle Haare)<br>Wird eine dieser Gruppen eliminiert und du lebst noch gewinnst du.<br>(Der verbitterte Greis macht zwei Gruppen)<br>Du darfst deine Augen wieder schließen."},
-        {"role": "Amor", "text": "Amor, du darfst deine Augen jetzt öffnen.<br>Wähle zwei Personen aus, die du verkuppeln möchtest.<br>(Amor zeigt auf zwei Personen)<br>Amor, schließe jetzt deine Augen.<br>Ich gehe jetzt rum und tippe die beiden Verliebten an.<br>(Erzähler geht rum und tippt die beiden Verliebten an)<br>Verliebten, ihr dürft jetzt eure Augen öffnen und euch gegenseitig sehen.<br>(Verliebten schauen sich an)<br>Verliebten, schließt eure Augen bitte wieder."},
-        {"role": "Der Wolfshund", "text": "Wolfshund, du darfst deine Augen jetzt öffnen.<br>Ich halte die beiden Hände hoch, die rechte Hand bedeutet Werwolf<br>und die linke Hand bedeutet Dorfbewohner.<br>(Erzähler hält beide Hände hoch)<br>Entscheide dich was du sein willst.<br>(Der Wolfshund zeigt auf einen der Hände)<br>Wolfshund, schließe jetzt deine Augen."},
-        {"role": "Die drei Brüder", "text": "Brüder, ihr dürft eure Augen jetzt öffnen.<br>Schaut euch an, damit ihr euch erkennt.<br>(Die drei Brüder schauen sich an)<br>Brüder, schließt bitte wieder die Augen."},
-        {"role": "Die zwei Schwestern", "text": "Schwestern, ihr dürft eure Augen jetzt öffnen.<br>Schaut euch an, damit ihr euch erkennt.<br>(Die zwei Schwestern schauen sich an)<br>Schwestern, schließt bitte wieder die Augen."},
-        {"role": "Das wilde Kind", "text": "Wildes Kind, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, die dein Vorbild sein soll.<br>Wenn dein Vorbild stirbt, wirst du zum Werwolf.<br>(Das wilde Kind zeigt auf eine Person)<br>Wildes Kind, schließe jetzt deine Augen."},
-        {"role": "Der stotternde Richter", "text": "Richter, du darfst deine Augen jetzt öffnen.<br>Zeige mir ein geheimes kleines Zeichen, welches du machst,<br>wenn am heutigen Tag eine zweite Abstimmung stattfinden soll.<br>(Der Richter und der Erzähler vereinbaren ein geheimes Zeichen)<br>Richter, schließe jetzt deine Augen."},
-        {"role": "Seherin", "text": "Seherin, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, von der du die Rolle sehen möchtest.<br>(Die Seherin zeigt auf eine Person)<br>(Erzähler tippt auf das I neben der Rolle der Person und zeigt sie der Seherin)<br>Seherin, schließe jetzt deine Augen."},
-        {"role": "Heiler/Beschützer", "text": "Heiler/Beschützer, du darfst jetzt deine Augen öffnen.<br>Wähle eine Person aus, die du beschützen möchtest.<br>Diese Person wird egal durch was sie getötet werden würde nicht sterben.<br>Du darfst keine Person zweimal hintereinander beschützen.<br>(Heiler zeigt auf die Person)<br>Heiler/Beschützer, schließe jetzt deine Augen."},
-        {"role": "Werwölfe", "text": "Werwölfe, ihr dürft jetzt eure Augen öffnen.<br>Sucht euch eine Person aus, die ihr fressen wollt.<br>(Die Werwölfe einigen sich auf ein Opfer)<br>Werwölfe, schließt jetzt eure Augen."},
-        {"role": "Der Urwolf", "text": "Ulwolf, du darfst deine Augen jetzt öffnen.<br>Welche Person möchtest du in einen Werwolf verwandeln?<br>(Der Urwolf zeigt auf eine Person, die Werwolf werden soll)<br>Ulwolf, schließe jetzt deine Augen.<br>Ich gehe jetzt herum und tippe die infizierte Person an.<br>(Erzähler geht rum und tippt die infizierte Person an)<br>Die Person die ich angetippt habe wird in der nächsten Nacht zum Werwolf.<br>Sie verliert ihre andere Rolle."},
-        {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
-        {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten möchtest.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
-        {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
-    ],
-    "round_2": [
-        {"role": "Der Gaukler", "text": "Gaukler, du darfst deine Augen jetzt öffnen.<br>Ich halte jetzt die drei für dich ausgewählten Rollen in der Hand.<br>Du kannst dich jetzt entscheiden welche Rolle du für diese Nacht spielen möchtest.<br>(Der Gaukler zeigt auf einer der Rollen)<br>Gaukler schließe deine Augen."},
-        {"role": "Seherin", "text": "Seherin, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus, von der du die Rolle sehen möchtest.<br>(Die Seherin zeigt auf eine Person)<br>(Erzähler tippt auf das I neben der Rolle der Person und zeigt sie der Seherin)<br>Seherin, schließe jetzt deine Augen."},
-        {"role": "Heiler/Beschützer", "text": "Heiler/Beschützer, du darfst jetzt deine Augen öffnen.<br>Wähle eine Person aus, die du beschützen möchtest.<br>Diese Person wird egal durch was sie getötet werden würde nicht sterben.<br>Du darfst keine Person zweimal hintereinander beschützen.<br>(Heiler zeigt auf die Person)<br>Heiler/Beschützer, schließe jetzt deine Augen."},
-        {"role": "Werwölfe", "text": "Werwölfe, ihr dürft jetzt eure Augen öffnen.<br>Sucht euch eine Person aus, die ihr fressen wollt.<br>(Die Werwölfe einigen sich auf ein Opfer)<br>Werwölfe, schließt jetzt eure Augen."},
-        {"role": "Der große böse Werwolf", "text": "(nur jede zweite Nacht aufrufen)<br>Großer böser Werwolf, öffne deine Augen.<br>Wähle noch ein zweites Opfer, das du in dieser Nacht töten möchtest.<br>(Der große böse Werwolf zeigt auf ein Opfer)<br>Großer böser Werwolf, schließe nun deine Augen."},
-        {"role": "Der weiße Werwolf", "text": "(nur jede zweite Nacht aufrufen)<br>Weißer Werwolf, du darfst jetzt deine Augen öffnen.<br>Welchen deiner Werwolf-Kollegen möchtest du töten?<br>(Der weiße Werwolf zeigt auf einen Werwolf)<br>Weißer Werwolf, schließe jetzt deine Augen."},
-        {"role": "Hexe", "text": "Hexe, du darfst deine Augen jetzt öffnen.<br>Das ist das Opfer der Werwölfe.<br>(Erzähler zeigt der Hexe, wer das Opfer der Werwölfe ist)<br>Möchtest du es mit deinem Heiltrank retten oder nicht?<br>Wenn ja mache einen Daumen nach oben.<br>Möchtest du noch jemanden töten?<br>Wenn ja mache einen Daumen nach unten.<br>Oder wenn du nichts tun möchtest<br>Mache einen Daumen in die Mitte.<br>Du darfst auch beide Tränke in der Nacht aufbrauchen.<br>(Die Hexe bewegt ihren Daumen)<br>Hexe, schließe jetzt deine Augen."},
-        {"role": "Flötenspieler", "text": "Flötenspieler, du darfst jetzt deine Augen öffnen.<br>Wähle jetzt zwei Personen aus, die du mit deiner Musik verzaubern möchtest.<br>(Der Flötenspieler zeigt auf zwei Personen)<br>Flötenspieler, schließe jetzt deine Augen.<br>Ich tippe jetzt die Verzauberten an.<br>(Erzähler geht rum und tippt die Verzauberten an)<br>Verzauberten ihr dürft jetzt aufwachen<br>und euch mit Handzeichen besprechen wer der Flötenspieler ist.<br>Wenn der Flötenspieler alle Personen verzaubert hat, gewinnt er.<br>Verzauberten ihr dürft eure Augen jetzt schließen."},
-        {"role": "Der Obdachlose", "text": "Obdachloser, du darfst deine Augen jetzt öffnen.<br>Suche dir eine Person aus, bei der du übernachten möchtest.<br>Wenn die Person in der Nacht von den Werwölfen gefressen wird, stirbst du auch.<br>Du darfst nicht zwei Nächte bei einer Person schlafen.<br>(Der Obdachlose zeigt auf eine Person)<br>Obdachlose, schließe jetzt deine Augen."},
-        {"role": "Der Fuchs", "text": "Fuchs, du darfst deine Augen jetzt öffnen.<br>Wähle eine Person aus.<br>Ich werde dir zeigen, ob sie oder einer ihrer beiden Nachbarn ein Werwolf ist.<br>Wenn einer ein Werwolf ist zeige ich einen Daumen nach oben.<br>Wenn keiner ein Werwolf ist zeige ich einen Daumen nach unten<br>und du verlierst deine Fähigkeit.<br>(Der Fuchs zeigt auf eine Person)<br>(Erzähler zeigt, ob im Trio ein Werwolf ist oder nicht)<br>Fuchs, schließe jetzt deine Augen."},
-        {"role": "Alle Bürger", "text": "Alle Bürger öffnen jetzt ihre Augen."},
-    ]
-}
-
-# Ein Dictionary, um den Zustand des Spiels zu speichern.
-game_state = {
-    "players": [],
-    "roles": {},
-    "total_roles_count": 0,
-    "game_started": False,
-    "assigned_roles": {},
-    "current_player_index": 0,
-    "role_counters": {}, # Zählt die lebenden Spieler pro Rolle
-    "lovers": [], # NEU: Verliebte Spieler
-}
-
 def get_role_counts_from_session():
+    """Hilfsfunktion, um Rollen aus der Session zu laden."""
     return json.loads(session.get('saved_roles', '{}'))
 
 def save_role_counts_to_session(role_counts):
+    """Hilfsfunktion, um Rollen in der Session zu speichern."""
     session['saved_roles'] = json.dumps(role_counts)
-    
-def get_players_from_session():
-    return [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]
 
-# --- Frontend-Routen (liefern die Templates aus) ---
+# --- WEBSEITEN-ROUTEN (Front-End) ---
 
 @app.route('/')
 def startseite():
     session.clear()
-    game_state["players"] = []
-    game_state["game_started"] = False
-    game_state["assigned_roles"] = {}
-    game_state["current_player_index"] = 0
-    game_state["role_counters"] = {}
-    game_state["lovers"] = []
-    return render_template('index.html')
+    html_content = """
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Willkommen bei dem Werwolf-Spiel von Thomas.</h1>
+        <p style="font-size: 1.2em; color: #555;">Hier kannst du einfach die Rollen für dein Werwolf-Spiel verteilen und sie dir erklären lassen.</p>
+        <hr style="margin: 30px auto; width: 50%;">
+        <a href="/spiel" style="text-decoration: none;">
+            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zum Spiel</button>
+        </a>
+    </div>
+    """
+    return html_content
 
 @app.route('/spiel', methods=['GET', 'POST'])
 def spiel_seite():
@@ -119,12 +80,6 @@ def spiel_seite():
         namen_string = request.form.get("namen")
         namen_liste = [name.strip() for name in namen_string.split('\n') if name.strip()]
         
-        if len(namen_liste) != len(set(name.lower() for name in namen_liste)):
-            return render_template('spiel.html', saved_players=namen_string, error="Doppelte Namen sind nicht erlaubt.")
-        
-        if len(namen_liste) < 4:
-            return render_template('spiel.html', saved_players=namen_string, error="Es müssen mindestens 4 Spieler angemeldet sein.")
-
         session['saved_players'] = namen_string
         
         saved_roles = get_role_counts_from_session()
@@ -135,84 +90,332 @@ def spiel_seite():
         return redirect(url_for('rollen_seite'))
 
     saved_players_string = session.get('saved_players', '')
-    return render_template('spiel.html', saved_players=saved_players_string)
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Namen eingeben</h1>
+        <p style="font-size: 1em; color: #555;">Gib die Namen der Spieler ein (jeder Name in einer neuen Zeile).</p>
+        <form action="/spiel" method="post">
+            <textarea name="namen" rows="10" cols="40" style="width: 80%; padding: 10px; font-size: 1em;">{saved_players_string}</textarea><br><br>
+            <button type="submit" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Zu den Rollen</button>
+        </form>
+    </div>
+    """
+    return html_content
 
-@app.route('/rollen', methods=['GET', 'POST'])
+@app.route('/rollen_seite', methods=['GET'])
 def rollen_seite():
-    player_count = len(get_players_from_session())
+    all_roles = list(ALL_ROLES.keys())
+    saved_roles = get_role_counts_from_session()
+    
+    player_count = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
     if player_count == 0:
         return redirect(url_for('spiel_seite'))
 
-    saved_roles = get_role_counts_from_session()
+    roles_html = ""
+    for role in all_roles:
+        count = saved_roles.get(role, 0)
+        roles_html += f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <div style="display: flex; align-items: center;">
+                <span style="font-size: 1.1em; color: #333;">{role}</span>
+                <button onclick="showInfo('{role}')" style="font-size: 1em; margin-left: 10px; padding: 0 5px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #008CBA; background-color: #008CBA; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center;">i</button>
+            </div>
+            <div>
+                <button onclick="decrementRole('{role}')" style="font-size: 1.2em; padding: 5px 10px; cursor: pointer;">-</button>
+                <span id="{role}-count" style="font-size: 1.2em; margin: 0 10px;">{count}</span>
+                <button onclick="incrementRole('{role}')" style="font-size: 1.2em; padding: 5px 10px; cursor: pointer;">+</button>
+            </div>
+        </div>
+        """
+    
+    return render_template_string(f"""
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Rollen auswählen</h1>
+        <p style="font-size: 1em; color: #555;">Wähle genau {player_count} Rollen aus.</p>
+        <p style="font-size: 1.2em; color: #008CBA;">Noch zu vergeben: <span id="roles-to-go">{player_count - sum(saved_roles.values())}</span></p>
+        
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <a href="/spiel" style="text-decoration: none;">
+                <button style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px;">Zurück</button>
+            </a>
+            <button id="start-button-top" onclick="startGame()" style="font-size: 1em; padding: 10px 15px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; display: none;">Mischen</button>
+        </div>
+        
 
-    return render_template('rollen.html', all_roles=ALL_ROLES, player_count=player_count, saved_roles=saved_roles)
+        {roles_html}
+
+        <button id="start-button-bottom" onclick="startGame()" style="font-size: 1.5em; padding: 15px 30px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px; display: none;">Mischen</button>
+    </div>
+
+    <div id="info-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
+        <h2 id="popup-role-name"></h2>
+        <p id="popup-role-description"></p>
+        <button onclick="hideInfo()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5em; cursor: pointer;">&times;</button>
+    </div>
+    <div id="overlay" onclick="hideInfo()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999;"></div>
+
+    <script>
+        let rolesCount = {json.dumps(saved_roles)};
+        const ALL_ROLES_DESCRIPTIONS = {json.dumps(ALL_ROLES)};
+        const totalPlayers = {player_count};
+        const rolesToGo = document.getElementById("roles-to-go");
+        const startButtonTop = document.getElementById("start-button-top");
+        const startButtonBottom = document.getElementById("start-button-bottom");
+
+        function updateRolesToGo() {
+            const totalRolesSelected = Object.values(rolesCount).reduce((a, b) => a + b, 0);
+            const remainingRoles = totalPlayers - totalRolesSelected;
+            rolesToGo.textContent = remainingRoles;
+            if (remainingRoles === 0) {
+                startButtonTop.style.display = 'inline-block';
+                startButtonBottom.style.display = 'inline-block';
+            } else {
+                startButtonTop.style.display = 'none';
+                startButtonBottom.style.display = 'none';
+            }
+        }
+
+        function incrementRole(role) {
+            if (!rolesCount[role]) {
+                rolesCount[role] = 0;
+            }
+            if (Object.values(rolesCount).reduce((a, b) => a + b, 0) < totalPlayers) {
+                rolesCount[role]++;
+                document.getElementById(role + '-count').textContent = rolesCount[role];
+                updateRolesToGo();
+                saveRoles();
+            }
+        }
+
+        function decrementRole(role) {
+            if (rolesCount[role] > 0) {
+                rolesCount[role]--;
+                document.getElementById(role + '-count').textContent = rolesCount[role];
+                updateRolesToGo();
+                saveRoles();
+            }
+        }
+
+        function showInfo(role) {
+            const popup = document.getElementById('info-popup');
+            const overlay = document.getElementById('overlay');
+            document.getElementById('popup-role-name').textContent = role;
+            document.getElementById('popup-role-description').textContent = ALL_ROLES_DESCRIPTIONS[role];
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function hideInfo() {
+            document.getElementById('info-popup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+        
+        function saveRoles() {
+            fetch('/api/game/save_roles', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 'role_counts': rolesCount })
+            });
+        }
+
+        async function startGame() {
+            const response = await fetch('/api/game/roles', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 'role_counts': rolesCount })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                window.location.href = '/karten';
+            } else {
+                alert(result.error);
+            }
+        }
+
+        updateRolesToGo();
+    </script>
+    """)
 
 @app.route('/karten')
 def karten_seite():
-    return render_template('karten.html', all_roles=ALL_ROLES)
+    return render_template_string(f"""
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Rollen aufdecken</h1>
+        <div id="player-card" style="min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; border: 2px dashed #008CBA; border-radius: 10px;">
+            <h2 id="player-name" style="color: #333;"></h2>
+            <p id="role-name" style="font-size: 1.5em; font-weight: bold; color: #f44336; display: none;"></p>
+            <p id="role-description" style="font-size: 1em; color: #555; display: none;"></p>
+            <button id="reveal-role-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #008CBA; color: white; border: none; border-radius: 5px; margin-top: 15px;">Rolle aufdecken</button>
+            <button id="show-description-btn" style="font-size: 1em; padding: 8px 15px; cursor: pointer; background-color: #2196F3; color: white; border: none; border-radius: 5px; margin-top: 10px; display: none;">Erklärung</button>
+            <button id="next-player-btn" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 15px; display: none;">Nächster Spieler</button>
+        </div>
+    </div>
+    <script>
+        let currentRoleData = null;
+        let isRevealed = false;
+
+        async function fetchCurrentPlayer() {
+            const response = await fetch('/api/game/next_card');
+            const data = await response.json();
+            if (response.ok) {
+                if (data.message) {
+                    window.location.href = '/neustart';
+                } else {
+                    document.getElementById('player-name').textContent = data.player_name;
+                    document.getElementById('reveal-role-btn').style.display = 'inline-block';
+                    isRevealed = false;
+                }
+            }
+        }
+        
+        async function revealCard() {
+            const response = await fetch('/api/game/reveal_and_next', { method: 'POST' });
+            const data = await response.json();
+            if (response.ok) {
+                currentRoleData = data;
+                document.getElementById('role-name').textContent = data.role_name;
+                document.getElementById('role-name').style.display = 'block';
+                document.getElementById('reveal-role-btn').style.display = 'none';
+                document.getElementById('show-description-btn').style.display = 'inline-block';
+                document.getElementById('next-player-btn').style.display = 'inline-block';
+                isRevealed = true;
+            } else {
+                alert(data.error);
+            }
+        }
+
+        function showDescription() {
+            if (currentRoleData && isRevealed) {
+                document.getElementById('role-description').textContent = currentRoleData.role_description;
+                document.getElementById('role-description').style.display = 'block';
+                document.getElementById('show-description-btn').style.display = 'none';
+            }
+        }
+
+        function nextPlayer() {
+            window.location.reload();
+        }
+
+        document.getElementById('reveal-role-btn').addEventListener('click', revealCard);
+        document.getElementById('show-description-btn').addEventListener('click', showDescription);
+        document.getElementById('next-player-btn').addEventListener('click', nextPlayer);
+
+        window.onload = fetchCurrentPlayer;
+    </script>
+    """)
 
 @app.route('/neustart')
 def neustart_seite():
-    if not game_state["game_started"]:
-        return redirect(url_for('spiel_seite'))
-    
-    players_list_data = []
+    players_list_html = ""
     for player_info in game_state["players"]:
         player_name = player_info["name"]
         role = game_state["assigned_roles"].get(player_name, "Rolle noch nicht zugewiesen.")
         status = player_info["status"]
-        players_list_data.append({
-            "name": player_name,
-            "role": role,
-            "status": status
-        })
-    return render_template('neustart.html', players=players_list_data, all_roles=ALL_ROLES)
+        
+        style = ''
+        if status == 'dead':
+            style = 'text-decoration: line-through; color: #888;'
+            
+        players_list_html += f"""
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; cursor: pointer; {style}">
+            <span onclick="killPlayer('{player_name}')" style="flex-grow: 1; text-align: left;">
+                <span style="font-weight: bold;">{role}</span> | {player_name}
+            </span>
+            <button onclick="showInfoNeustart('{role}')" style="font-size: 1em; margin-left: 10px; padding: 0 5px; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #008CBA; background-color: #008CBA; color: white; cursor: pointer; display: flex; justify-content: center; align-items: center;">i</button>
+        </div>
+        """
 
-@app.route('/erzaehler')
-def erzaehler_seite():
-    if not game_state["game_started"]:
-        return redirect(url_for('spiel_seite'))
-    return render_template('erzaehler.html')
+    return render_template_string(f"""
+    <div style="font-family: Arial, sans-serif; text-align: center; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h1 style="color: #4CAF50;">Spielübersicht</h1>
+        
+        <div style="text-align: left; padding: 0 20px;">
+            <p>Tippe auf den Namen, um einen ausgeschiedenen Spieler zu entfernen.</p>
+        </div>
+        
+        <div id="player-list" style="text-align: left; margin: 20px auto; width: 80%;">
+            {players_list_html}
+        </div>
+        
+        <button onclick="restartGame()" style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #f44336; color: white; border: none; border-radius: 5px; margin-top: 20px;">Neustart</button>
+        <a href="/" style="text-decoration: none;">
+            <button style="font-size: 1.2em; padding: 10px 20px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; margin-top: 20px;">Zur Startseite</button>
+        </a>
+    </div>
 
-@app.route('/special-roles-selection')
-def special_roles_selection():
-    role_type = request.args.get('type')
-    count = request.args.get('count', type=int)
-    
-    extra_roles = session.get(f'{role_type.lower()}_extra_roles', [])
-    
-    all_roles_list = list(ALL_ROLES.keys())
-    
-    return render_template('special-roles-selection.html', all_roles=all_roles_list, role_type=role_type, count=count, selected_roles=extra_roles)
+    <div id="info-popup-neustart" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 400px; background: white; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
+        <p id="popup-role-name-neustart" style="font-size: 3em; font-weight: bold; color: #008CBA; margin-bottom: 5px;"></p>
+        <p id="popup-role-description-neustart" style="font-size: 0.9em; color: #555;"></p>
+        <button onclick="hideInfoNeustart()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 2em; cursor: pointer;">&times;</button>
+    </div>
+    <div id="overlay-neustart" onclick="hideInfoNeustart()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999;"></div>
+
+    <script>
+        const ALL_ROLES_DESCRIPTIONS = {json.dumps(ALL_ROLES)};
+
+        async function killPlayer(playerName) {
+            const confirmKill = confirm(`Spieler '{{playerName}}' als 'tot' markieren?`);
+            if (confirmKill) {
+                const killResponse = await fetch(`/api/gamemaster/kill/` + playerName, { method: 'PUT' });
+                if (killResponse.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Fehler beim Markieren des Spielers.');
+                }
+            }
+        }
+
+        async function restartGame() {
+            const response = await fetch('/api/game/restart', { method: 'POST' });
+            const result = await response.json();
+            alert(result.message);
+            window.location.href = '/rollen_seite';
+        }
+        
+        function showInfoNeustart(role) {
+            const popup = document.getElementById('info-popup-neustart');
+            const overlay = document.getElementById('overlay-neustart');
+            document.getElementById('popup-role-name-neustart').textContent = role;
+            document.getElementById('popup-role-description-neustart').textContent = ALL_ROLES_DESCRIPTIONS[role];
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+
+        function hideInfoNeustart() {
+            document.getElementById('info-popup-neustart').style.display = 'none';
+            document.getElementById('overlay-neustart').style.display = 'none';
+        }
+    </script>
+    """)
 
 # --- API-ENDPUNKTE ---
 
-@app.route('/api/game/save_extra_roles', methods=['POST'])
-def save_extra_roles():
+@app.route('/api/game/save_roles', methods=['POST'])
+def save_roles_api():
     data = request.get_json()
-    role_type = data.get('role_type')
-    selected_roles = data.get('selected_roles')
-    session[f'{role_type.lower()}_extra_roles'] = selected_roles
-    return jsonify({"message": "Extra roles saved."}), 200
+    save_role_counts_to_session(data.get('role_counts', {}))
+    return jsonify({"message": "Rollen wurden in der Session gespeichert."}), 200
 
 @app.route('/api/game/roles', methods=['POST'])
 def set_game_roles():
     data = request.get_json()
     role_counts = data.get("role_counts", {})
-    extra_roles = data.get("extra_roles", {})
     
-    players_list_raw = get_players_from_session()
-    total_players = len(players_list_raw)
+    total_players = len([name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()])
+    if total_players < 4:
+        return jsonify({"error": "Es müssen mindestens 4 Spieler angemeldet sein."}), 400
 
     total_roles_count = sum(role_counts.values())
 
     if total_roles_count != total_players:
         return jsonify({
-            "error": f"Die Anzahl der Rollen ({total_roles_count}) muss genau der Anzahl der Spieler ({total_players}) entsprechen.",
+            "error": "Die Anzahl der Rollen muss genau der Anzahl der Spieler entsprechen.",
+            "players_count": total_players,
+            "roles_count": total_roles_count
         }), 400
     
-    # Reset game state
-    game_state["players"] = [{"name": name, "status": "alive"} for name in players_list_raw]
+    players_list = [{"name": name, "status": "alive"} for name in [name.strip() for name in session.get('saved_players', '').split('\n') if name.strip()]]
+    game_state["players"] = players_list
     game_state["roles"] = role_counts
     game_state["total_roles_count"] = total_roles_count
     
@@ -226,12 +429,10 @@ def set_game_roles():
     for i, player_info in enumerate(game_state["players"]):
         player_name = player_info["name"]
         assigned_roles[player_name] = roles_to_assign[i]
-    
+        
     game_state["assigned_roles"] = assigned_roles
     game_state["game_started"] = True
     game_state["current_player_index"] = 0
-    game_state["role_counters"] = {role: count for role, count in role_counts.items()}
-    game_state["extra_roles"] = extra_roles
     
     return jsonify({"message": "Spiel erfolgreich gestartet. Rollen wurden zugewiesen."}), 200
 
@@ -300,8 +501,8 @@ def get_gamemaster_view():
         
     return jsonify(overview)
 
-@app.route('/api/gamemaster/toggle_status/<player_name>', methods=['PUT'])
-def toggle_player_status(player_name):
+@app.route('/api/gamemaster/kill/<player_name>', methods=['PUT'])
+def kill_player(player_name):
     if not game_state["game_started"]:
         return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
     
@@ -309,201 +510,25 @@ def toggle_player_status(player_name):
     
     for player_info in game_state["players"]:
         if player_info["name"] == player_name:
-            role = game_state["assigned_roles"].get(player_name)
-            
-            if player_info["status"] == "alive":
-                player_info["status"] = "dead"
-                if role in game_state["role_counters"]:
-                    game_state["role_counters"][role] -= 1
-            else:
-                player_info["status"] = "alive"
-                if role in game_state["role_counters"]:
-                    game_state["role_counters"][role] += 1
-            
+            player_info["status"] = "dead"
             player_found = True
             break
     
     if player_found:
-        return jsonify({"message": f"Status von '{player_name}' wurde geändert."})
+        return jsonify({"message": f"Spieler '{player_name}' wurde als 'tot' markiert."})
     else:
         return jsonify({"error": "Spieler nicht gefunden."}), 404
-        
-@app.route('/api/perform_action', methods=['POST'])
-def perform_action():
-    data = request.get_json()
-    action = data.get('action')
-    params = data.get('params', {})
-
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
-
-    if action == 'swap_roles_dieb':
-        player_name = params.get('player_name')
-        target_role = params.get('target_role')
-        
-        dieb_player = next((p for p in game_state["players"] if p["name"] == player_name), None)
-        if not dieb_player or game_state["assigned_roles"].get(dieb_player["name"]) != 'Dieb':
-            return jsonify({"error": "Aktion fehlgeschlagen. Spieler ist kein Dieb."}), 400
-
-        # Finde eine unzugewiesene Rolle, die dem Ziel entspricht
-        current_dieb_role = game_state["assigned_roles"][dieb_player["name"]]
-        
-        game_state["assigned_roles"][dieb_player["name"]] = target_role
-        
-        # Markiere die alte Dieb-Rolle als "nicht da" (oder handle sie entsprechend)
-        game_state["roles"][current_dieb_role] -= 1
-        
-        # Markiere die neue Dieb-Rolle als "da"
-        game_state["roles"][target_role] += 1
-        
-        return jsonify({"message": f"Dieb ({player_name}) hat die Rolle mit {target_role} getauscht."})
-
-    elif action == 'swap_roles_gaukler':
-        player_name = params.get('player_name')
-        target_role = params.get('target_role')
-
-        gaukler_player = next((p for p in game_state["players"] if p["name"] == player_name), None)
-        if not gaukler_player or game_state["assigned_roles"].get(gaukler_player["name"]) != 'Gaukler':
-            return jsonify({"error": "Aktion fehlgeschlagen. Spieler ist kein Gaukler."}), 400
-
-        # Temporäre Rollenänderung für den Gaukler
-        # In dieser Logik setzen wir die Rolle einfach um, die eigentliche temporäre
-        # Natur wird vom Erzähler und den Spielern selbst gehandhabt
-        game_state["assigned_roles"][gaukler_player["name"]] = target_role
-        
-        # Logik, die Rolle für diese Nacht als "da" zu markieren (kann optional sein)
-        # Hier nicht als Zähler implementiert, da es eine temporäre Aktion ist
-        
-        return jsonify({"message": f"Gaukler ({player_name}) spielt nun die Rolle {target_role} für diese Nacht."})
-        
-    elif action == 'verwandeln_urwolf':
-        player_name = params.get('player_name')
-        
-        urwolf_player = next((p for p in game_state["players"] if p["name"] == player_name), None)
-        if not urwolf_player:
-            return jsonify({"error": "Spieler nicht gefunden."}), 400
-            
-        old_role = game_state["assigned_roles"][player_name]
-        
-        # Ändere die Rolle zu "Werwölfe"
-        game_state["assigned_roles"][player_name] = 'Werwölfe'
-        
-        # Aktualisiere die Rollenzähler
-        if old_role in game_state["role_counters"]:
-            game_state["role_counters"][old_role] -= 1
-        if 'Werwölfe' in game_state["role_counters"]:
-            game_state["role_counters"]['Werwölfe'] += 1
-        else:
-            game_state["role_counters"]['Werwölfe'] = 1
-
-        return jsonify({"message": f"Ulwolf hat {player_name} in einen Werwolf verwandelt. Alte Rolle war {old_role}."})
-
-    elif action == 'tauschen_magd':
-        magd_name = params.get('magd_name')
-        target_name = params.get('target_name')
-
-        magd_player = next((p for p in game_state["players"] if p["name"] == magd_name), None)
-        target_player = next((p for p in game_state["players"] if p["name"] == target_name), None)
-
-        if not magd_player or not target_player:
-            return jsonify({"error": "Spieler nicht gefunden."}), 400
-
-        # Hole die Rollen
-        magd_role = game_state["assigned_roles"][magd_name]
-        target_role = game_state["assigned_roles"][target_name]
-        
-        if magd_role != "Die ergebene Magd":
-            return jsonify({"error": "Nur die ergebene Magd kann diese Aktion ausführen."}), 400
-            
-        # Tausche die Rollen
-        game_state["assigned_roles"][magd_name] = target_role
-        
-        # Setze den Status des Ziels auf "dead"
-        target_player["status"] = "dead"
-        
-        # Aktualisiere die Rollenzähler
-        game_state["role_counters"][magd_role] -= 1
-        game_state["role_counters"][target_role] += 1
-        
-        return jsonify({"message": f"Magd ({magd_name}) hat die Rolle von {target_name} übernommen. {target_name} ist jetzt tot."})
-
-    elif action == 'verlieben_amor':
-        selected_players = params.get('selected_players')
-
-        if len(selected_players) != 2:
-            return jsonify({"error": "Amor muss genau zwei Spieler auswählen."}), 400
-        
-        player1, player2 = selected_players
-        game_state["lovers"] = [player1, player2]
-        
-        return jsonify({"message": f"{player1} und {player2} sind jetzt verliebt."})
-        
-    return jsonify({"error": "Unbekannte Aktion."}), 400
 
 @app.route('/api/game/restart', methods=['POST'])
 def restart_game():
     game_state["game_started"] = False
     game_state["assigned_roles"] = {}
     game_state["current_player_index"] = 0
-    game_state["role_counters"] = {}
-    game_state["lovers"] = []
     
     for player_info in game_state["players"]:
         player_info["status"] = "alive"
     
     return jsonify({"message": "Spiel wurde erfolgreich zurückgesetzt. Du kannst nun wieder zur Rollenauswahl wechseln."})
 
-# NEUE API-ROUTE FÜR GEORDNETE ROLLENLISTE
-@app.route('/api/get_roles_list')
-def get_roles_list():
-    return jsonify(list(ALL_ROLES.keys()))
-
-@app.route('/api/get_roles_and_players')
-def get_roles_and_players():
-    player_count = len(get_players_from_session())
-    saved_roles = get_role_counts_from_session()
-    all_roles = ALL_ROLES
-    return jsonify({
-        "player_count": player_count,
-        "saved_roles": saved_roles,
-        "all_roles": all_roles
-    })
-
-@app.route('/api/narrator_text/<round_number>', methods=['GET'])
-def get_narrator_text(round_number):
-    if not game_state["game_started"]:
-        return jsonify({"error": "Spiel wurde noch nicht gestartet."}), 400
-
-    target_text = NARRATOR_TEXT.get(f"round_{round_number}")
-    if not target_text:
-        return jsonify({"error": "Ungültige Runden-Nummer."}), 400
-
-    filtered_text = []
-    selected_roles = set(game_state["assigned_roles"].values())
-
-    if round_number == '1' and NARRATOR_TEXT["round_1"][0]["role"] == "Alle Bürger":
-        filtered_text.append(NARRATOR_TEXT["round_1"][0])
-
-    for item in target_text:
-        role_name = item["role"]
-        if role_name == "Alle Bürger" and round_number == '1':
-            continue
-        
-        # NEU: Überprüfung, ob die Rolle überhaupt existiert
-        if role_name in ALL_ROLES.keys():
-            # Nur hinzufügen, wenn die Rolle im Spiel ist und noch lebende Spieler hat
-            if role_name in selected_roles and game_state["role_counters"].get(role_name, 0) > 0:
-                 # Sonderbehandlung für die "Reine Seele", die nur in der 1. Runde kommt
-                if role_name == "Die reine Seele" and round_number == '1':
-                     filtered_text.insert(1, item)  # Füge nach dem ersten Block ein
-                else:
-                    filtered_text.append(item)
-    
-    # Füge den letzten "Alle Bürger" Block am Ende hinzu
-    if round_number == '2' and target_text[-1]["role"] == "Alle Bürger":
-        filtered_text.append(target_text[-1])
-
-    return jsonify({"text_blocks": filtered_text})
-    
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=os.environ.get('PORT', 5000))
+    app.run(debug=True)
