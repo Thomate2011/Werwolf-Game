@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rollen zuweisen</title>
+    <title>Rollen auswählen</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="rollen-page">
     <div class="container">
-        <h1>Rollen zuweisen</h1>
-        <hr>
-        <p>Es spielen <span id="player-count">{{ player_count }}</span> Spieler.</p>
+        <h1>Rollen auswählen</h1>
+        <p>Wähle genau <span id="player-count">{{ player_count }}</span> Rollen aus.</p>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
+            <button id="mix-button" class="primary-button start-button" style="display: none;">Mischen</button>
+        </div>
         <p id="roles-to-go" style="font-weight: bold;"></p>
-
-        <a href="#" id="mix-button" class="button-link primary-button" style="display: none; margin-bottom: 20px;">Rollen mischen</a>
-
         <div id="roles-container">
             </div>
-
-        <a href="#" id="mix-button-bottom" class="button-link primary-button" style="display: none; margin-top: 20px;">Rollen mischen</a>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+            <a href="{{ url_for('spiel_seite') }}" class="button-link danger-button">Zurück</a>
+            <button id="mix-button-bottom" class="primary-button start-button" style="display: none;">Mischen</button>
+        </div>
     </div>
-
     <div id="info-popup" class="popup">
-        <h2 id="popup-role-name"></h2>
-        <p id="popup-role-description"></p>
+        <h2 id="popup-role-name" class="role-popup-title"></h2>
+        <p id="popup-role-description" class="role-popup-description"></p>
         <button onclick="hideInfo()" class="popup-close-btn">&times;</button>
     </div>
     <div id="overlay" class="overlay" onclick="hideInfo()"></div>
-
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -66,8 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rolesContainer = document.getElementById('roles-container');
         const playerCountSpan = document.getElementById('player-count');
         const rolesToGoSpan = document.getElementById('roles-to-go');
-        const mixButtonTop = document.getElementById('mix-button');
-        const mixButtonBottom = document.getElementById('mix-button-bottom');
+        const mixButton = document.getElementById('mix-button');
         const player_count = parseInt(playerCountSpan.textContent);
         let role_counts = JSON.parse(sessionStorage.getItem('role_counts') || '{}');
         let total_roles = 0;
@@ -105,18 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rolesLeft > 0) {
                 rolesToGoSpan.textContent = `Wähle noch ${rolesLeft} Rollen aus.`;
                 rolesToGoSpan.style.color = 'red';
-                mixButtonTop.style.display = 'none';
-                mixButtonBottom.style.display = 'none';
+                mixButton.style.display = 'none';
             } else if (rolesLeft < 0) {
                 rolesToGoSpan.textContent = `Du hast ${-rolesLeft} Rollen zu viel ausgewählt.`;
                 rolesToGoSpan.style.color = 'red';
-                mixButtonTop.style.display = 'none';
-                mixButtonBottom.style.display = 'none';
+                mixButton.style.display = 'none';
             } else {
                 rolesToGoSpan.textContent = `Alle ${player_count} Rollen ausgewählt.`;
                 rolesToGoSpan.style.color = 'green';
-                mixButtonTop.style.display = 'block';
-                mixButtonBottom.style.display = 'block';
+                mixButton.style.display = 'block';
             }
             sessionStorage.setItem('role_counts', JSON.stringify(role_counts));
         };
@@ -197,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateRolesToGo();
         });
 
-        const handleMixButton = async () => {
+        mixButton.addEventListener('click', async () => {
             if (checkSpecialRoles()) {
                 const extra_roles = {
                     Dieb: JSON.parse(sessionStorage.getItem('dieb_extra_roles') || '[]'),
@@ -217,10 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Fehler: ' + data.error);
                 }
             }
-        };
-
-        mixButtonTop.addEventListener('click', handleMixButton);
-        mixButtonBottom.addEventListener('click', handleMixButton);
+        });
 
         renderRoles();
     }
